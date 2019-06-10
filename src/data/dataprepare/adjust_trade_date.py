@@ -1,5 +1,10 @@
 # coding=utf-8
 
+import sys
+sys.path.append('../')
+sys.path.append('../../')
+sys.path.append('../../../')
+
 from src.conf import config
 import datetime
 from uqer import DataAPI
