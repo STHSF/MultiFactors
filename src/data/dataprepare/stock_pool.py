@@ -124,7 +124,7 @@ if __name__ == '__main__':
     stock_pool = StockPool(uqer_token=uqer_token)
     # stock_pool = StockPool(conn=stock_conn)
     adjust_trade = AdjustTradeDate(uqer_token=uqer_token, is_uqer=0)
-    start_date = datetime.datetime(2007, 1, 1).date()
+    start_date = datetime.datetime(2019, 6, 5).date()
     end_date = datetime.datetime(2019, 6, 9).date()
     #trade_date_list = adjust_trade.custom_fetch_end(start_date, end_date, 'isWeekEnd')
     trade_date_list = adjust_trade.custom_fetch_end(start_date, end_date, 'isOpen')
@@ -136,7 +136,7 @@ if __name__ == '__main__':
     print(stock_pool.on_work_by_interval(trade_date_list, 1, '000905.XSHG'))
     res_df = stock_pool.on_work_by_interval(trade_date_list, 1, '000905.XSHG')
 
-    with open("zz500_all.pkl", 'wb') as pk:
-        pickle.dump(res_df, pk)
+    # with open("zz500_all.pkl", 'wb') as pk:
+    #     pickle.dump(res_df, pk)
 
     # res_df.to_csv('zz500.csv')
