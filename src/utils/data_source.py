@@ -35,8 +35,11 @@ __DNS = {
     'XAVIER_SQLITE': {
         URL: 'sqlite://///Users/li/workshop/dataset/database/xueqiu/discuss.db',
         DTYPE: SQLALCHEMY
+    },
+    'ALPHA_FACTOR': {
+        URL: 'postgresql+psycopg2://alpha:alpha@180.166.26.82:8889/alpha',
+        DTYPE: SQLALCHEMY
     }
-
 }
 
 

@@ -112,7 +112,7 @@ class StockPool(object):
             stock_pool_df = index_df.merge(industry_df, on=['symbol','trade_date'])
             stock_pool_df['industryName'] = stock_pool_df['iname'].apply(lambda x: x[:-2] if x[-2:]=='指数' else x)
             stock_pool_df.rename(columns={'isymbol':'indexSymbol','symbol':'code'},inplace=True)
-            stock_pool_df = stock_pool_df.drop(['iname'],axis=1)
+            stock_pool_df = stock_pool_df.drop(['iname'], axis=1)
             stock_pool_df['trade_date'] = pd.to_datetime(stock_pool_df['trade_date'])
             #stock_pool_df['code'] = stock_pool_df['code'].apply(lambda x: int(x.split('.')[0]))
             return stock_pool_df
