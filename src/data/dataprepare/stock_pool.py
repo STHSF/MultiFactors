@@ -17,7 +17,7 @@ from adjust_trade_date import AdjustTradeDate
 
 class StockPool(object):
     def __init__(self, **kwargs):
-        self._conn = kwargs.get('conn', None)
+        self._conn = kwargs.get('engine', None)
         self._uqer_token = kwargs.get('uqer_token', None)
         is_uqer_init = kwargs.get('is_uqer', 0)
         if is_uqer_init == 0 and self._uqer_token is not None:
@@ -122,7 +122,7 @@ if __name__ == '__main__':
     uqer_token = config.uqer_token
     stock_conn = sa.create_engine(config.vision_db)
     stock_pool = StockPool(uqer_token=uqer_token)
-    # stock_pool = StockPool(conn=stock_conn)
+    # stock_pool = StockPool(engine=stock_conn)
     adjust_trade = AdjustTradeDate(uqer_token=uqer_token, is_uqer=0)
     start_date = datetime.datetime(2019, 6, 5).date()
     end_date = datetime.datetime(2019, 6, 9).date()

@@ -12,7 +12,7 @@ import uqer
 
 class AdjustTradeDate(object):
     def __init__(self, **kwargs):
-        self._conn = kwargs.get('conn', None)
+        self._conn = kwargs.get('engine', None)
         self._uqer_token = kwargs.get('uqer_token', None)
         is_uqer_init = kwargs.get('is_uqer', 0)
         if is_uqer_init == 0:

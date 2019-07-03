@@ -23,7 +23,7 @@ from src.conf.configuration import regress_conf
 import pandas as pd
 from sklearn.externals import joblib
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import mean_squared_error
+from sklearn.metrics import mean_squared_error, r2_score
 import matplotlib.pyplot as plt
 pd.set_option('display.max_rows', None, 'display.max_columns', None, "display.max_colwidth", 1000, 'display.width', 1000)
 
@@ -84,7 +84,8 @@ class XGBooster(object):
                            seed=self.seed,
                            verbose_eval=True,
                            early_stopping_rounds=self.early_stop_round,
-                           show_stdv=False)
+                           show_stdv=False,
+                           shuffle=True)
         return cv_result
 
     def plot_feature_importances(self):
@@ -121,32 +122,33 @@ def cal_acc(test_data, pre_data):
     pass
 
 
+def plot_figure(y_pred, y_test):
+    fig1 = plt.figure(num='fig111111', figsize=(10, 3), dpi=75, facecolor='#FFFFFF', edgecolor='#0000FF')
+    plt.plot(y_pred)
+    plt.plot(y_test)
+    plt.title(u"REGRESSION")
+    plt.legend((u'Predict', u'Test'), loc='best')  # sets our legend for our graph.
+    plt.show()
+    plt.close()
+
+
+def ic_cal(y_pred: np.ndarray, y_test: np.ndarray) -> float:
+    return np.corrcoef(y_pred, y_test)[0, 1]
+
+
 def xgb_predict(model, x_test, y_test, save_result_path=None):
-    # print('x_test:\n %s' % x_test)
     d_test = xgb.DMatrix(x_test)
-    if regress_conf.params['objective'] == "multi:softmax":
-        y_pred = model.predict(d_test)
-        print('shape_of_pre: %s' % y_pred)
-        # 如果输入数据y_test为array
-        result = y_test.reshape(1, -1) == y_pred
-        # 如果输入数据y_test为dataframe
-        # result = y_test.values.reshape(1, -1) == y_pred
-        print('the accuracy:\t', float(np.sum(result)) / len(y_pred))
-    else:
-        # 输出
-        y_pred_prob = model.predict(d_test)
-        y_pred = y_pred_prob
-        rmse = np.sqrt(mean_squared_error(y_test, y_pred))
-        print('rmse_of_pred: %s' % rmse)
-        print(y_pred)
-        print(y_test)
-        fig1 = plt.figure(num='fig111111', figsize=(10, 3), dpi=75, facecolor='#FFFFFF', edgecolor='#0000FF')
-        plt.plot(y_pred)
-        plt.plot(y_test)
-        plt.title(u"REGRESSION")
-        plt.legend((u'Predict', u'Test'), loc='best')  # sets our legend for our graph.
-        plt.show()
-        plt.close()
+    # 输出
+    y_pred = model.predict(d_test)
+    rmse = np.sqrt(mean_squared_error(y_test, y_pred))
+    print('rmse_of_pred: %s' % rmse)
+    r_square_ = r2_score(y_test, y_pred)
+    r_square = 1 - mean_squared_error(y_test, y_pred)/ np.var(y_test)
+    print('r_square_of_pred: %s' % r_square)
+    print('r_square_of_pred: %s' % r_square_)
+    # print(y_pred)
+    # print(y_test)
+    plot_figure(y_pred, y_test)
 
     if save_result_path:
         df_reult = pd.DataFrame(x_test)
@@ -176,7 +178,7 @@ def run_cv(x_train, x_test, y_train, y_test):
 
 def train_test_sp(train_dataset_df, label_dataset_df, test_size=0.02, shift=100, random=None):
     """
-
+    # 训练集和测试集划分
     :param train_dataset_df: 训练集
     :param label_dataset_df: 标签集
     :param test_size: 测试数据所占比例
@@ -184,7 +186,6 @@ def train_test_sp(train_dataset_df, label_dataset_df, test_size=0.02, shift=100,
     :param random: 随机划分还是分段切分
     :return:
     """
-    # 训练集和测试集划分
     if random:
         # 随机划分
         x_train, x_test, y_train, y_test = train_test_split(train_dataset_df, label_dataset_df, test_size=0.02, random_state=10000, shuffle=True)
@@ -204,8 +205,8 @@ if __name__ == '__main__':
     # 输入数据为dataframe格式
     train_sample_df = pd.read_csv('../data/dataset/traning_sample.csv')
     print(train_sample_df.head())
-    train_dataset_df = train_sample_df[['alpha_1','alpha_2','alpha_3','alpha_4','alpha_5',
-                                        'alpha_6','alpha_7','alpha_8','alpha_9','alpha_10']]
+    train_dataset_df = train_sample_df[['alpha_1', 'alpha_2', 'alpha_3', 'alpha_4', 'alpha_5',
+                                        'alpha_6', 'alpha_7', 'alpha_8', 'alpha_9', 'alpha_10']]
     label_dataset_df = train_sample_df[['dx_2']]
 
     x_train, x_test, y_train, y_test = train_test_sp(train_dataset_df[:30000], label_dataset_df[:30000])
