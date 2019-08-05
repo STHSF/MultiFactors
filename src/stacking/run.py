@@ -22,6 +22,9 @@ from m1_xgb import *
 from src.conf.configuration import regress_conf
 import xgboost as xgb
 import gc
+from flask import Flask
+
+app = Flask(__name__)
 
 
 def create_scenario(weight_gap):
@@ -166,6 +169,13 @@ def create_scenario(weight_gap):
     ret_df.loc[advanceDateByCalendar('china.sse', ref_dates[-1], freq).strftime('%Y-%m-%d')] = 0.
     ret_df = ret_df.shift(1)
     ret_df.iloc[0] = 0.
+    return ret_df, tune_record
+
+
+@app.route('/')
+def first_flask():
+    print('hello word')
+    ret_df, tune_record = create_scenario(weight_gap)
     return ret_df, tune_record
 
 
@@ -358,4 +368,6 @@ if __name__ == '__main__':
 
     label = ['dx']
 
-    ret_df, tune_record = create_scenario(weight_gap)
+    app.run(host='0.0.0.0', port='8000')
+
+
