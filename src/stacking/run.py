@@ -11,6 +11,7 @@
 import time
 import sys
 sys.path.append('../../')
+sys.path.append('../../../')
 sys.path.append('../')
 import pandas as pd
 from PyFin.api import *
