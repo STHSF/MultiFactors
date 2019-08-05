@@ -29,10 +29,17 @@ from flask import Flask
 app = Flask(__name__)
 
 
-def create_scenario(weight_gap):
+def create_scenario(weight_gap, return_data, risk_total, benchmark_total, industry_total, bounds, train_data):
+    executor = NaiveExecutor()
+    trade_dates = []
+    transact_cost = 0.003
     previous_pos = pd.DataFrame()
     tune_record = pd.DataFrame()
+    current_pos = pd.DataFrame()
+    turn_overs = []
+    leverags = []
     rets = []
+    net_rets = []
     turn_overs = []
     leverags = []
     ics = []
@@ -177,7 +184,58 @@ def create_scenario(weight_gap):
 @app.route('/')
 def first_flask():
     print('hello word')
-    ret_df, tune_record = create_scenario(weight_gap)
+    # 获取因子数据
+    # factor_data_org = engine.fetch_factor_range(universe, basic_factor_store,
+    #                                             dates=ref_dates, used_factor_tables=[Alpha191])
+    factor_data_org = engine.fetch_factor_range(universe, basic_factor_store, dates=ref_dates)
+
+    # 获取行业数据， 风险因子
+    industry = engine.fetch_industry_range(universe, dates=ref_dates)
+    factor_data = pd.merge(factor_data_org, industry, on=['trade_date', 'code']).fillna(0.)
+
+    risk_total = engine.fetch_risk_model_range(universe, dates=ref_dates)[1]
+
+    # 获取收益率
+    return_data = engine.fetch_dx_return_range(universe, dates=ref_dates,
+                                               horizon=horizon, offset=0,
+                                               benchmark=benchmark_code)
+
+    # 获取benchmark
+    benchmark_total = engine.fetch_benchmark_range(dates=ref_dates, benchmark=benchmark_code)
+    industry_total = engine.fetch_industry_matrix_range(universe, dates=ref_dates, category=industry_name,
+                                                        level=industry_level)
+
+    ## Constraintes settings
+    weight_gap = 1
+
+    industry_names = industry_list(industry_name, industry_level)
+    constraint_risk = ['EARNYILD', 'LIQUIDTY', 'GROWTH', 'SIZE', 'BETA', 'MOMENTUM'] + industry_names
+    total_risk_names = constraint_risk + ['benchmark', 'total']
+
+    b_type = []
+    l_val = []
+    u_val = []
+
+
+    for name in total_risk_names:
+        if name == 'benchmark':
+            b_type.append(BoundaryType.RELATIVE)
+            l_val.append(0.0)
+            u_val.append(1.0)
+        elif name == 'total':
+            b_type.append(BoundaryType.ABSOLUTE)
+            l_val.append(.0)
+            u_val.append(.0)
+        else:
+            b_type.append(BoundaryType.ABSOLUTE)
+            l_val.append(-1.005)
+            u_val.append(1.005)
+
+    bounds = create_box_bounds(total_risk_names, b_type, l_val, u_val)  # # Constraintes settings
+
+    train_data = pd.merge(factor_data, return_data, on=['trade_date', 'code']).dropna()
+
+    ret_df, tune_record = create_scenario(weight_gap, return_data, risk_total, benchmark_total, industry_total, bounds, train_data)
     return ret_df, tune_record
 
 
@@ -188,9 +246,10 @@ if __name__ == '__main__':
     universe = Universe('zz500')
     freq = '2b'
     benchmark_code = 905
-    start_date = '2010-01-01'
+    start_date = '2019-01-01'
     end_date = '2019-08-01'
     ref_dates = makeSchedule(start_date, end_date, freq, 'china.sse')
+    print(ref_dates)
     horizon = map_freq(freq)
     industry_name = 'sw'
     industry_level = 1
@@ -297,67 +356,6 @@ if __name__ == '__main__':
         'f98': CSQuantiles(LAST('TOBT'), groups='sw1'),
         'f99': CSQuantiles(LAST('TotalAssetGrowRate'), groups='sw1'),
         'f100': CSQuantiles(LAST('TotalAssetsTRate'), groups='sw1')}
-
-    # 获取因子数据
-    # factor_data_org = engine.fetch_factor_range(universe, basic_factor_store,
-    #                                             dates=ref_dates, used_factor_tables=[Alpha191])
-    factor_data_org = engine.fetch_factor_range(universe, basic_factor_store, dates=ref_dates)
-
-    # 获取行业数据， 风险因子
-    industry = engine.fetch_industry_range(universe, dates=ref_dates)
-    factor_data = pd.merge(factor_data_org, industry, on=['trade_date', 'code']).fillna(0.)
-    risk_total = engine.fetch_risk_model_range(universe, dates=ref_dates)[1]
-
-    # 获取收益率
-    return_data = engine.fetch_dx_return_range(universe, dates=ref_dates,
-                                               horizon=horizon, offset=0,
-                                               benchmark=benchmark_code)
-
-    # 获取benchmark
-    benchmark_total = engine.fetch_benchmark_range(dates=ref_dates, benchmark=benchmark_code)
-    industry_total = engine.fetch_industry_matrix_range(universe, dates=ref_dates, category=industry_name,
-                                                        level=industry_level)
-
-    ## Constraintes settings
-    weight_gap = 1
-
-    industry_names = industry_list(industry_name, industry_level)
-    constraint_risk = ['EARNYILD', 'LIQUIDTY', 'GROWTH', 'SIZE', 'BETA', 'MOMENTUM'] + industry_names
-    total_risk_names = constraint_risk + ['benchmark', 'total']
-
-    b_type = []
-    l_val = []
-    u_val = []
-
-    previous_pos = pd.DataFrame()
-    rets = []
-    turn_overs = []
-    leverags = []
-    trade_dates = []
-
-    transact_cost = 0.003
-    current_pos = pd.DataFrame()
-    executor = NaiveExecutor()
-    net_rets = []
-
-    for name in total_risk_names:
-        if name == 'benchmark':
-            b_type.append(BoundaryType.RELATIVE)
-            l_val.append(0.0)
-            u_val.append(1.0)
-        elif name == 'total':
-            b_type.append(BoundaryType.ABSOLUTE)
-            l_val.append(.0)
-            u_val.append(.0)
-        else:
-            b_type.append(BoundaryType.ABSOLUTE)
-            l_val.append(-1.005)
-            u_val.append(1.005)
-
-    bounds = create_box_bounds(total_risk_names, b_type, l_val, u_val)  # # Constraintes settings
-
-    train_data = pd.merge(factor_data, return_data, on=['trade_date', 'code']).dropna()
-    # train_data.head()
 
     features = ['f0', 'f1', 'f2', 'f3', 'f4', 'f5', 'f6', 'f7', 'f8', 'f9', 'f10', 'f11', 'f12', 'f13', 'f14', 'f15',
                 'f16', 'f17', 'f18', 'f19', 'f20', 'f21', 'f22', 'f23', 'f24', 'f25', 'f26', 'f27', 'f28', 'f29',
