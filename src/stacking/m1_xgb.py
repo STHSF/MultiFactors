@@ -122,8 +122,8 @@ def cal_acc(test_data, pre_data):
     pass
 
 
-def plot_figure(y_pred, y_test):
-    fig1 = plt.figure(num='fig111111', figsize=(10, 3), dpi=75, facecolor='#FFFFFF', edgecolor='#0000FF')
+def plot_figure(y_pred, y_test, fig_name):
+    fig1 = plt.figure(num=fig_name, figsize=(10, 3), dpi=75, facecolor='#FFFFFF', edgecolor='#0000FF')
     plt.plot(y_pred)
     plt.plot(y_test)
     plt.title(u"REGRESSION")
