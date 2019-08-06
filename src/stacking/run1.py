@@ -7,7 +7,13 @@
 @file: run.py
 @time: 2019-08-05 19:55
 """
-%matplotlib inline
+import time
+from datetime import datetime, timedelta
+from m1_xgb import *
+from src.conf.configuration import regress_conf
+import xgboost as xgb
+import gc
+
 import sys
 sys.path.append('../../')
 import pandas as pd
@@ -186,163 +192,154 @@ features = ['f0', 'f1', 'f2', 'f3', 'f4', 'f5', 'f6', 'f7', 'f8', 'f9', 'f10', '
 
 label = ['dx']
 
-from datetime import datetime, timedelta
-from m1_xgb import *
-from src.conf.configuration import regress_conf
-import xgboost as xgb
-import gc
 
 
-def create_scenario():
-    weight_gap = 1
-    transact_cost = 0.003
 
-    executor = NaiveExecutor()
-    turn_overs = []
-    leverags = []
-    trade_dates = []
-    current_pos = pd.DataFrame()
-    previous_pos = pd.DataFrame()
-    tune_record = pd.DataFrame()
-    rets = []
-    net_rets = []
-    turn_overs = []
-    leverags = []
-    ics = []
-    # take ref_dates[i] as an example
-    for i, ref_date in enumerate(ref_dates):
-        alpha_logger.info('{0} is start'.format(ref_date))
+weight_gap = 1
+transact_cost = 0.003
 
-        # machine learning model
-        # Filter Training data
-        # train data
-        trade_date_pre = ref_date - timedelta(days=1)
-        trade_date_pre_80 = ref_date - timedelta(days=80)
+executor = NaiveExecutor()
+turn_overs = []
+leverags = []
+trade_dates = []
+current_pos = pd.DataFrame()
+previous_pos = pd.DataFrame()
+tune_record = pd.DataFrame()
+rets = []
+net_rets = []
+turn_overs = []
+leverags = []
+ics = []
+# take ref_dates[i] as an example
+for i, ref_date in enumerate(ref_dates):
+    alpha_logger.info('{0} is start'.format(ref_date))
 
-        # train = train_data[(train_data.trade_date <= trade_date_pre) & (trade_date_pre_80 <= train_data.trade_date)].dropna()
-        train = train_data[train_data.trade_date <= trade_date_pre].dropna()
+    # machine learning model
+    # Filter Training data
+    # train data
+    trade_date_pre = ref_date - timedelta(days=1)
+    trade_date_pre_80 = ref_date - timedelta(days=80)
 
-        if len(train) <= 0:
-            continue
-        x_train = train[features]
-        y_train = train[label]
-        alpha_logger.info('len_x_train: {0}, len_y_train: {1}'.format(len(x_train.values), len(y_train.values)))
-        alpha_logger.info('X_train.shape={0}, X_test.shape = {1}'.format(np.shape(x_train), np.shape(y_train)))
+    # train = train_data[(train_data.trade_date <= trade_date_pre) & (trade_date_pre_80 <= train_data.trade_date)].dropna()
+    train = train_data[train_data.trade_date <= trade_date_pre].dropna()
 
-        # xgb_configuration
-        regress_conf.xgb_config_r()
-        regress_conf.cv_folds = None
-        regress_conf.early_stop_round = 10
-        regress_conf.max_round = 800
-        tic = time.time()
-        # training
-        xgb_model = XGBooster(regress_conf)
-        xgb_model.set_params(tree_method='gpu_hist', max_depth=5)
-        # xgb_model.set_params(max_depth=5)
-        print(xgb_model.get_params)
-        best_score, best_round, cv_rounds, best_model = xgb_model.fit(x_train, y_train)
-        alpha_logger.info('Training time cost {}s'.format(time.time() - tic))
-        alpha_logger.info('best_score = {}, best_round = {}'.format(best_score, best_round))
+    if len(train) <= 0:
+        continue
+    x_train = train[features]
+    y_train = train[label]
+    alpha_logger.info('len_x_train: {0}, len_y_train: {1}'.format(len(x_train.values), len(y_train.values)))
+    alpha_logger.info('X_train.shape={0}, X_test.shape = {1}'.format(np.shape(x_train), np.shape(y_train)))
 
-        # Test data
-        total_data_test_excess = train_data[train_data.trade_date == ref_date]
-        alpha_logger.info('{0} total_data_test_excess: {1}'.format(ref_date, len(total_data_test_excess)))
+    # xgb_configuration
+    regress_conf.xgb_config_r()
+    regress_conf.cv_folds = None
+    regress_conf.early_stop_round = 10
+    regress_conf.max_round = 800
+    tic = time.time()
+    # training
+    xgb_model = XGBooster(regress_conf)
+    xgb_model.set_params(tree_method='gpu_hist', max_depth=5)
+    # xgb_model.set_params(max_depth=5)
+    print(xgb_model.get_params)
+    best_score, best_round, cv_rounds, best_model = xgb_model.fit(x_train, y_train)
+    alpha_logger.info('Training time cost {}s'.format(time.time() - tic))
+    alpha_logger.info('best_score = {}, best_round = {}'.format(best_score, best_round))
 
-        if len(total_data_test_excess) <= 0:
-            alpha_logger.info('{0} HAS NO DATA!!!'.format(ref_date))
-            continue
+    # Test data
+    total_data_test_excess = train_data[train_data.trade_date == ref_date]
+    alpha_logger.info('{0} total_data_test_excess: {1}'.format(ref_date, len(total_data_test_excess)))
 
-        industry_matrix = industry_total[industry_total.trade_date == ref_date]
-        benchmark_w = benchmark_total[benchmark_total.trade_date == ref_date]
-        risk_matrix = risk_total[risk_total.trade_date == ref_date]
+    if len(total_data_test_excess) <= 0:
+        alpha_logger.info('{0} HAS NO DATA!!!'.format(ref_date))
+        continue
 
-        total_data = pd.merge(industry_matrix, benchmark_w, on=['code'], how='left').fillna(0.)
-        total_data = pd.merge(total_data, risk_matrix, on=['code'])
-        alpha_logger.info('{0} len_of_total_data: {1}'.format(ref_date, len(total_data)))
+    industry_matrix = industry_total[industry_total.trade_date == ref_date]
+    benchmark_w = benchmark_total[benchmark_total.trade_date == ref_date]
+    risk_matrix = risk_total[risk_total.trade_date == ref_date]
 
-        total_data_test_excess = pd.merge(total_data, total_data_test_excess, on=['code'])
-        alpha_logger.info('{0} len_of_total_data_test_excess: {1}'.format(ref_date, len(total_data_test_excess)))
+    total_data = pd.merge(industry_matrix, benchmark_w, on=['code'], how='left').fillna(0.)
+    total_data = pd.merge(total_data, risk_matrix, on=['code'])
+    alpha_logger.info('{0} len_of_total_data: {1}'.format(ref_date, len(total_data)))
 
-        codes = total_data_test_excess.code.values.tolist()
-        alpha_logger.info('{0} full re-balance: {1}'.format(ref_date, len(codes)))
-        dx_returns = return_data[return_data.trade_date == ref_date][['code', 'dx']]
+    total_data_test_excess = pd.merge(total_data, total_data_test_excess, on=['code'])
+    alpha_logger.info('{0} len_of_total_data_test_excess: {1}'.format(ref_date, len(total_data_test_excess)))
 
-        benchmark_w = total_data_test_excess.weight.values
-        alpha_logger.info('shape_of_benchmark_w: {}'.format(np.shape(benchmark_w)))
-        is_in_benchmark = (benchmark_w > 0.).astype(float).reshape((-1, 1))
-        total_risk_exp = np.concatenate([total_data_test_excess[constraint_risk].values.astype(float),
-                                         is_in_benchmark,
-                                         np.ones_like(is_in_benchmark)],
-                                        axis=1)
-        alpha_logger.info('shape_of_total_risk_exp_pre: {}'.format(np.shape(total_risk_exp)))
-        total_risk_exp = pd.DataFrame(total_risk_exp, columns=total_risk_names)
-        alpha_logger.info('shape_of_total_risk_exp: {}'.format(np.shape(total_risk_exp)))
-        constraints = LinearConstraints(bounds, total_risk_exp, benchmark_w)
-        alpha_logger.info('constraints: {0} in {1}'.format(np.shape(constraints.risk_targets()), ref_date))
+    codes = total_data_test_excess.code.values.tolist()
+    alpha_logger.info('{0} full re-balance: {1}'.format(ref_date, len(codes)))
+    dx_returns = return_data[return_data.trade_date == ref_date][['code', 'dx']]
 
-        lbound = np.maximum(0., benchmark_w - weight_gap)
-        ubound = weight_gap + benchmark_w
-        alpha_logger.info('lbound: {0} in {1}'.format(np.shape(lbound), ref_date))
-        alpha_logger.info('ubound: {0} in {1}'.format(np.shape(ubound), ref_date))
+    benchmark_w = total_data_test_excess.weight.values
+    alpha_logger.info('shape_of_benchmark_w: {}'.format(np.shape(benchmark_w)))
+    is_in_benchmark = (benchmark_w > 0.).astype(float).reshape((-1, 1))
+    total_risk_exp = np.concatenate([total_data_test_excess[constraint_risk].values.astype(float),
+                                     is_in_benchmark,
+                                     np.ones_like(is_in_benchmark)],
+                                    axis=1)
+    alpha_logger.info('shape_of_total_risk_exp_pre: {}'.format(np.shape(total_risk_exp)))
+    total_risk_exp = pd.DataFrame(total_risk_exp, columns=total_risk_names)
+    alpha_logger.info('shape_of_total_risk_exp: {}'.format(np.shape(total_risk_exp)))
+    constraints = LinearConstraints(bounds, total_risk_exp, benchmark_w)
+    alpha_logger.info('constraints: {0} in {1}'.format(np.shape(constraints.risk_targets()), ref_date))
 
-        # predict
-        x_pred = total_data_test_excess[features]
-        dpred = xgb.DMatrix(x_pred.values)
-        predict_xgboost = best_model.predict(dpred)
-        a = np.shape(predict_xgboost)
-        predict_xgboost = np.reshape(predict_xgboost, (a[0], -1)).astype(np.float64)
-        alpha_logger.info('shape_of_predict_xgboost: {}'.format(np.shape(predict_xgboost)))
-        # alpha_logger.info('predict_xgboost: {}'.format(predict_xgboost))
-        del xgb_model
-        del best_model
-        gc.collect()
+    lbound = np.maximum(0., benchmark_w - weight_gap)
+    ubound = weight_gap + benchmark_w
+    alpha_logger.info('lbound: {0} in {1}'.format(np.shape(lbound), ref_date))
+    alpha_logger.info('ubound: {0} in {1}'.format(np.shape(ubound), ref_date))
 
-        # backtest
-        try:
-            target_pos, _ = er_portfolio_analysis(predict_xgboost,
-                                                  total_data_test_excess['industry'].values,
-                                                  None,
-                                                  constraints,
-                                                  False,
-                                                  benchmark_w,
-                                                  method='risk_neutral',
-                                                  lbound=lbound,
-                                                  ubound=ubound)
-        except:
-            import pdb
-            pdb.set_trace()
-            alpha_logger.info('target_pos: {}'.format(target_pos))
-        alpha_logger.info('target_pos_shape: {}'.format(np.shape(target_pos)))
-        alpha_logger.info('len_codes:{}'.format(np.shape(codes)))
-        target_pos['code'] = codes
+    # predict
+    x_pred = total_data_test_excess[features]
+    dpred = xgb.DMatrix(x_pred.values)
+    predict_xgboost = best_model.predict(dpred)
+    a = np.shape(predict_xgboost)
+    predict_xgboost = np.reshape(predict_xgboost, (a[0], -1)).astype(np.float64)
+    alpha_logger.info('shape_of_predict_xgboost: {}'.format(np.shape(predict_xgboost)))
+    # alpha_logger.info('predict_xgboost: {}'.format(predict_xgboost))
+    del xgb_model
+    del best_model
+    gc.collect()
 
-        result = pd.merge(target_pos, dx_returns, on=['code'])
-        result['trade_date'] = ref_date
-        tune_record = tune_record.append(result)
-        alpha_logger.info('len_result: {}'.format(len(result)))
+    # backtest
+    try:
+        target_pos, _ = er_portfolio_analysis(predict_xgboost,
+                                              total_data_test_excess['industry'].values,
+                                              None,
+                                              constraints,
+                                              False,
+                                              benchmark_w,
+                                              method='risk_neutral',
+                                              lbound=lbound,
+                                              ubound=ubound)
+    except:
+        import pdb
+        pdb.set_trace()
+        alpha_logger.info('target_pos: {}'.format(target_pos))
+    alpha_logger.info('target_pos_shape: {}'.format(np.shape(target_pos)))
+    alpha_logger.info('len_codes:{}'.format(np.shape(codes)))
+    target_pos['code'] = codes
 
-        # excess_return = np.exp(result.dx.values) - 1. - index_return.loc[ref_date, 'dx']
-        excess_return = np.exp(result.dx.values) - 1.
-        ret = result.weight.values @ excess_return
+    result = pd.merge(target_pos, dx_returns, on=['code'])
+    result['trade_date'] = ref_date
+    tune_record = tune_record.append(result)
+    alpha_logger.info('len_result: {}'.format(len(result)))
 
-        trade_dates.append(ref_date)
-        rets.append(np.log(1. + ret))
-        alpha_logger.info('len_rets: {}, len_trade_dates: {}'.format(len(rets), len(trade_dates)))
+    # excess_return = np.exp(result.dx.values) - 1. - index_return.loc[ref_date, 'dx']
+    excess_return = np.exp(result.dx.values) - 1.
+    ret = result.weight.values @ excess_return
 
-        turn_over_org, current_pos = executor.execute(target_pos=target_pos)
-        turn_over = turn_over_org / sum(target_pos.weight.values)
-        executor.set_current(current_pos)
-        net_rets.append(np.log(1. + ret - transact_cost * turn_over))
-        alpha_logger.info('len_net_rets: {}, len_trade_dates: {}'.format(len(net_rets), len(trade_dates)))
+    trade_dates.append(ref_date)
+    rets.append(np.log(1. + ret))
+    alpha_logger.info('len_rets: {}, len_trade_dates: {}'.format(len(rets), len(trade_dates)))
 
-        alpha_logger.info('{} is finished'.format(ref_date))
+    turn_over_org, current_pos = executor.execute(target_pos=target_pos)
+    turn_over = turn_over_org / sum(target_pos.weight.values)
+    executor.set_current(current_pos)
+    net_rets.append(np.log(1. + ret - transact_cost * turn_over))
+    alpha_logger.info('len_net_rets: {}, len_trade_dates: {}'.format(len(net_rets), len(trade_dates)))
 
-    # ret_df = pd.DataFrame({'xgb_regress': rets}, index=trade_dates)
-    ret_df = pd.DataFrame({'xgb_regress': rets, 'net_xgb_regress': net_rets}, index=trade_dates)
-    ret_df.loc[advanceDateByCalendar('china.sse', ref_dates[-1], freq).strftime('%Y-%m-%d')] = 0.
-    ret_df = ret_df.shift(1)
-    ret_df.iloc[0] = 0.
-    return ret_df, tune_record
+    alpha_logger.info('{} is finished'.format(ref_date))
 
-
-ret_df, tune_record = create_scenario()
+# ret_df = pd.DataFrame({'xgb_regress': rets}, index=trade_dates)
+ret_df = pd.DataFrame({'xgb_regress': rets, 'net_xgb_regress': net_rets}, index=trade_dates)
+ret_df.loc[advanceDateByCalendar('china.sse', ref_dates[-1], freq).strftime('%Y-%m-%d')] = 0.
+ret_df = ret_df.shift(1)
+ret_df.iloc[0] = 0.
