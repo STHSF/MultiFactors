@@ -24,6 +24,7 @@ from m1_xgb import *
 from src.conf.configuration import regress_conf
 import xgboost as xgb
 import gc
+import json
 from flask import Flask
 
 app = Flask(__name__)
@@ -179,9 +180,7 @@ def create_scenario(train_data, weight_gap, return_data, risk_total,
     ret_df.loc[advanceDateByCalendar('china.sse', ref_dates[-1], freq).strftime('%Y-%m-%d')] = 0.
     ret_df = ret_df.shift(1)
     ret_df.iloc[0] = 0.
-
-    result_dic = {'ret_df': ret_df, 'tune_record': tune_record}
-    return result_dic
+    return ret_df, tune_record
 
 
 @app.route('/')
@@ -244,7 +243,9 @@ def first_flask():
     print('data load success >>>>>>>>>>>>')
     ret_df, tune_record = create_scenario(train_data, weight_gap, return_data, risk_total,
                                           benchmark_total, industry_total, bounds, constraint_risk, total_risk_names)
-    return ret_df, tune_record
+
+    result_dic = {'ret_df': ret_df, 'tune_record': tune_record}
+    return result_dic
 
 
 if __name__ == '__main__':
@@ -257,7 +258,6 @@ if __name__ == '__main__':
     start_date = '2019-01-01'
     end_date = '2019-08-01'
     ref_dates = makeSchedule(start_date, end_date, freq, 'china.sse')
-    print(ref_dates)
     horizon = map_freq(freq)
     industry_name = 'sw'
     industry_level = 1
