@@ -14,7 +14,6 @@ sys.path.append('../../')
 sys.path.append('../../../')
 
 import time
-import pickle
 import argparse
 import numpy as np
 from math import *
@@ -36,8 +35,6 @@ class XGBooster(object):
         self.early_stop_round = args.early_stop_round
         self.seed = args.seed
         self.save_model_path = args.save_model_path
-        # self.xgb_params.update({'silent': 1, 'objective': 'multi:softmax', 'num_class': 3})
-        # self.xgb_params.update({'eval_metric': ['merror', 'mlogloss']})
 
     def fit(self, x_train, y_train, x_val=None, y_val=None):
         xgb_start = time.time()
@@ -71,7 +68,7 @@ class XGBooster(object):
             self.best_score = self.best_model.best_score
             cv_result = None
 
-        print('spend time :' + str((time.time() - xgb_start)) + '(s)')
+        # print('spend time :' + str((time.time() - xgb_start)) + '(s)')
         return self.best_score, self.best_round, cv_result, self.best_model
 
     def predict(self, bst_model, x_pred):
