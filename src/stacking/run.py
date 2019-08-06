@@ -30,7 +30,7 @@ app = Flask(__name__)
 
 
 def create_scenario(train_data, weight_gap, return_data, risk_total,
-                    benchmark_total, industry_total, bounds, constraint_risk):
+                    benchmark_total, industry_total, bounds, constraint_risk, total_risk_names):
     executor = NaiveExecutor()
     trade_dates = []
     transact_cost = 0.003
@@ -241,7 +241,7 @@ def first_flask():
     train_data = pd.merge(factor_data, return_data, on=['trade_date', 'code']).dropna()
     print('data load success >>>>>>>>>>>>')
     ret_df, tune_record = create_scenario(train_data, weight_gap, return_data, risk_total,
-                                          benchmark_total, industry_total, bounds, constraint_risk)
+                                          benchmark_total, industry_total, bounds, constraint_risk, total_risk_names)
     return ret_df, tune_record
 
 
