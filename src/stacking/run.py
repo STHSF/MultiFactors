@@ -193,7 +193,7 @@ def first_flask():
     universe = Universe('zz500')
     freq = '2b'
     benchmark_code = 905
-    start_date = '2019-01-01'
+    start_date = '2016-01-01'
     end_date = '2019-08-01'
     ref_dates = makeSchedule(start_date, end_date, freq, 'china.sse')
     horizon = map_freq(freq)
