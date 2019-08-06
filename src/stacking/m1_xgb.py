@@ -203,7 +203,7 @@ now = time.strftime('%Y-%m-%d %H:%M')
 
 if __name__ == '__main__':
     # 输入数据为dataframe格式
-    train_sample_df = pd.read_csv('../data/dataset/traning_sample.csv')
+    train_sample_df = pd.read_csv('..//data/dataset/training_sample.csv')
     print(train_sample_df.head())
     train_dataset_df = train_sample_df[['alpha_1', 'alpha_2', 'alpha_3', 'alpha_4', 'alpha_5',
                                         'alpha_6', 'alpha_7', 'alpha_8', 'alpha_9', 'alpha_10']]
