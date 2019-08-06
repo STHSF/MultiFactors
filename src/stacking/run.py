@@ -244,7 +244,7 @@ def first_flask():
     ret_df, tune_record = create_scenario(train_data, weight_gap, return_data, risk_total,
                                           benchmark_total, industry_total, bounds, constraint_risk, total_risk_names)
 
-    result_dic = {'ret_df': ret_df.to_json(orient='index'), 'tune_record': tune_record.to_json(orient='index')}
+    result_dic = {'ret_df': ret_df.to_json(), 'tune_record': tune_record.reset_index().to_json()}
     return result_dic
 
 
