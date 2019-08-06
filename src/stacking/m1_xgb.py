@@ -55,7 +55,8 @@ class XGBooster(object):
         else:
             print('non_cross_validation。。。。')
             if x_val is None and y_val is None:
-                x_train, x_valid, y_train, y_valid = train_test_sp(x_train, y_train, test_size=0.2)
+                # 注意这里的shift
+                x_train, x_valid, y_train, y_valid = train_test_sp(x_train, y_train, test_size=0.2, shift=0)
             else:
                 x_valid, y_valid = x_val, y_val
             d_train = xgb.DMatrix(x_train, label=y_train)
@@ -203,7 +204,7 @@ now = time.strftime('%Y-%m-%d %H:%M')
 
 if __name__ == '__main__':
     # 输入数据为dataframe格式
-    train_sample_df = pd.read_csv('..//data/dataset/training_sample.csv')
+    train_sample_df = pd.read_csv('../data/dataset/training_sample.csv')
     print(train_sample_df.head())
     train_dataset_df = train_sample_df[['alpha_1', 'alpha_2', 'alpha_3', 'alpha_4', 'alpha_5',
                                         'alpha_6', 'alpha_7', 'alpha_8', 'alpha_9', 'alpha_10']]
