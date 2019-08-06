@@ -30,7 +30,7 @@ from flask import Flask, request
 app = Flask(__name__)
 
 
-def create_scenario(train_data, features, label, ref_dates, freq, weight_gap, return_data, risk_total,
+def create_scenario(train_data, features, label, ref_dates, freq, regress_conf, weight_gap, return_data, risk_total,
                     benchmark_total, industry_total, bounds, constraint_risk, total_risk_names):
     executor = NaiveExecutor()
     trade_dates = []
@@ -38,8 +38,6 @@ def create_scenario(train_data, features, label, ref_dates, freq, weight_gap, re
     previous_pos = pd.DataFrame()
     tune_record = pd.DataFrame()
     current_pos = pd.DataFrame()
-    turn_overs = []
-    leverags = []
     rets = []
     net_rets = []
     turn_overs = []
@@ -65,11 +63,6 @@ def create_scenario(train_data, features, label, ref_dates, freq, weight_gap, re
         alpha_logger.info('len_x_train: {0}, len_y_train: {1}'.format(len(x_train.values), len(y_train.values)))
         alpha_logger.info('X_train.shape={0}, X_test.shape = {1}'.format(np.shape(x_train), np.shape(y_train)))
 
-        # xgb_configuration
-        regress_conf.xgb_config_r()
-        regress_conf.cv_folds = None
-        regress_conf.early_stop_round = 10
-        regress_conf.max_round = 10
         tic = time.time()
         # training
         xgb_model = XGBooster(regress_conf)
@@ -193,12 +186,22 @@ def backtest():
     start_date = request.form['start_date']
     end_date = request.form['end_date']
     freq = request.form['freq']
+    max_round = request.form['max_round']
+
     if start_date is None or start_date == '':
         start_date = '2019-01-01'
     if end_date is None or end_date == '':
         end_date = '2019-08-01'
     if freq is None or freq == '':
         freq = '2b'
+    if max_round is None or max_round == '':
+        max_round = 10
+
+    # xgb_configuration
+    regress_conf.xgb_config_r()
+    regress_conf.cv_folds = None
+    regress_conf.early_stop_round = 10
+    regress_conf.max_round = max_round
 
     ref_dates = makeSchedule(start_date, end_date, freq, 'china.sse')
     universe = Universe('zz500')
@@ -371,8 +374,9 @@ def backtest():
 
     train_data = pd.merge(factor_data, return_data, on=['trade_date', 'code']).dropna()
     print('data load success >>>>>>>>>>>>')
-    ret_df, tune_record = create_scenario(train_data, features, label, ref_dates, freq, weight_gap, return_data, risk_total,
-                                          benchmark_total, industry_total, bounds, constraint_risk, total_risk_names)
+    ret_df, tune_record = create_scenario(train_data, features, label, ref_dates, freq, regress_conf,  weight_gap,
+                                          return_data, risk_total, benchmark_total, industry_total,
+                                          bounds, constraint_risk, total_risk_names)
 
     result_dic = {'ret_df': ret_df.to_json(), 'tune_record': tune_record.reset_index().to_json()}
     return result_dic
