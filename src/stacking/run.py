@@ -25,7 +25,7 @@ from src.conf.configuration import regress_conf
 import xgboost as xgb
 import gc
 import json
-from flask import Flask
+from flask import Flask, request
 
 app = Flask(__name__)
 
@@ -188,14 +188,21 @@ def index():
     return '<h1>hello Test<h1>'
 
 
-@app.route('/runxgb')
-def first_flask():
-    universe = Universe('zz500')
-    freq = '2b'
-    benchmark_code = 905
-    start_date = '2016-01-01'
-    end_date = '2019-08-01'
+@app.route('/backtest', methods=['POST'])
+def backtest():
+    start_date = request.form['start_date']
+    end_date = request.form['end_date']
+    freq = request.form['freq']
+    if start_date is None or start_date == '':
+        start_date = '2019-01-01'
+    if end_date is None or end_date == '':
+        end_date = '2019-08-01'
+    if freq is None or freq == '':
+        freq = '2b'
+
     ref_dates = makeSchedule(start_date, end_date, freq, 'china.sse')
+    universe = Universe('zz500')
+    benchmark_code = 905
     horizon = map_freq(freq)
     industry_name = 'sw'
     industry_level = 1
@@ -313,7 +320,6 @@ def first_flask():
                 'f100']
 
     label = ['dx']
-
     print('backtesting>>>>>>>>>>>>>>>>>')
     # 获取因子数据
     # factor_data_org = engine.fetch_factor_range(universe, basic_factor_store,
