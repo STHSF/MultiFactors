@@ -71,8 +71,8 @@ def create_scenario(weight_gap, return_data, risk_total, benchmark_total, indust
         tic = time.time()
         # training
         xgb_model = XGBooster(regress_conf)
-        xgb_model.set_params(tree_method='gpu_hist', max_depth=5)
-        #         xgb_model.set_params(max_depth=5)
+        # xgb_model.set_params(tree_method='gpu_hist', max_depth=5)
+        xgb_model.set_params(max_depth=5)
         print(xgb_model.get_params)
         best_score, best_round, cv_rounds, best_model = xgb_model.fit(x_train, y_train)
         alpha_logger.info('Training time cost {}s'.format(time.time() - tic))
@@ -180,10 +180,12 @@ def create_scenario(weight_gap, return_data, risk_total, benchmark_total, indust
     ret_df.iloc[0] = 0.
     return ret_df, tune_record
 
-
 @app.route('/')
+def index():
+    return '<h1>hello Test<h1>'
+
+@app.route('/run')
 def first_flask():
-    print('hello word')
     # 获取因子数据
     # factor_data_org = engine.fetch_factor_range(universe, basic_factor_store,
     #                                             dates=ref_dates, used_factor_tables=[Alpha191])
@@ -234,7 +236,7 @@ def first_flask():
     bounds = create_box_bounds(total_risk_names, b_type, l_val, u_val)  # # Constraintes settings
 
     train_data = pd.merge(factor_data, return_data, on=['trade_date', 'code']).dropna()
-
+    print('data load success >>>>>>>>>>>>')
     ret_df, tune_record = create_scenario(weight_gap, return_data, risk_total, benchmark_total, industry_total, bounds, train_data)
     return ret_df, tune_record
 
