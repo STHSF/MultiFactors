@@ -30,7 +30,7 @@ from flask import Flask
 app = Flask(__name__)
 
 
-def create_scenario(train_data, weight_gap, return_data, risk_total,
+def create_scenario(train_data, features, label, ref_dates, freq, weight_gap, return_data, risk_total,
                     benchmark_total, industry_total, bounds, constraint_risk, total_risk_names):
     executor = NaiveExecutor()
     trade_dates = []
@@ -190,68 +190,6 @@ def index():
 
 @app.route('/runxgb')
 def first_flask():
-    print('backtesting>>>>>>>>>>>>>>>>>')
-    # 获取因子数据
-    # factor_data_org = engine.fetch_factor_range(universe, basic_factor_store,
-    #                                             dates=ref_dates, used_factor_tables=[Alpha191])
-    factor_data_org = engine.fetch_factor_range(universe, basic_factor_store, dates=ref_dates)
-
-    # 获取行业数据， 风险因子
-    industry = engine.fetch_industry_range(universe, dates=ref_dates)
-    factor_data = pd.merge(factor_data_org, industry, on=['trade_date', 'code']).fillna(0.)
-
-    risk_total = engine.fetch_risk_model_range(universe, dates=ref_dates)[1]
-
-    # 获取收益率
-    return_data = engine.fetch_dx_return_range(universe, dates=ref_dates,
-                                               horizon=horizon, offset=0,
-                                               benchmark=benchmark_code)
-
-    # 获取benchmark
-    benchmark_total = engine.fetch_benchmark_range(dates=ref_dates, benchmark=benchmark_code)
-    industry_total = engine.fetch_industry_matrix_range(universe, dates=ref_dates, category=industry_name,
-                                                        level=industry_level)
-
-    # Constraintes settings
-    weight_gap = 1
-
-    industry_names = industry_list(industry_name, industry_level)
-    constraint_risk = ['EARNYILD', 'LIQUIDTY', 'GROWTH', 'SIZE', 'BETA', 'MOMENTUM'] + industry_names
-    total_risk_names = constraint_risk + ['benchmark', 'total']
-
-    b_type = []
-    l_val = []
-    u_val = []
-
-    for name in total_risk_names:
-        if name == 'benchmark':
-            b_type.append(BoundaryType.RELATIVE)
-            l_val.append(0.0)
-            u_val.append(1.0)
-        elif name == 'total':
-            b_type.append(BoundaryType.ABSOLUTE)
-            l_val.append(.0)
-            u_val.append(.0)
-        else:
-            b_type.append(BoundaryType.ABSOLUTE)
-            l_val.append(-1.005)
-            u_val.append(1.005)
-
-    bounds = create_box_bounds(total_risk_names, b_type, l_val, u_val)  # # Constraintes settings
-
-    train_data = pd.merge(factor_data, return_data, on=['trade_date', 'code']).dropna()
-    print('data load success >>>>>>>>>>>>')
-    ret_df, tune_record = create_scenario(train_data, weight_gap, return_data, risk_total,
-                                          benchmark_total, industry_total, bounds, constraint_risk, total_risk_names)
-
-    result_dic = {'ret_df': ret_df.to_json(), 'tune_record': tune_record.reset_index().to_json()}
-    return result_dic
-
-
-if __name__ == '__main__':
-    data_source = 'postgresql+psycopg2://alpha:alpha@180.166.26.82:8889/alpha'
-    engine = SqlEngine(data_source)
-
     universe = Universe('zz500')
     freq = '2b'
     benchmark_code = 905
@@ -375,6 +313,68 @@ if __name__ == '__main__':
                 'f100']
 
     label = ['dx']
+
+    print('backtesting>>>>>>>>>>>>>>>>>')
+    # 获取因子数据
+    # factor_data_org = engine.fetch_factor_range(universe, basic_factor_store,
+    #                                             dates=ref_dates, used_factor_tables=[Alpha191])
+    factor_data_org = engine.fetch_factor_range(universe, basic_factor_store, dates=ref_dates)
+
+    # 获取行业数据， 风险因子
+    industry = engine.fetch_industry_range(universe, dates=ref_dates)
+    factor_data = pd.merge(factor_data_org, industry, on=['trade_date', 'code']).fillna(0.)
+
+    risk_total = engine.fetch_risk_model_range(universe, dates=ref_dates)[1]
+
+    # 获取收益率
+    return_data = engine.fetch_dx_return_range(universe, dates=ref_dates,
+                                               horizon=horizon, offset=0,
+                                               benchmark=benchmark_code)
+
+    # 获取benchmark
+    benchmark_total = engine.fetch_benchmark_range(dates=ref_dates, benchmark=benchmark_code)
+    industry_total = engine.fetch_industry_matrix_range(universe, dates=ref_dates, category=industry_name,
+                                                        level=industry_level)
+
+    # Constraintes settings
+    weight_gap = 1
+
+    industry_names = industry_list(industry_name, industry_level)
+    constraint_risk = ['EARNYILD', 'LIQUIDTY', 'GROWTH', 'SIZE', 'BETA', 'MOMENTUM'] + industry_names
+    total_risk_names = constraint_risk + ['benchmark', 'total']
+
+    b_type = []
+    l_val = []
+    u_val = []
+
+    for name in total_risk_names:
+        if name == 'benchmark':
+            b_type.append(BoundaryType.RELATIVE)
+            l_val.append(0.0)
+            u_val.append(1.0)
+        elif name == 'total':
+            b_type.append(BoundaryType.ABSOLUTE)
+            l_val.append(.0)
+            u_val.append(.0)
+        else:
+            b_type.append(BoundaryType.ABSOLUTE)
+            l_val.append(-1.005)
+            u_val.append(1.005)
+
+    bounds = create_box_bounds(total_risk_names, b_type, l_val, u_val)  # Constraintes settings
+
+    train_data = pd.merge(factor_data, return_data, on=['trade_date', 'code']).dropna()
+    print('data load success >>>>>>>>>>>>')
+    ret_df, tune_record = create_scenario(train_data, features, label, ref_dates, freq, weight_gap, return_data, risk_total,
+                                          benchmark_total, industry_total, bounds, constraint_risk, total_risk_names)
+
+    result_dic = {'ret_df': ret_df.to_json(), 'tune_record': tune_record.reset_index().to_json()}
+    return result_dic
+
+
+if __name__ == '__main__':
+    data_source = 'postgresql+psycopg2://alpha:alpha@180.166.26.82:8889/alpha'
+    engine = SqlEngine(data_source)
 
     app.run(host='0.0.0.0', port='8000')
 
