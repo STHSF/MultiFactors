@@ -179,7 +179,9 @@ def create_scenario(train_data, weight_gap, return_data, risk_total,
     ret_df.loc[advanceDateByCalendar('china.sse', ref_dates[-1], freq).strftime('%Y-%m-%d')] = 0.
     ret_df = ret_df.shift(1)
     ret_df.iloc[0] = 0.
-    return ret_df, tune_record
+
+    result_dic = {'ret_df': ret_df, 'tune_record': tune_record}
+    return result_dic
 
 
 @app.route('/')
