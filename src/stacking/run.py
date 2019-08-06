@@ -29,7 +29,8 @@ from flask import Flask
 app = Flask(__name__)
 
 
-def create_scenario(weight_gap, return_data, risk_total, benchmark_total, industry_total, bounds, train_data):
+def create_scenario(train_data, weight_gap, return_data, risk_total,
+                    benchmark_total, industry_total, bounds, constraint_risk):
     executor = NaiveExecutor()
     trade_dates = []
     transact_cost = 0.003
@@ -180,12 +181,15 @@ def create_scenario(weight_gap, return_data, risk_total, benchmark_total, indust
     ret_df.iloc[0] = 0.
     return ret_df, tune_record
 
+
 @app.route('/')
 def index():
     return '<h1>hello Test<h1>'
 
-@app.route('/run')
+
+@app.route('/runxgb')
 def first_flask():
+    print('backtesting>>>>>>>>>>>>>>>>>')
     # 获取因子数据
     # factor_data_org = engine.fetch_factor_range(universe, basic_factor_store,
     #                                             dates=ref_dates, used_factor_tables=[Alpha191])
@@ -207,7 +211,7 @@ def first_flask():
     industry_total = engine.fetch_industry_matrix_range(universe, dates=ref_dates, category=industry_name,
                                                         level=industry_level)
 
-    ## Constraintes settings
+    # Constraintes settings
     weight_gap = 1
 
     industry_names = industry_list(industry_name, industry_level)
@@ -217,7 +221,6 @@ def first_flask():
     b_type = []
     l_val = []
     u_val = []
-
 
     for name in total_risk_names:
         if name == 'benchmark':
@@ -237,7 +240,8 @@ def first_flask():
 
     train_data = pd.merge(factor_data, return_data, on=['trade_date', 'code']).dropna()
     print('data load success >>>>>>>>>>>>')
-    ret_df, tune_record = create_scenario(weight_gap, return_data, risk_total, benchmark_total, industry_total, bounds, train_data)
+    ret_df, tune_record = create_scenario(train_data, weight_gap, return_data, risk_total,
+                                          benchmark_total, industry_total, bounds, constraint_risk)
     return ret_df, tune_record
 
 
