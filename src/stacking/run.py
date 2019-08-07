@@ -201,7 +201,7 @@ def backtest():
     regress_conf.xgb_config_r()
     regress_conf.cv_folds = None
     regress_conf.early_stop_round = 10
-    regress_conf.max_round = max_round
+    regress_conf.max_round = int(max_round)
 
     ref_dates = makeSchedule(start_date, end_date, freq, 'china.sse')
     universe = Universe('zz500')
