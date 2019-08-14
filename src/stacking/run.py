@@ -682,7 +682,7 @@ def backtest():
                 'f412', 'f413', 'f414', 'f415', 'f416', 'f417', 'f418', 'f419', 'f420', 'f421', 'f422']
 
     label = ['dx']
-    print('backtesting >>>>>>>>>>>>>>>>>')
+    print('>>>>>>>>>>>>>>>>> Backtesting >>>>>>>>>>>>>>>>>')
     # 获取因子数据
     # factor_data_org = engine.fetch_factor_range(universe, basic_factor_store,
     #                                             dates=ref_dates, used_factor_tables=[Alpha191])
@@ -732,7 +732,7 @@ def backtest():
     bounds = create_box_bounds(total_risk_names, b_type, l_val, u_val)  # Constraintes settings
 
     train_data = pd.merge(factor_data, return_data, on=['trade_date', 'code']).dropna()
-    print('data load success >>>>>>>>>>>>')
+    print('>>>>>>>>>>>> Data Load Success >>>>>>>>>>>>')
     ret_df, tune_record = create_scenario(train_data, features, label, ref_dates, freq, regress_conf, weight_gap,
                                           return_data, risk_total, benchmark_total, industry_total,
                                           bounds, constraint_risk, total_risk_names)
