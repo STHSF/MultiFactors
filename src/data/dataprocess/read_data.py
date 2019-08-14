@@ -33,7 +33,7 @@ if __name__ == '__main__':
     # print(len(zz500_df))
     # print(zz500_df[zz500_df['code'] == '000006.XSHG'])
     # factor_df = factor_read('alpha191')
-    factor_df = pd.read_csv('../dataset/traning_sample.csv')
+    factor_df = pd.read_csv('../dataset/training_sample.csv')
     print(factor_df.head())
 
 
