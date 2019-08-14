@@ -65,8 +65,8 @@ def create_scenario(train_data, features, label, ref_dates, freq, regress_conf, 
         tic = time.time()
         # training
         xgb_model = XGBooster(regress_conf)
-        # xgb_model.set_params(tree_method='gpu_hist', max_depth=5)
-        xgb_model.set_params(max_depth=5)
+        xgb_model.set_params(tree_method='gpu_hist', n_gpus=-1, max_depth=5)
+        # xgb_model.set_params(max_depth=5)
         print(xgb_model.get_params)
         best_score, best_round, cv_rounds, best_model = xgb_model.fit(x_train, y_train)
         alpha_logger.info('Training time cost {}s'.format(time.time() - tic))
