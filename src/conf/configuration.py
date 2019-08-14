@@ -26,7 +26,6 @@ class RegressionConfig(object):
             'max_depth': 5,
             'eta': 1,
             'silent': 1,
-            'tree_method': 'gpu_hist',
             'objective': 'reg:linear',
             'eval_metric': 'rmse'}
         self.max_round = 500
