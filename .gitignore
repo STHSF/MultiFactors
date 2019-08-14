@@ -108,6 +108,7 @@ venv.bak/
 .git/
 *.pyc
 /src/conf/config.py
+/src/data/*
 /src/data/dataset/zz500.csv
 /src/utils/data_source.py
 /src/conf/config(1).py

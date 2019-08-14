@@ -23,9 +23,10 @@ class RegressionConfig(object):
         self.params = {
             'booster': 'dart',
             'learning_rate': 0.01,
-            'max_depth': 27,
+            'max_depth': 5,
             'eta': 1,
             'silent': 1,
+            'tree_method': 'gpu_hist',
             'objective': 'reg:linear',
             'eval_metric': 'rmse'}
         self.max_round = 500
