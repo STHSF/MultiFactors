@@ -10,22 +10,20 @@
 
 import time
 import sys
-
+sys.path.append('../')
 sys.path.append('../../')
 sys.path.append('../../../')
-sys.path.append('../')
 import pandas as pd
 from PyFin.api import *
 from alphamind.api import *
 from src.conf.models import *
 import numpy as np
 from alphamind.execution.naiveexecutor import NaiveExecutor
-from datetime import datetime, timedelta
+from datetime import timedelta
 from m1_xgb import *
 from src.conf.configuration import regress_conf
 import xgboost as xgb
 import gc
-import json
 from flask import Flask, request
 
 app = Flask(__name__)
