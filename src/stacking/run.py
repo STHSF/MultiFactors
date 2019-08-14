@@ -681,6 +681,7 @@ def backtest():
 
     label = ['dx']
     print('>>>>>>>>>>>>>>>>> Backtesting >>>>>>>>>>>>>>>>>')
+    print('>>>>>>>>> Loading Factor Data >>>>>>>>>>')
     # 获取因子数据
     # factor_data_org = engine.fetch_factor_range(universe, basic_factor_store,
     #                                             dates=ref_dates, used_factor_tables=[Alpha191])
@@ -696,7 +697,7 @@ def backtest():
     return_data = engine.fetch_dx_return_range(universe, dates=ref_dates,
                                                horizon=horizon, offset=0,
                                                benchmark=benchmark_code)
-
+    print('>>>>>>>>> Loading Benchmark >>>>>>>>>>')
     # 获取benchmark
     benchmark_total = engine.fetch_benchmark_range(dates=ref_dates, benchmark=benchmark_code)
     industry_total = engine.fetch_industry_matrix_range(universe, dates=ref_dates, category=industry_name,
