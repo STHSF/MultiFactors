@@ -183,6 +183,9 @@ def index():
 
 @app.route('/backtest', methods=['POST'])
 def backtest():
+    data_source = 'postgresql+psycopg2://alpha:alpha@180.166.26.82:8889/alpha'
+    engine = SqlEngine(data_source)
+
     start_date = request.form['start_date']
     end_date = request.form['end_date']
     freq = request.form['freq']
@@ -201,7 +204,7 @@ def backtest():
     regress_conf.xgb_config_r()
     regress_conf.cv_folds = None
     regress_conf.early_stop_round = 10
-    regress_conf.max_round = max_round
+    regress_conf.max_round = int(max_round)
 
     ref_dates = makeSchedule(start_date, end_date, freq, 'china.sse')
     universe = Universe('zz500')
@@ -323,7 +326,7 @@ def backtest():
                 'f100']
 
     label = ['dx']
-    print('backtesting>>>>>>>>>>>>>>>>>')
+    print('backtesting >>>>>>>>>>>>>>>>>')
     # 获取因子数据
     # factor_data_org = engine.fetch_factor_range(universe, basic_factor_store,
     #                                             dates=ref_dates, used_factor_tables=[Alpha191])
@@ -383,8 +386,5 @@ def backtest():
 
 
 if __name__ == '__main__':
-    data_source = 'postgresql+psycopg2://alpha:alpha@180.166.26.82:8889/alpha'
-    engine = SqlEngine(data_source)
-
     app.run(host='0.0.0.0', port='8000')
 
