@@ -192,7 +192,7 @@ def backtest():
     end_date = request.form['end_date']
     freq = request.form['freq']
     max_round = request.form['max_round']
-    GPUs = request.form['GPU']
+    GPUs = request.form['GPUs']
 
     if start_date is None or start_date == '':
         start_date = '2019-01-01'
