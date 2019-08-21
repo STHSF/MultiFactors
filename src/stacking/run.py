@@ -30,7 +30,7 @@ app = Flask(__name__)
 
 
 def create_scenario(train_data, features, label, ref_dates, freq, regress_conf, weight_gap, return_data, risk_total,
-                    benchmark_total, industry_total, bounds, constraint_risk, total_risk_names):
+                    benchmark_total, industry_total, bounds, constraint_risk, total_risk_names, GPUs=True):
     executor = NaiveExecutor()
     trade_dates = []
     transact_cost = 0.003
@@ -65,8 +65,11 @@ def create_scenario(train_data, features, label, ref_dates, freq, regress_conf, 
         tic = time.time()
         # training
         xgb_model = XGBooster(regress_conf)
-        xgb_model.set_params(tree_method='gpu_hist', n_gpus=-1, max_depth=5)
-        # xgb_model.set_params(max_depth=5)
+        if GPUs:
+            xgb_model.set_params(tree_method='gpu_hist', n_gpus=-1, max_depth=5)
+        else:
+            xgb_model.set_params(max_depth=5)
+
         print(xgb_model.get_params)
         best_score, best_round, cv_rounds, best_model = xgb_model.fit(x_train, y_train)
         alpha_logger.info('Training time cost {}s'.format(time.time() - tic))
@@ -189,6 +192,7 @@ def backtest():
     end_date = request.form['end_date']
     freq = request.form['freq']
     max_round = request.form['max_round']
+    GPUs = request.form['GPU']
 
     if start_date is None or start_date == '':
         start_date = '2019-01-01'
@@ -734,7 +738,7 @@ def backtest():
     print('>>>>>>>>>>>> Data Load Success >>>>>>>>>>>>')
     ret_df, tune_record = create_scenario(train_data, features, label, ref_dates, freq, regress_conf, weight_gap,
                                           return_data, risk_total, benchmark_total, industry_total,
-                                          bounds, constraint_risk, total_risk_names)
+                                          bounds, constraint_risk, total_risk_names, GPUs)
 
     result_dic = {'ret_df': ret_df.to_json(), 'tune_record': tune_record.reset_index().to_json()}
     return result_dic
