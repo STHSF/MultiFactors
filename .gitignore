@@ -118,3 +118,4 @@ venv.bak/
 .ip*
 .*
 !/.gitignore
+/src/stacking/notebooks/.ipynb_checkpoints/
