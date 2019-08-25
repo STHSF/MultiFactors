@@ -122,3 +122,6 @@ venv.bak/
 /src/data/dataset/training_sample.csv
 /src/data/dataset/zz500_all.csv
 /src/data/dataset/zz500_all.pkl
+src/data/dataprepare/nohup.out
+src/data/dataprepare/zz500_all.csv
+src/data/dataprepare/zz500_all.pkl
