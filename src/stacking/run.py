@@ -698,9 +698,9 @@ def backtest():
     risk_total = engine.fetch_risk_model_range(universe, dates=ref_dates)[1]
 
     # 获取收益率
-    return_data = engine.fetch_dx_return_range(universe, dates=ref_dates,
-                                               horizon=horizon, offset=0,
+    return_data = engine.fetch_dx_return_range(universe, dates=ref_dates, horizon=horizon, offset=0,
                                                benchmark=benchmark_code)
+
     print('>>>>>>>>> Loading Benchmark >>>>>>>>>>')
     # 获取benchmark
     benchmark_total = engine.fetch_benchmark_range(dates=ref_dates, benchmark=benchmark_code)
