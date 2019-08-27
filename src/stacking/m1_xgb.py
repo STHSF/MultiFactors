@@ -134,10 +134,12 @@ def ic_cal(y_pred: np.ndarray, y_test: np.ndarray) -> float:
     return np.corrcoef(y_pred, y_test)[0, 1]
 
 
-def xgb_predict(model, x_test, y_test, save_result_path=None):
+def xgb_predict(model, x_test, y_test=None, save_result_path=None):
     d_test = xgb.DMatrix(x_test)
     # 输出
     y_pred = model.predict(d_test)
+    if y_test is None:
+        return y_pred
     rmse = np.sqrt(mean_squared_error(y_test, y_pred))
     print('rmse_of_pred: %s' % rmse)
     r_square_ = r2_score(y_test, y_pred)
@@ -180,7 +182,7 @@ def train_test_sp(train_dataset_df, label_dataset_df, test_size=0.02, shift=100,
     :param train_dataset_df: 训练集
     :param label_dataset_df: 标签集
     :param test_size: 测试数据所占比例
-    :param shift: 测试数据后移
+    :param shift: 测试数据后移, 针对时间序列的数据, 为了train和test不重合
     :param random: 随机划分还是分段切分
     :return:
     """

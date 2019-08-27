@@ -108,7 +108,6 @@ venv.bak/
 .git/
 *.pyc
 /src/conf/config.py
-/src/data/*
 /src/data/dataset/zz500.csv
 /src/utils/data_source.py
 /src/conf/config(1).py
@@ -119,3 +118,10 @@ venv.bak/
 .*
 !/.gitignore
 /src/stacking/notebooks/.ipynb_checkpoints/
+/src/data/dataset/return_label.csv
+/src/data/dataset/training_sample.csv
+/src/data/dataset/zz500_all.csv
+/src/data/dataset/zz500_all.pkl
+src/data/dataprepare/nohup.out
+src/data/dataprepare/zz500_all.csv
+src/data/dataprepare/zz500_all.pkl
