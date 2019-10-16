@@ -5,7 +5,7 @@ import sys
 sys.path.append('../')
 sys.path.append('../../')
 sys.path.append('../../../')
-import gc, logging, time, sqlite3
+import gc, time, sqlite3
 import pandas as pd
 import numpy as np
 from m1_xgb import *
@@ -15,8 +15,6 @@ from PyFin.api import *
 from alphamind.api import *
 from src.conf.models import *
 from alphamind.execution.naiveexecutor import NaiveExecutor
-
-logging.basicConfig(format="%(asctime)---%(levelname)s: %(message)s", level=logging.DEBUG)
 
 data_source = 'postgresql+psycopg2://alpha:alpha@180.166.26.82:8889/alpha'
 engine = SqlEngine(data_source)
@@ -32,7 +30,7 @@ back_ref_dates = makeSchedule(back_start_date, end_date, freq, 'china.sse')
 horizon = map_freq(freq)
 industry_name = 'sw'
 industry_level = 1
-logging.info('读取数据。。。。。。。。。')
+alpha_logger.info('读取数据。。。。。。。。。')
 basic_factor_store = {'AccountsPayablesTDays': CSQuantiles(LAST('AccountsPayablesTDays'), groups='sw1'),
                       'AccountsPayablesTRate': CSQuantiles(LAST('AccountsPayablesTRate'), groups='sw1'),
                       'AdminiExpenseRate': CSQuantiles(LAST('AdminiExpenseRate'), groups='sw1'),
@@ -523,11 +521,11 @@ alpha_factor_store = {'alpha_1': LAST('alpha_1'), 'alpha_2': LAST('alpha_2'), 'a
                       'alpha_190': LAST('alpha_190'), 'alpha_191': LAST('alpha_191')}
 
 # 提取Uqer因子
-logging.info('loading basic_factor_org ...........')
+alpha_logger.info('loading basic_factor_org ...........')
 basic_factor_org = engine.fetch_factor_range(universe, basic_factor_store, dates=ref_dates)
-logging.info('basic_factor_org loading success')
+alpha_logger.info('basic_factor_org loading success')
 # 提取alpha191因子
-logging.info('loading alpha191_factor_org ...........')
+alpha_logger.info('loading alpha191_factor_org ...........')
 alpha191_factor_org = engine.fetch_factor_range(universe, alpha_factor_store, dates=ref_dates,
                                                 used_factor_tables=[Alpha191])
 
@@ -535,7 +533,7 @@ alpha191_factor_org = engine.fetch_factor_range(universe, alpha_factor_store, da
 factor_data_org = pd.merge(basic_factor_org, alpha191_factor_org, on=['trade_date', 'code'], how='outer')
 
 # 获取
-logging.info('loading industry_total data ...........')
+alpha_logger.info('loading industry_total data ...........')
 industry = engine.fetch_industry_range(universe, dates=ref_dates)
 factor_data = pd.merge(factor_data_org, industry, on=['trade_date', 'code']).fillna(0.)
 risk_total = engine.fetch_risk_model_range(universe, dates=ref_dates)[1]
@@ -546,7 +544,7 @@ return_data = engine.fetch_dx_return_range(universe, dates=ref_dates, horizon=ho
 benchmark_total = engine.fetch_benchmark_range(dates=ref_dates, benchmark=benchmark_code)
 industry_total = engine.fetch_industry_matrix_range(universe, dates=ref_dates, category=industry_name,
                                                     level=industry_level)
-logging.info('industry_total loading success')
+alpha_logger.info('industry_total loading success')
 
 train_data = pd.merge(factor_data, return_data, on=['trade_date', 'code']).dropna()
 
@@ -654,8 +652,7 @@ def create_scenario():
             xgb_model.set_params(tree_method='gpu_hist', max_depth=5)
         else:
             xgb_model.set_params(max_depth=5)
-        print(xgb_model.get_params)
-
+        alpha_logger.info(xgb_model.get_params)
         best_score, best_round, cv_rounds, best_model = xgb_model.fit(x_train, y_train)
         alpha_logger.info('Training time cost {}s'.format(time.time() - tic))
         alpha_logger.info('best_score = {}, best_round = {}'.format(best_score, best_round))
@@ -767,6 +764,6 @@ ret_df, tune_record, rets, net_rets = create_scenario()
 # 调仓记录保存
 con = sqlite3.connect('./tune_record.db')
 # 约束条件比较严格
-# tune_record.to_sql('tune_record', con=con, if_exists='append', index=False)
+tune_record.to_sql('tune_record_strict', con=con, if_exists='append', index=False)
 # 约束条件比较宽松
-tune_record.to_sql('tune_record_adj', con=con, if_exists='append', index=False)
+# tune_record.to_sql('tune_record_adj', con=con, if_exists='append', index=False)
