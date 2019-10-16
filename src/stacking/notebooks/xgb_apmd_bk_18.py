@@ -24,10 +24,6 @@ from matplotlib import pyplot as plt
 data_source = 'postgresql+psycopg2://alpha:alpha@180.166.26.82:8889/alpha'
 engine = SqlEngine(data_source)
 
-
-# In[2]:
-
-
 universe = Universe('zz500')
 freq = '5b'
 benchmark_code = 905
@@ -39,10 +35,6 @@ back_ref_dates = makeSchedule(back_start_date, end_date, freq, 'china.sse')
 horizon = map_freq(freq)
 industry_name = 'sw'
 industry_level = 1
-
-
-# In[3]:
-
 
 basic_factor_store = {
     'AccountsPayablesTDays': CSQuantiles(LAST('AccountsPayablesTDays'), groups='sw1'), 
@@ -469,10 +461,6 @@ basic_factor_store = {
     'STOA': CSQuantiles(LAST('STOA'), groups='sw1'), 
     'NLSIZE': CSQuantiles(LAST('NLSIZE'), groups='sw1')}
 
-
-# In[4]:
-
-
 alpha_factor_store = {
     'alpha_1': LAST('alpha_1'), 'alpha_2': LAST('alpha_2'), 'alpha_3': LAST('alpha_3'),
     'alpha_4': LAST('alpha_4'), 'alpha_5': LAST('alpha_5'), 'alpha_6': LAST('alpha_6'),
@@ -540,39 +528,28 @@ alpha_factor_store = {
     'alpha_190': LAST('alpha_190'), 'alpha_191': LAST('alpha_191')
 }
 
-
-# In[5]:
-
-
-get_ipython().run_cell_magic('time', '', "# 提取Uqer因子\nbasic_factor_org = engine.fetch_factor_range(universe, basic_factor_store, dates=ref_dates)\nbasic_factor_orgl = basic_factor_org.set_index(['trade_date', 'code'])\n# 提取alpha191因子\nalpha191_factor_org = engine.fetch_factor_range(universe, alpha_factor_store, dates=ref_dates, used_factor_tables=[Alpha191])\nalpha191_factor_orgl = alpha191_factor_org.set_index(['trade_date', 'code'])")
-
-
-# In[6]:
+# 提取Uqer因子
+basic_factor_org = engine.fetch_factor_range(universe, basic_factor_store, dates=ref_dates)
+basic_factor_orgl = basic_factor_org.set_index(['trade_date', 'code'])
+# 提取alpha191因子
+alpha191_factor_org = engine.fetch_factor_range(universe, alpha_factor_store, dates=ref_dates, used_factor_tables=[Alpha191])
+alpha191_factor_orgl = alpha191_factor_org.set_index(['trade_date', 'code'])
 
 
-get_ipython().run_cell_magic('time', '', "# 合并所有的因子\nfactor_data_org = pd.merge(basic_factor_orgl, alpha191_factor_orgl,\n                           left_index=True, right_index=True, how='inner').reset_index()")
+# 合并所有的因子
+factor_data_org = pd.merge(basic_factor_orgl, alpha191_factor_orgl, left_index=True, right_index=True, how='inner').reset_index()
 
+# 获取
+industry = engine.fetch_industry_range(universe, dates=ref_dates)
+factor_data = pd.merge(factor_data_org, industry, on=['trade_date', 'code']).fillna(0.)
+risk_total = engine.fetch_risk_model_range(universe, dates=ref_dates)[1]
 
-# In[7]:
+return_data = engine.fetch_dx_return_range(universe, dates=ref_dates, horizon=horizon, offset=0,benchmark = benchmark_code)
 
+benchmark_total = engine.fetch_benchmark_range(dates=ref_dates, benchmark=benchmark_code)
+industry_total = engine.fetch_industry_matrix_range(universe, dates=ref_dates, category=industry_name, level=industry_level)
 
-get_ipython().run_cell_magic('time', '', "# 获取\nindustry = engine.fetch_industry_range(universe, dates=ref_dates)\nfactor_data = pd.merge(factor_data_org, industry, on=['trade_date', 'code']).fillna(0.)\nrisk_total = engine.fetch_risk_model_range(universe, dates=ref_dates)[1]")
-
-
-# In[ ]:
-
-
-get_ipython().run_cell_magic('time', '', 'return_data = engine.fetch_dx_return_range(universe, dates=ref_dates, horizon=horizon, offset=0,benchmark = benchmark_code)')
-
-
-# In[ ]:
-
-
-get_ipython().run_cell_magic('time', '', "benchmark_total = engine.fetch_benchmark_range(dates=ref_dates, benchmark=benchmark_code)\nindustry_total = engine.fetch_industry_matrix_range(universe, dates=ref_dates, category=industry_name, level=industry_level)\n\ntrain_data = pd.merge(factor_data, return_data, on=['trade_date', 'code']).dropna()\ntrain_data.head()")
-
-
-# In[ ]:
-
+train_data = pd.merge(factor_data, return_data, on=['trade_date', 'code']).dropna()
 
 # Constraintes settings
 
@@ -627,66 +604,62 @@ for name in total_risk_names:
 
 bounds = create_box_bounds(total_risk_names, b_type, l_val, u_val)
 
-
-# In[ ]:
-
-
 features = [
-    'AccountsPayablesTDays', 'AccountsPayablesTRate', 'AdminiExpenseRate', 'ARTDays', 
-    'ARTRate', 'ASSI', 'BLEV', 'BondsPayableToAsset', 'CashRateOfSales', 'CashToCurrentLiability', 
-    'CMRA', 'CTOP', 'CTP5', 'CurrentAssetsRatio', 'CurrentAssetsTRate', 'CurrentRatio', 'DAVOL10', 
-    'DAVOL20', 'DAVOL5', 'DDNBT', 'DDNCR', 'DDNSR', 'DebtEquityRatio', 'DebtsAssetRatio', 'DHILO', 
+    'AccountsPayablesTDays', 'AccountsPayablesTRate', 'AdminiExpenseRate', 'ARTDays',
+    'ARTRate', 'ASSI', 'BLEV', 'BondsPayableToAsset', 'CashRateOfSales', 'CashToCurrentLiability',
+    'CMRA', 'CTOP', 'CTP5', 'CurrentAssetsRatio', 'CurrentAssetsTRate', 'CurrentRatio', 'DAVOL10',
+    'DAVOL20', 'DAVOL5', 'DDNBT', 'DDNCR', 'DDNSR', 'DebtEquityRatio', 'DebtsAssetRatio', 'DHILO',
     'DilutedEPS', 'DVRAT', 'EBITToTOR', 'EGRO', 'EMA10', 'EMA120', 'EMA20', 'EMA5', 'EMA60', 'EPS',
-    'EquityFixedAssetRatio', 'EquityToAsset', 'EquityTRate', 'ETOP', 'ETP5', 'FinancialExpenseRate', 
-    'FinancingCashGrowRate', 'FixAssetRatio', 'FixedAssetsTRate', 'GrossIncomeRatio', 'HBETA', 
-    'HSIGMA', 'IntangibleAssetRatio', 'InventoryTDays', 'InventoryTRate', 'InvestCashGrowRate', 
-    'LCAP', 'LFLO', 'LongDebtToAsset', 'LongDebtToWorkingCapital', 'LongTermDebtToAsset', 
-    'MA10', 'MA120', 'MA20', 'MA5', 'MA60', 'MAWVAD', 'MFI', 'MLEV', 'NetAssetGrowRate', 
-    'NetProfitGrowRate', 'NetProfitRatio', 'NOCFToOperatingNI', 'NonCurrentAssetsRatio', 
-    'NPParentCompanyGrowRate', 'NPToTOR', 'OperatingExpenseRate', 'OperatingProfitGrowRate', 
+    'EquityFixedAssetRatio', 'EquityToAsset', 'EquityTRate', 'ETOP', 'ETP5', 'FinancialExpenseRate',
+    'FinancingCashGrowRate', 'FixAssetRatio', 'FixedAssetsTRate', 'GrossIncomeRatio', 'HBETA',
+    'HSIGMA', 'IntangibleAssetRatio', 'InventoryTDays', 'InventoryTRate', 'InvestCashGrowRate',
+    'LCAP', 'LFLO', 'LongDebtToAsset', 'LongDebtToWorkingCapital', 'LongTermDebtToAsset',
+    'MA10', 'MA120', 'MA20', 'MA5', 'MA60', 'MAWVAD', 'MFI', 'MLEV', 'NetAssetGrowRate',
+    'NetProfitGrowRate', 'NetProfitRatio', 'NOCFToOperatingNI', 'NonCurrentAssetsRatio',
+    'NPParentCompanyGrowRate', 'NPToTOR', 'OperatingExpenseRate', 'OperatingProfitGrowRate',
     'OperatingProfitRatio', 'OperatingProfitToTOR', 'OperatingRevenueGrowRate', 'OperCashGrowRate',
-    'OperCashInToCurrentLiability', 'PB','PCF', 'PE','PS','PSY', 'QuickRatio', 'REVS10', 
-    'REVS20', 'REVS5', 'ROA','ROA5', 'ROE', 'ROE5', 'RSI', 'RSTR12', 'RSTR24', 'SalesCostRatio', 
-    'SaleServiceCashToOR' , 'SUE', 'TaxRatio', 'TOBT', 'TotalAssetGrowRate', 'TotalAssetsTRate', 
-    'TotalProfitCostRatio', 'TotalProfitGrowRate', 'VOL10', 'VOL120', 'VOL20', 'VOL240', 'VOL5', 
-    'VOL60', 'WVAD', 'REC', 'DAREC', 'GREC', 'FY12P', 'DAREV', 'GREV', 'SFY12P', 'DASREV', 'GSREV', 
-    'FEARNG', 'FSALESG', 'TA2EV', 'CFO2EV', 'ACCA', 'DEGM', 'SUOI', 'EARNMOM', 'FiftyTwoWeekHigh', 
-    'Volatility', 'Skewness', 'ILLIQUIDITY', 'BackwardADJ', 'MACD', 'ADTM', 'ATR14', 'ATR6', 'BIAS10', 
-    'BIAS20', 'BIAS5', 'BIAS60', 'BollDown', 'BollUp', 'CCI10', 'CCI20', 'CCI5', 'CCI88', 'KDJ_K', 'KDJ_D', 
-    'KDJ_J', 'ROC6', 'ROC20', 'SBM', 'STM', 'UpRVI', 'DownRVI', 'RVI', 'SRMI', 'ChandeSD', 'ChandeSU', 
-    'CMO', 'DBCD', 'ARC', 'OBV', 'OBV6', 'OBV20', 'TVMA20', 'TVMA6', 'TVSTD20', 'TVSTD6', 'VDEA', 'VDIFF', 
-    'VEMA10', 'VEMA12', 'VEMA26', 'VEMA5', 'VMACD', 'VR', 'VROC12', 'VROC6', 'VSTD10', 'VSTD20', 'KlingerOscillator' , 
-    'MoneyFlow20', 'AD', 'AD20', 'AD6','CoppockCurve','ASI', 'ChaikinOscillator', 'ChaikinVolatility', 
-    'EMV14', 'EMV6', 'plusDI', 'minusDI', 'ADX', 'ADXR', 'Aroon', 'AroonDown', 'AroonUp', 'DEA', 'DIFF', 'DDI', 'DIZ', 
-    'DIF', 'MTM', 'MTMMA', 'PVT', 'PVT6', 'PVT12', 'TRIX5', 'TRIX10', 'UOS', 'MA10RegressCoeff12', 'MA10RegressCoeff6', 
-    'PLRC6', 'PLRC12', 'SwingIndex', 'Ulcer10', 'Ulcer5', 'Hurst', 'ACD6', 'ACD20', 'EMA12', 'EMA26', 'APBMA', 
-    'BBI', 'BBIC', 'TEMA10', 'TEMA5', 'MA10Close', 'AR', 'BR','ARBR', 'CR20', 'MassIndex', 'BearPower', 'BullPower', 
-    'Elder', 'NVI', 'PVI', 'RC12', 'RC24', 'JDQS20', 'Variance20', 'Variance60', 'Variance120', 'Kurtosis20', 
-    'Kurtosis60', 'Kurtosis120', 'Alpha20', 'Alpha60', 'Alpha120', 'Beta20', 'Beta60', 'Beta120', 'SharpeRatio20', 
-    'SharpeRatio60', 'SharpeRatio120', 'TreynorRatio20', 'TreynorRatio60', 'TreynorRatio120', 'InformationRatio20', 
-    'InformationRatio60', 'InformationRatio120', 'GainVariance20', 'GainVariance60', 'GainVariance120', 'LossVariance20', 
-    'LossVariance60', 'LossVariance120', 'GainLossVarianceRatio20', 'GainLossVarianceRatio60', 'GainLossVarianceRatio120', 
-    'RealizedVolatility', 'REVS60', 'REVS120', 'REVS250', 'REVS750', 'REVS5m20', 'REVS5m60', 'REVS5Indu1', 'REVS20Indu1', 
-    'Volumn1M', 'Volumn3M', 'Price1M', 'Price3M', 'Price1Y', 'Rank1M', 'CashDividendCover', 'DividendCover', 
-    'DividendPaidRatio', 'RetainedEarningRatio', 'CashEquivalentPS', 'DividendPS', 'EPSTTM', 'NetAssetPS', 'TORPS', 
-    'TORPSLatest', 'OperatingRevenuePS', 'OperatingRevenuePSLatest', 'OperatingProfitPS', 'OperatingProfitPSLatest', 
-    'CapitalSurplusFundPS', 'SurplusReserveFundPS','UndividedProfitPS', 'RetainedEarningsPS', 'OperCashFlowPS', 
-    'CashFlowPS', 'NetNonOIToTP', 'NetNonOIToTPLatest', 'PeriodCostsRate', 'InterestCover', 'NetProfitGrowRate3Y', 
-    'NetProfitGrowRate5Y', 'OperatingRevenueGrowRate3Y', 'OperatingRevenueGrowRate5Y', 'NetCashFlowGrowRate', 
-    'NetProfitCashCover', 'OperCashInToAsset', 'CashConversionCycle', 'OperatingCycle', 'PEG3Y', 'PEG5Y', 'PEIndu', 
-    'PBIndu', 'PSIndu', 'PCFIndu', 'PEHist20', 'PEHist60', 'PEHist120', 'PEHist250', 'StaticPE', 'ForwardPE', 
-    'EnterpriseFCFPS', 'ShareholderFCFPS', 'ROEDiluted', 'ROEAvg', 'ROEWeighted', 'ROECut', 'ROECutWeighted', 
-    'ROIC', 'ROAEBIT', 'ROAEBITTTM', 'OperatingNIToTP', 'OperatingNIToTPLatest', 'InvestRAssociatesToTP', 'InvestRAssociatesToTPLatest', 
-    'NPCutToNP', 'SuperQuickRatio', 'TSEPToInterestBearDebt', 'DebtTangibleEquityRatio', 'TangibleAToInteBearDebt', 
+    'OperCashInToCurrentLiability', 'PB','PCF', 'PE','PS','PSY', 'QuickRatio', 'REVS10',
+    'REVS20', 'REVS5', 'ROA','ROA5', 'ROE', 'ROE5', 'RSI', 'RSTR12', 'RSTR24', 'SalesCostRatio',
+    'SaleServiceCashToOR' , 'SUE', 'TaxRatio', 'TOBT', 'TotalAssetGrowRate', 'TotalAssetsTRate',
+    'TotalProfitCostRatio', 'TotalProfitGrowRate', 'VOL10', 'VOL120', 'VOL20', 'VOL240', 'VOL5',
+    'VOL60', 'WVAD', 'REC', 'DAREC', 'GREC', 'FY12P', 'DAREV', 'GREV', 'SFY12P', 'DASREV', 'GSREV',
+    'FEARNG', 'FSALESG', 'TA2EV', 'CFO2EV', 'ACCA', 'DEGM', 'SUOI', 'EARNMOM', 'FiftyTwoWeekHigh',
+    'Volatility', 'Skewness', 'ILLIQUIDITY', 'BackwardADJ', 'MACD', 'ADTM', 'ATR14', 'ATR6', 'BIAS10',
+    'BIAS20', 'BIAS5', 'BIAS60', 'BollDown', 'BollUp', 'CCI10', 'CCI20', 'CCI5', 'CCI88', 'KDJ_K', 'KDJ_D',
+    'KDJ_J', 'ROC6', 'ROC20', 'SBM', 'STM', 'UpRVI', 'DownRVI', 'RVI', 'SRMI', 'ChandeSD', 'ChandeSU',
+    'CMO', 'DBCD', 'ARC', 'OBV', 'OBV6', 'OBV20', 'TVMA20', 'TVMA6', 'TVSTD20', 'TVSTD6', 'VDEA', 'VDIFF',
+    'VEMA10', 'VEMA12', 'VEMA26', 'VEMA5', 'VMACD', 'VR', 'VROC12', 'VROC6', 'VSTD10', 'VSTD20', 'KlingerOscillator' ,
+    'MoneyFlow20', 'AD', 'AD20', 'AD6','CoppockCurve','ASI', 'ChaikinOscillator', 'ChaikinVolatility',
+    'EMV14', 'EMV6', 'plusDI', 'minusDI', 'ADX', 'ADXR', 'Aroon', 'AroonDown', 'AroonUp', 'DEA', 'DIFF', 'DDI', 'DIZ',
+    'DIF', 'MTM', 'MTMMA', 'PVT', 'PVT6', 'PVT12', 'TRIX5', 'TRIX10', 'UOS', 'MA10RegressCoeff12', 'MA10RegressCoeff6',
+    'PLRC6', 'PLRC12', 'SwingIndex', 'Ulcer10', 'Ulcer5', 'Hurst', 'ACD6', 'ACD20', 'EMA12', 'EMA26', 'APBMA',
+    'BBI', 'BBIC', 'TEMA10', 'TEMA5', 'MA10Close', 'AR', 'BR','ARBR', 'CR20', 'MassIndex', 'BearPower', 'BullPower',
+    'Elder', 'NVI', 'PVI', 'RC12', 'RC24', 'JDQS20', 'Variance20', 'Variance60', 'Variance120', 'Kurtosis20',
+    'Kurtosis60', 'Kurtosis120', 'Alpha20', 'Alpha60', 'Alpha120', 'Beta20', 'Beta60', 'Beta120', 'SharpeRatio20',
+    'SharpeRatio60', 'SharpeRatio120', 'TreynorRatio20', 'TreynorRatio60', 'TreynorRatio120', 'InformationRatio20',
+    'InformationRatio60', 'InformationRatio120', 'GainVariance20', 'GainVariance60', 'GainVariance120', 'LossVariance20',
+    'LossVariance60', 'LossVariance120', 'GainLossVarianceRatio20', 'GainLossVarianceRatio60', 'GainLossVarianceRatio120',
+    'RealizedVolatility', 'REVS60', 'REVS120', 'REVS250', 'REVS750', 'REVS5m20', 'REVS5m60', 'REVS5Indu1', 'REVS20Indu1',
+    'Volumn1M', 'Volumn3M', 'Price1M', 'Price3M', 'Price1Y', 'Rank1M', 'CashDividendCover', 'DividendCover',
+    'DividendPaidRatio', 'RetainedEarningRatio', 'CashEquivalentPS', 'DividendPS', 'EPSTTM', 'NetAssetPS', 'TORPS',
+    'TORPSLatest', 'OperatingRevenuePS', 'OperatingRevenuePSLatest', 'OperatingProfitPS', 'OperatingProfitPSLatest',
+    'CapitalSurplusFundPS', 'SurplusReserveFundPS','UndividedProfitPS', 'RetainedEarningsPS', 'OperCashFlowPS',
+    'CashFlowPS', 'NetNonOIToTP', 'NetNonOIToTPLatest', 'PeriodCostsRate', 'InterestCover', 'NetProfitGrowRate3Y',
+    'NetProfitGrowRate5Y', 'OperatingRevenueGrowRate3Y', 'OperatingRevenueGrowRate5Y', 'NetCashFlowGrowRate',
+    'NetProfitCashCover', 'OperCashInToAsset', 'CashConversionCycle', 'OperatingCycle', 'PEG3Y', 'PEG5Y', 'PEIndu',
+    'PBIndu', 'PSIndu', 'PCFIndu', 'PEHist20', 'PEHist60', 'PEHist120', 'PEHist250', 'StaticPE', 'ForwardPE',
+    'EnterpriseFCFPS', 'ShareholderFCFPS', 'ROEDiluted', 'ROEAvg', 'ROEWeighted', 'ROECut', 'ROECutWeighted',
+    'ROIC', 'ROAEBIT', 'ROAEBITTTM', 'OperatingNIToTP', 'OperatingNIToTPLatest', 'InvestRAssociatesToTP', 'InvestRAssociatesToTPLatest',
+    'NPCutToNP', 'SuperQuickRatio', 'TSEPToInterestBearDebt', 'DebtTangibleEquityRatio', 'TangibleAToInteBearDebt',
     'TangibleAToNetDebt', 'NOCFToTLiability', 'NOCFToInterestBearDebt', 'NOCFToNetDebt', 'TSEPToTotalCapital',
-    'InteBearDebtToTotalCapital', 'NPParentCompanyCutYOY', 'SalesServiceCashToORLatest', 'CashRateOfSalesLatest', 
-    'NOCFToOperatingNILatest', 'TotalAssets', 'MktValue','NegMktValue', 'TEAP', 'NIAP', 'TotalFixedAssets', 
-    'IntFreeCL', 'IntFreeNCL', 'IntCL', 'IntDebt', 'NetDebt','NetTangibleAssets', 'WorkingCapital', 'NetWorkingCapital', 
-    'TotalPaidinCapital', 'RetainedEarnings', 'OperateNetIncome', 'ValueChgProfit', 'NetIntExpense', 'EBIT', 
-    'EBITDA', 'EBIAT', 'NRProfitLoss', 'NIAPCut', 'FCFF', 'FCFE', 'DA','TRevenueTTM', 'TCostTTM','RevenueTTM', 
-    'CostTTM', 'GrossProfitTTM', 'SalesExpenseTTM', 'AdminExpenseTTM', 'FinanExpenseTTM', 'AssetImpairLossTTM', 
-    'NPFromOperatingTTM', 'NPFromValueChgTTM', 'OperateProfitTTM', 'NonOperatingNPTTM', 'TProfitTTM', 'NetProfitTTM', 
-    'NetProfitAPTTM', 'SaleServiceRenderCashTTM', 'NetOperateCFTTM', 'NetInvestCFTTM', 'NetFinanceCFTTM', 'GrossProfit', 
+    'InteBearDebtToTotalCapital', 'NPParentCompanyCutYOY', 'SalesServiceCashToORLatest', 'CashRateOfSalesLatest',
+    'NOCFToOperatingNILatest', 'TotalAssets', 'MktValue','NegMktValue', 'TEAP', 'NIAP', 'TotalFixedAssets',
+    'IntFreeCL', 'IntFreeNCL', 'IntCL', 'IntDebt', 'NetDebt','NetTangibleAssets', 'WorkingCapital', 'NetWorkingCapital',
+    'TotalPaidinCapital', 'RetainedEarnings', 'OperateNetIncome', 'ValueChgProfit', 'NetIntExpense', 'EBIT',
+    'EBITDA', 'EBIAT', 'NRProfitLoss', 'NIAPCut', 'FCFF', 'FCFE', 'DA','TRevenueTTM', 'TCostTTM','RevenueTTM',
+    'CostTTM', 'GrossProfitTTM', 'SalesExpenseTTM', 'AdminExpenseTTM', 'FinanExpenseTTM', 'AssetImpairLossTTM',
+    'NPFromOperatingTTM', 'NPFromValueChgTTM', 'OperateProfitTTM', 'NonOperatingNPTTM', 'TProfitTTM', 'NetProfitTTM',
+    'NetProfitAPTTM', 'SaleServiceRenderCashTTM', 'NetOperateCFTTM', 'NetInvestCFTTM', 'NetFinanceCFTTM', 'GrossProfit',
     'Beta252', 'RSTR504', 'EPIBS', 'CETOP', 'DASTD', 'CmraCNE5', 'HsigmaCNE5', 'SGRO', 'EgibsLong', 'STOM', 'STOQ', 'STOA', 'NLSIZE']
 
 alpha_features = [
@@ -715,353 +688,177 @@ features.extend(alpha_features)
 
 label = ['dx']
 
-
-# In[ ]:
-
-
-get_ipython().run_cell_magic('time', '', "from datetime import datetime, timedelta\nfrom m1_xgb import *\nfrom src.conf.configuration import regress_conf\nimport xgboost as xgb\nimport gc\n\ndef create_scenario():\n    weight_gap = 1\n    transact_cost = 0.003\n    GPU_device = False\n\n    executor = NaiveExecutor()\n    leverags = []\n    trade_dates = []\n    current_pos = pd.DataFrame()\n    previous_pos = pd.DataFrame()\n    tune_record = pd.DataFrame()  \n    rets = []\n    net_rets = []\n    turn_overs = []\n    leverags = []\n    ics = []\n\n    # take ref_dates[i] as an example\n    for i, ref_date in enumerate(back_ref_dates):\n        alpha_logger.info('{0} is start'.format(ref_date))\n\n        # machine learning model\n        # Filter Training data\n        # train data\n        trade_date_pre = ref_date - timedelta(days=1)\n        trade_date_pre_80 = ref_date - timedelta(days=80)\n        \n        # train = train_data[(train_data.trade_date <= trade_date_pre) & (trade_date_pre_80 <= train_data.trade_date)].dropna()\n        # 训练集构造, 选择当天之前(不含当天)的因子数据作为训练集.\n        train = train_data[train_data.trade_date <= trade_date_pre].dropna()\n\n        if len(train) <= 0:\n            continue\n        x_train = train[features]\n        y_train = train[label]\n        alpha_logger.info('len_x_train: {0}, len_y_train: {1}'.format(len(x_train.values), len(y_train.values)))\n        alpha_logger.info('X_train.shape={0}, X_test.shape = {1}'.format(np.shape(x_train), np.shape(y_train)))\n\n        # xgb_configuration\n        regress_conf.xgb_config_r()\n        regress_conf.cv_folds = None\n        regress_conf.early_stop_round = 10\n        regress_conf.max_round = 800\n        tic = time.time()\n        # training\n        xgb_model = XGBooster(regress_conf)\n        if GPU_device:\n            xgb_model.set_params(tree_method='gpu_hist', max_depth=5)\n        else:\n            xgb_model.set_params(max_depth=5)\n        print(xgb_model.get_params)\n        \n        best_score, best_round, cv_rounds, best_model = xgb_model.fit(x_train, y_train)\n        alpha_logger.info('Training time cost {}s'.format(time.time() - tic))\n        alpha_logger.info('best_score = {}, best_round = {}'.format(best_score, best_round))\n    \n        # 测试集, 取当天的因子数据作为输入.\n        total_data_test_excess = train_data[train_data.trade_date == ref_date]\n        alpha_logger.info('{0} total_data_test_excess: {1}'.format(ref_date, len(total_data_test_excess)))\n\n        if len(total_data_test_excess) <= 0:\n            alpha_logger.info('{0} HAS NO DATA!!!'.format(ref_date))\n            continue\n        \n        # 获取当天的行业, 风险模型和基准数据\n        industry_matrix = industry_total[industry_total.trade_date == ref_date]\n        benchmark_w = benchmark_total[benchmark_total.trade_date == ref_date]\n        risk_matrix = risk_total[risk_total.trade_date == ref_date]\n\n        total_data = pd.merge(industry_matrix, benchmark_w, on=['code'], how='left').fillna(0.)\n        total_data = pd.merge(total_data, risk_matrix, on=['code'])\n        alpha_logger.info('{0} len_of_total_data: {1}'.format(ref_date, len(total_data)))\n\n        total_data_test_excess = pd.merge(total_data, total_data_test_excess, on=['code'])\n        alpha_logger.info('{0} len_of_total_data_test_excess: {1}'.format(ref_date, len(total_data_test_excess)))\n        \n        codes = total_data_test_excess.code.values.tolist()\n        alpha_logger.info('{0} full re-balance: {1}'.format(ref_date, len(codes)))\n        ## 获取调仓日当天的股票收益\n        dx_returns = return_data[return_data.trade_date == ref_date][['code', 'dx']]\n\n        benchmark_w = total_data_test_excess.weight.values\n        alpha_logger.info('shape_of_benchmark_w: {}'.format(np.shape(benchmark_w)))\n        is_in_benchmark = (benchmark_w > 0.).astype(float).reshape((-1, 1))\n        total_risk_exp = np.concatenate([total_data_test_excess[constraint_risk].values.astype(float),\n                                         is_in_benchmark,\n                                         np.ones_like(is_in_benchmark)],\n                                         axis=1)\n        alpha_logger.info('shape_of_total_risk_exp_pre: {}'.format(np.shape(total_risk_exp)))\n        total_risk_exp = pd.DataFrame(total_risk_exp, columns=total_risk_names)\n        alpha_logger.info('shape_of_total_risk_exp: {}'.format(np.shape(total_risk_exp)))\n        constraints = LinearConstraints(bounds, total_risk_exp, benchmark_w)\n        alpha_logger.info('constraints: {0} in {1}'.format(np.shape(constraints.risk_targets()), ref_date))\n\n        lbound = np.maximum(0., benchmark_w - weight_gap)\n        ubound = weight_gap + benchmark_w\n        alpha_logger.info('lbound: {0} in {1}'.format(np.shape(lbound), ref_date))\n        alpha_logger.info('ubound: {0} in {1}'.format(np.shape(ubound), ref_date))\n\n        # predict\n        x_pred = total_data_test_excess[features]\n        predict_xgboost = xgb_model.predict(best_model, x_pred)\n        a = np.shape(predict_xgboost)\n        predict_xgboost = np.reshape(predict_xgboost, (a[0], -1)).astype(np.float64)\n        alpha_logger.info('shape_of_predict_xgboost: {}'.format(np.shape(predict_xgboost)))\n        del xgb_model\n        del best_model\n        gc.collect()\n        \n        # 股票过滤, 组合优化之前过滤掉\n        \n        \n        # backtest\n        try:\n            target_pos, _ = er_portfolio_analysis(predict_xgboost,\n                                                  total_data_test_excess['industry'].values,\n                                                  None,\n                                                  constraints,\n                                                  False,\n                                                  benchmark_w,\n                                                  method = 'risk_neutral',\n                                                  lbound=lbound,\n                                                  ubound=ubound)\n        except:\n            import pdb\n            pdb.set_trace()\n            alpha_logger.info('target_pos: {}'.format(target_pos))\n        alpha_logger.info('target_pos_shape: {}'.format(np.shape(target_pos)))\n        alpha_logger.info('len_codes:{}'.format(np.shape(codes)))\n        target_pos['code'] = codes\n        \n        result = pd.merge(target_pos, dx_returns, on=['code'])\n        result['trade_date'] = ref_date\n        tune_record = tune_record.append(result)\n        alpha_logger.info('len_result: {}'.format(len(result)))\n\n        # excess_return = np.exp(result.dx.values) - 1. - index_return.loc[ref_date, 'dx']\n        excess_return = np.exp(result.dx.values) - 1.\n        ret = result.weight.values @ excess_return\n        \n        trade_dates.append(ref_date)\n        rets.append(np.log(1. + ret))\n        alpha_logger.info('len_rets: {}, len_trade_dates: {}'.format(len(rets), len(trade_dates)))\n        \n        turn_over_org, current_pos = executor.execute(target_pos=target_pos)\n        turn_over = turn_over_org / sum(target_pos.weight.values)\n        alpha_logger.info('turn_over: {}'.format(turn_over))\n        turn_overs.append(turn_over)\n        alpha_logger.info('turn_over: {}'.format(turn_over))\n        executor.set_current(current_pos)\n        net_rets.append(np.log(1. + ret - transact_cost * turn_over))        \n        alpha_logger.info('len_net_rets: {}, len_trade_dates: {}'.format(len(net_rets), len(trade_dates)))\n\n        alpha_logger.info('{} is finished'.format(ref_date))\n        \n    # ret_df = pd.DataFrame({'xgb_regress': rets}, index=trade_dates)\n    ret_df = pd.DataFrame({'xgb_regress': rets, 'net_xgb_regress':net_rets}, index=trade_dates)\n    ret_df.loc[advanceDateByCalendar('china.sse', ref_dates[-1], freq).strftime('%Y-%m-%d')] = 0.\n    ret_df = ret_df.shift(1)\n    ret_df.iloc[0] = 0.\n    return ret_df, tune_record, rets, net_rets")
-
-
-# In[ ]:
+from datetime import datetime, timedelta
+from m1_xgb import *
+from src.conf.configuration import regress_conf
+import xgboost as xgb
+import gc
 
 
-# 滚动回测
+def create_scenario():
+    weight_gap = 1
+    transact_cost = 0.003
+    GPU_device = False
+
+    executor = NaiveExecutor()
+    leverags = []
+    trade_dates = []
+    current_pos = pd.DataFrame()
+    previous_pos = pd.DataFrame()
+    tune_record = pd.DataFrame()
+    rets = []
+    net_rets = []
+    turn_overs = []
+    leverags = []
+    ics = []
+
+    # take ref_dates[i] as an example
+    for i, ref_date in enumerate(back_ref_dates):
+        alpha_logger.info('{0} is start'.format(ref_date))
+
+        # machine learning model
+        # Filter Training data
+        # train data
+        trade_date_pre = ref_date - timedelta(days=1)
+        trade_date_pre_80 = ref_date - timedelta(days=80)
+
+        # train = train_data[(train_data.trade_date <= trade_date_pre) & (trade_date_pre_80 <= train_data.trade_date)].dropna()
+        # 训练集构造, 选择当天之前(不含当天)的因子数据作为训练集.
+        train = train_data[train_data.trade_date <= trade_date_pre].dropna()
+
+        if len(train) <= 0:
+            continue
+        x_train = train[features]
+        y_train = train[label]
+        alpha_logger.info('len_x_train: {0}, len_y_train: {1}'.format(len(x_train.values), len(y_train.values)))
+        alpha_logger.info('X_train.shape={0}, X_test.shape = {1}'.format(np.shape(x_train), np.shape(y_train)))
+
+        # xgb_configuration
+        regress_conf.xgb_config_r()
+        regress_conf.cv_folds = None
+        regress_conf.early_stop_round = 10
+        regress_conf.max_round = 800
+        tic = time.time()
+        # training
+        xgb_model = XGBooster(regress_conf)
+        if GPU_device:
+            xgb_model.set_params(tree_method='gpu_hist', max_depth=5)
+        else:
+            xgb_model.set_params(max_depth=5)
+        print(xgb_model.get_params)
+
+        best_score, best_round, cv_rounds, best_model = xgb_model.fit(x_train, y_train)
+        alpha_logger.info('Training time cost {}s'.format(time.time() - tic))
+        alpha_logger.info('best_score = {}, best_round = {}'.format(best_score, best_round))
+
+        # 测试集, 取当天的因子数据作为输入.
+        total_data_test_excess = train_data[train_data.trade_date == ref_date]
+        alpha_logger.info('{0} total_data_test_excess: {1}'.format(ref_date, len(total_data_test_excess)))
+
+        if len(total_data_test_excess) <= 0:
+            alpha_logger.info('{0} HAS NO DATA!!!'.format(ref_date))
+            continue
+
+        # 获取当天的行业, 风险模型和基准数据
+        industry_matrix = industry_total[industry_total.trade_date == ref_date]
+        benchmark_w = benchmark_total[benchmark_total.trade_date == ref_date]
+        risk_matrix = risk_total[risk_total.trade_date == ref_date]
+
+        total_data = pd.merge(industry_matrix, benchmark_w, on=['code'], how='left').fillna(0.)
+        total_data = pd.merge(total_data, risk_matrix, on=['code'])
+        alpha_logger.info('{0} len_of_total_data: {1}'.format(ref_date, len(total_data)))
+
+        total_data_test_excess = pd.merge(total_data, total_data_test_excess, on=['code'])
+        alpha_logger.info('{0} len_of_total_data_test_excess: {1}'.format(ref_date, len(total_data_test_excess)))
+
+        codes = total_data_test_excess.code.values.tolist()
+        alpha_logger.info('{0} full re-balance: {1}'.format(ref_date, len(codes)))
+        ## 获取调仓日当天的股票收益
+        dx_returns = return_data[return_data.trade_date == ref_date][['code', 'dx']]
+
+        benchmark_w = total_data_test_excess.weight.values
+        alpha_logger.info('shape_of_benchmark_w: {}'.format(np.shape(benchmark_w)))
+        is_in_benchmark = (benchmark_w > 0.).astype(float).reshape((-1, 1))
+        total_risk_exp = np.concatenate([total_data_test_excess[constraint_risk].values.astype(float),
+                                         is_in_benchmark,
+                                         np.ones_like(is_in_benchmark)],
+                                        axis=1)
+        alpha_logger.info('shape_of_total_risk_exp_pre: {}'.format(np.shape(total_risk_exp)))
+        total_risk_exp = pd.DataFrame(total_risk_exp, columns=total_risk_names)
+        alpha_logger.info('shape_of_total_risk_exp: {}'.format(np.shape(total_risk_exp)))
+        constraints = LinearConstraints(bounds, total_risk_exp, benchmark_w)
+        alpha_logger.info('constraints: {0} in {1}'.format(np.shape(constraints.risk_targets()), ref_date))
+
+        lbound = np.maximum(0., benchmark_w - weight_gap)
+        ubound = weight_gap + benchmark_w
+        alpha_logger.info('lbound: {0} in {1}'.format(np.shape(lbound), ref_date))
+        alpha_logger.info('ubound: {0} in {1}'.format(np.shape(ubound), ref_date))
+
+        # predict
+        x_pred = total_data_test_excess[features]
+        predict_xgboost = xgb_model.predict(best_model, x_pred)
+        a = np.shape(predict_xgboost)
+        predict_xgboost = np.reshape(predict_xgboost, (a[0], -1)).astype(np.float64)
+        alpha_logger.info('shape_of_predict_xgboost: {}'.format(np.shape(predict_xgboost)))
+        del xgb_model
+        del best_model
+        gc.collect()
+
+        # 股票过滤, 组合优化之前过滤掉
+
+        # backtest
+        try:
+            target_pos, _ = er_portfolio_analysis(predict_xgboost,
+                                                  total_data_test_excess['industry'].values,
+                                                  None,
+                                                  constraints,
+                                                  False,
+                                                  benchmark_w,
+                                                  method='risk_neutral',
+                                                  lbound=lbound,
+                                                  ubound=ubound)
+        except:
+            import pdb
+            pdb.set_trace()
+            alpha_logger.info('target_pos: {}'.format(target_pos))
+        alpha_logger.info('target_pos_shape: {}'.format(np.shape(target_pos)))
+        alpha_logger.info('len_codes:{}'.format(np.shape(codes)))
+        target_pos['code'] = codes
+
+        result = pd.merge(target_pos, dx_returns, on=['code'])
+        result['trade_date'] = ref_date
+        tune_record = tune_record.append(result)
+        alpha_logger.info('len_result: {}'.format(len(result)))
+
+        # excess_return = np.exp(result.dx.values) - 1. - index_return.loc[ref_date, 'dx']
+        excess_return = np.exp(result.dx.values) - 1.
+        ret = result.weight.values @ excess_return
+
+        trade_dates.append(ref_date)
+        rets.append(np.log(1. + ret))
+        alpha_logger.info('len_rets: {}, len_trade_dates: {}'.format(len(rets), len(trade_dates)))
+
+        turn_over_org, current_pos = executor.execute(target_pos=target_pos)
+        turn_over = turn_over_org / sum(target_pos.weight.values)
+        alpha_logger.info('turn_over: {}'.format(turn_over))
+        turn_overs.append(turn_over)
+        alpha_logger.info('turn_over: {}'.format(turn_over))
+        executor.set_current(current_pos)
+        net_rets.append(np.log(1. + ret - transact_cost * turn_over))
+        alpha_logger.info('len_net_rets: {}, len_trade_dates: {}'.format(len(net_rets), len(trade_dates)))
+
+        alpha_logger.info('{} is finished'.format(ref_date))
+
+    # ret_df = pd.DataFrame({'xgb_regress': rets}, index=trade_dates)
+    ret_df = pd.DataFrame({'xgb_regress': rets, 'net_xgb_regress': net_rets}, index=trade_dates)
+    ret_df.loc[advanceDateByCalendar('china.sse', ref_dates[-1], freq).strftime('%Y-%m-%d')] = 0.
+    ret_df = ret_df.shift(1)
+    ret_df.iloc[0] = 0.
+    return ret_df, tune_record, rets, net_rets
+
 ret_df, tune_record, rets, net_rets = create_scenario()
 
-
-# In[ ]:
-
-
-# # 调仓记录保存
-# import sqlite3
-# con = sqlite3.connect('./tune_recoed.db')
-# tune_record.to_sql('tune_record', con=con, if_exists='append', index=False)
-
-
-# In[ ]:
-
-
-# sql = 'select * from tune_record'
-# tune_record = pd.read_sql(sql, con)
-# tune_record[['trade_date','code','portfolio_weight']].head()
-
-
-# In[ ]:
-
-
-from pyecharts import options as opts
-from example.commons import Collector
-from pyecharts.charts import Line
-
-plot = ret_df[['xgb_regress', 'net_xgb_regress']].cumsum()
-v1 = list(plot.index)
-v2 = list(plot.xgb_regress)
-v3 = list(plot.net_xgb_regress)
-
-line_chart = (
-    Line()
-    .add_xaxis(v1)
-    .add_yaxis("xgb_regress", v2)
-    .add_yaxis("net_xgb_regress", v3)
-    .set_series_opts(
-        label_opts=opts.LabelOpts(is_show=False),
-    )
-    .set_global_opts(
-        xaxis_opts=opts.AxisOpts(is_scale=True),
-        yaxis_opts=opts.AxisOpts(
-            is_scale=True,
-            splitarea_opts=opts.SplitAreaOpts(
-                is_show=True, areastyle_opts=opts.AreaStyleOpts(opacity=1)
-            ),
-        ),
-        datazoom_opts=[opts.DataZoomOpts(pos_bottom="-1%")],
-        title_opts=opts.TitleOpts(title='Fixed freq rebalanced: {0}'.format(freq)),
-    )
-)
-
-line_chart.render_notebook()
-
-
-# In[ ]:
-
-
-##--------------因子组合回测--------------
-import json
-import pdb
-from rqalpha.api import *
-from rqalpha import run_func
-class DailyDefaultStrategy(object):
-   def __init__(self, session, stock_sets_ob):
-       self._stock_sets_ob = json.loads(stock_sets_ob)
-       self._session = session
-       self._start_time_str = datetime.now().strftime('%m-%d %H:%M')
-   
-   
-   def init(self,context):
-       #读取股票池文件
-       context.stock_sets = pd.DataFrame(self._stock_sets_ob)
-       context.trade_date_list= list(set(context.stock_sets.trade_date))
-       context.holding_stock_df = None
-       
-       # 是否已发送了order
-       context.fired = False
-
-   #盘前处理
-   def before_trading(self, context, bar_dict):
-       context.trade_signal = False
-       date = context.now.date()
-       if str(date) in context.trade_date_list:
-           context.trade_signal = True
-
-   #盘后处理
-   def after_trading(self, context):
-       pass
-   
-   # 你选择的证券的数据更新将会触发此段逻辑，例如日或分钟历史数据切片或者是实时数据切片更新
-   def handle_bar(self, context, bar_dict):
-       # 开始编写你的主要的算法逻辑
-       if context.trade_signal == False:
-           return
-       date = context.now.date()
-       # stock_dict = context.stock_sets.set_index('trade_date').loc[str(date)]
-       stock_set = context.stock_sets
-       stock_dict = stock_set[stock_set['trade_date'] == str(date)].set_index('trade_date')
-       stock_df = self.filter_specials(stock_dict, context)
-       #剔除后的股票
-       if 'portfolio_weight' in list(set(stock_df.columns)):
-           self.rebalance_weight(context, stock_df)
-       else:
-           self.rebalance_equal(context, stock_df)
-  
-   def _industry_distribute(self, stock_positions, industries):
-       industry_sets_dict = {}
-       industries = industries.rename(columns={'symbol':'code'})
-       stock_positions = stock_positions.reset_index().rename(
-           columns={'symbol':'name','order_book_id':'code','date':'trade_date'})
-       stock_positions['trade_date'] = stock_positions['trade_date'].apply(lambda x: x.strftime('%Y-%m-%d'))
-       industries['trade_date'] = industries['trade_date'].apply(lambda x: x.strftime('%Y-%m-%d'))
-       stock_positions = stock_positions.merge(industries, on=['trade_date','code'])
-       industry_grouped = stock_positions.dropna().groupby(['trade_date'])
-       for k, g in industry_grouped:
-           gt = g.groupby(['industry_code','industry']).count().reset_index()[['industry_code','industry','code']]
-           gt['ratio'] = gt['code']/gt['code'].values.sum()
-           gt=gt.rename(columns={'industry':'industry_name'})
-           industry_sets_dict[k] = gt[['industry_code','industry_name','ratio']].to_dict(orient='records')
-       return industry_sets_dict
-   
-   def _month_profit(self, portfolio, stock_capital):
-       pd.DataFrame(portfolio.reset_index()).shift(1)
-       month_profit = portfolio['total_value'].resample('M').mean()
-       month_profit = pd.DataFrame(month_profit.reset_index())
-       month_profit['last_total'] = month_profit['total_value'].shift(1)
-       month_profit = month_profit.fillna(stock_capital)
-       month_profit['month_ratio'] = np.log(month_profit.total_value / month_profit.last_total)
-       return month_profit.rename(columns={'date':'trade_date'})
-   
-   def set_result(self, result):
-       #summary 结算信息
-       summary = result['sys_analyser']['summary']
-       #trades 交易记录
-       trades = result['sys_analyser']['trades']
-       #portfolio 收益曲线
-       portfolio = result['sys_analyser']['portfolio']
-       # benchmark_portfolio 基础收益曲线benchmark_portfolio
-       benchmark_portfolio = result['sys_analyser']['benchmark_portfolio']
-       # stock_account 个人收益
-       stock_account = result['sys_analyser']['stock_account']
-       # stock_positions 股票持仓情况
-       stock_positions = result['sys_analyser']['stock_positions']
-       
-       
-   def filter_specials(self, stock_dict, context):
-       stock_df = pd.DataFrame(stock_dict)
-       stock_list = list(stock_df.code)
-       stock_list=[stock for stock in stock_list]
-       
-       return stock_df.set_index('code').loc[stock_list,:] 
-   
-   def rebalance_equal(self, context, stock_df):
-       holding_list = list(set(stock_df.index))
-       if len(holding_list) > 0:
-           every_stock = context.portfolio.portfolio_value/len(holding_list) 
-       # 空仓只有买入操作
-       if len(list(context.portfolio.positions.keys()))==0:
-           for stock_to_buy in list(holding_list):
-               #print(stock_to_buy)
-               order_target_value(stock_to_buy,every_stock)
-       else:
-           for stock_to_sell in list(context.portfolio.positions.keys()):
-               if stock_to_sell not in list(holding_list):
-                   order_target_value(stock_to_sell, 0)
-           for stock_to_buy in list(holding_list):
-               order_target_value(stock_to_buy, every_stock)
-               
-       
-   def rebalance_weight(self, context, stock_df):
-       #没有持仓则全部下单
-       if len(list(context.portfolio.positions.keys())) == 0:
-           weight_sum = stock_df.portfolio_weight.sum()
-           every_values = context.portfolio.total_value / weight_sum
-           for index, weight in stock_df.iterrows():
-               order_target_value(index, weight.portfolio_weight * every_values)
-           context.holding_stock_df = stock_df
-       else:
-           now_df = context.holding_stock_df #当前持有的股票
-           # 做交集查看上次实际成交股票
-           intersect = list(set(now_df.index).intersection(set(context.portfolio.stock_account.positions.keys())))
-           if len(intersect) <= 0:
-               now_df = pd.DataFrame({'now_weight':[]})
-           else:
-               now_df = now_df.loc[context.portfolio.stock_account.positions.keys()]
-               now_df = now_df.rename(columns={'portfolio_weight':'now_weight'}) #持仓
-           # 做并集
-           stock_df = stock_df.rename(columns={'portfolio_weight':'next_weight'}) #调仓
-           now_df = pd.merge(now_df, stock_df, left_index=True, right_index=True, how='outer')
-           now_df = now_df.fillna(0)
-           now_df['diff_weight'] = now_df.next_weight - now_df.now_weight #调仓股票和持仓股票进行对比
-           buy_stock = now_df[now_df['diff_weight'] > 0] #当前需买进
-           sell_stock = now_df[now_df['diff_weight'] < 0]
-           
-           # 根据当前权重分配，目的是持仓达到和调仓的权重一样
-           weight_sum = stock_df.next_weight.sum()
-           every_values = context.portfolio.total_value/ weight_sum
-           
-           # 平掉不需要股票
-           for index, weight in sell_stock.iterrows():
-               if weight.now_weight == abs(weight.diff_weight): #全部清仓
-                   order_target_value(index, 0)
-               else:# 调整权重，此处会有误差，每期的every_values不一样
-                   order_target_value(index, weight.diff_weight * every_values)
-           # 新建增仓
-           for index, weight in buy_stock.iterrows():
-               order_target_value(index, abs(weight.diff_weight) * every_values)
-           stock_df = stock_df.rename(columns={'next_weight':'portfolio_weight'})
-           context.holding_stock_df = stock_df
-
-
-# In[ ]:
-
-
-def ricequant_backtesting(conmbine):
-    benchmark_info = '000905.XSHG'
-    conmbine = conmbine.copy()
-    conmbine['trade_date'] = conmbine['trade_date'].apply(lambda x: x.date().strftime('%Y-%m-%d'))
-    #stk_result = stk_data[stk_data['portfolio_weight']>0.001]#.set_index('trade_date').loc['2018-04-12']
-    conmbine['code'] = conmbine['code'].apply(lambda x: "{:06d}".format(x) + '.XSHG' 
-                                              if len(str(x))==6 and str(x)[0] in '6' 
-                                              else "{:06d}".format(x)+ '.XSHE')
-    backtesting = DailyDefaultStrategy(1234412, json.dumps(conmbine.to_dict(orient='records')))
-    trade_date_list = list(set(conmbine.trade_date))
-    trade_date_list.sort(reverse=False)
-    base_config = {}
-    base_config['start_date'] = trade_date_list[0]
-    base_config['end_date'] = trade_date_list[-1]
-    base_config['benchmark'] = benchmark_info
-            
-    accounts_config = {}
-    accounts_config['stock'] = 100000000
-    base_config['accounts'] = accounts_config
-    base_config['frequency'] = '1d'
-    base_config['skip_suspended'] = True
-    
-    extra_config = {}
-
-    mod_config = {}
-    sys_analyser_config = {}
-    sys_analyser_config['enabled'] = True
-    sys_analyser_config['plot'] = True
-    mod_config['sys_analyser'] = sys_analyser_config
-        
-    config = {}
-    config['base'] = base_config
-    config['extra'] = extra_config
-    config['mod'] = mod_config
-    result = run_func(init=backtesting.init, before_trading=backtesting.before_trading, 
-                  after_trading=backtesting.after_trading, handle_bar=backtesting.handle_bar, config=config)
-    return result
-
-
-# In[ ]:
-
-
-tune_record  = tune_record.rename(columns={'weight':'portfolio_weight'})
-#处理权重小, 直接处理为0
-# tune_record = tune_record[tune_record['portfolio_weight'] >= 0.05]
-result = ricequant_backtesting(tune_record[['trade_date','code','portfolio_weight']])
-
-
-# In[ ]:
-
-
-tune_record[tune_record['trade_date'] == '2019-06-05']
-
-
-# # 回测记录
-
-# In[ ]:
-
-
-print(result.keys())
-record = result['sys_analyser']
-print(record.keys())
-trade_detail = record['trades']
-stock_account = record['stock_account']
-stock_positions = record['stock_positions']
-stock_positions.head()
-
-
-# In[ ]:
-
-
-# 获取指定交易日期的交易记录
-trade_detail[trade_detail['trading_datetime'] == '2018-11-29 15:00:00']
-
-
-# In[ ]:
-
-
-trade_detail[trade_detail['trading_datetime'] == '2018-12-06 15:00:00']
-
-
-# In[ ]:
-
-
-# 获取指定交易日的持仓仓位
-stock_positions[(stock_positions.index == '2018-12-20') & (stock_positions.quantity != 0)].reset_index()
-
-
-# In[ ]:
-
-
-stock_positions[(stock_positions.index == '2018-12-27') & (stock_positions.quantity != 0)].reset_index()
-
-
-# In[ ]:
-
-
-stock_positions[(stock_positions.index == '2019-01-07') & (stock_positions.quantity != 0)].reset_index()
-
-
-# In[ ]:
-
-
-# trade_detail.to_csv('./trades_record.csv', encoding="utf_8_sig")
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
+# 调仓记录保存
+import sqlite3
+con = sqlite3.connect('./tune_record.db')
+tune_record.to_sql('tune_record', con=con, if_exists='append', index=False)
