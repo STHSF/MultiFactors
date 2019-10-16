@@ -13,6 +13,8 @@ import numpy as np
 from alphamind.execution.naiveexecutor import NaiveExecutor
 from matplotlib import pyplot as plt
 
+logging.basicConfig(format="%(asctime)---%(levename)s: %(message)s", levelname=logging.DEBUG)
+
 data_source = 'postgresql+psycopg2://alpha:alpha@180.166.26.82:8889/alpha'
 engine = SqlEngine(data_source)
 
