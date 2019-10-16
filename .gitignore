@@ -116,7 +116,6 @@ venv.bak/
 /src/stacking/bk.py
 .ip*
 .*
-!/.gitignore
 /src/stacking/notebooks/.ipynb_checkpoints/
 /src/data/dataset/return_label.csv
 /src/data/dataset/training_sample.csv
@@ -125,3 +124,6 @@ venv.bak/
 src/data/dataprepare/nohup.out
 src/data/dataprepare/zz500_all.csv
 src/data/dataprepare/zz500_all.pkl
+*.db
+*.csv
+*.pkl
