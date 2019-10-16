@@ -5,14 +5,16 @@ import sys
 sys.path.append('../')
 sys.path.append('../../')
 sys.path.append('../../../')
-import logging
+import gc, logging, time, sqlite3
 import pandas as pd
+import numpy as np
+from m1_xgb import *
+from datetime import datetime, timedelta
+from src.conf.configuration import regress_conf
 from PyFin.api import *
 from alphamind.api import *
 from src.conf.models import *
-import numpy as np
 from alphamind.execution.naiveexecutor import NaiveExecutor
-from matplotlib import pyplot as plt
 
 logging.basicConfig(format="%(asctime)---%(levelname)s: %(message)s", level=logging.DEBUG)
 
@@ -521,17 +523,19 @@ alpha_factor_store = {'alpha_1': LAST('alpha_1'), 'alpha_2': LAST('alpha_2'), 'a
                       'alpha_190': LAST('alpha_190'), 'alpha_191': LAST('alpha_191')}
 
 # 提取Uqer因子
+logging.info('loading basic_factor_org ...........')
 basic_factor_org = engine.fetch_factor_range(universe, basic_factor_store, dates=ref_dates)
 logging.info('basic_factor_org loading success')
 # 提取alpha191因子
-alpha191_factor_org = engine.fetch_factor_range(universe, alpha_factor_store, dates=ref_dates, used_factor_tables=[Alpha191])
-
-# alpha191_factor_orgl = alpha191_factor_org.set_index(['trade_date', 'code'])
+logging.info('loading alpha191_factor_org ...........')
+alpha191_factor_org = engine.fetch_factor_range(universe, alpha_factor_store, dates=ref_dates,
+                                                used_factor_tables=[Alpha191])
 
 # 合并所有的因子
 factor_data_org = pd.merge(basic_factor_org, alpha191_factor_org, on=['trade_date', 'code'], how='outer')
 
 # 获取
+logging.info('loading industry_total data ...........')
 industry = engine.fetch_industry_range(universe, dates=ref_dates)
 factor_data = pd.merge(factor_data_org, industry, on=['trade_date', 'code']).fillna(0.)
 risk_total = engine.fetch_risk_model_range(universe, dates=ref_dates)[1]
@@ -547,42 +551,14 @@ logging.info('industry_total loading success')
 train_data = pd.merge(factor_data, return_data, on=['trade_date', 'code']).dropna()
 
 # Constraintes settings
-
 industry_names = industry_list(industry_name, industry_level)
 constraint_risk = ['EARNYILD', 'LIQUIDTY', 'GROWTH', 'SIZE', 'SIZENL', 'BETA', 'MOMENTUM'] + industry_names
 # constraint_risk = ['EARNYILD', 'LIQUIDTY', 'GROWTH', 'SIZE', 'BETA', 'MOMENTUM'] + industry_names
 
 total_risk_names = constraint_risk + ['benchmark', 'total']
-
 b_type = []
 l_val = []
 u_val = []
-
-for name in total_risk_names:
-    if name == 'benchmark':
-        b_type.append(BoundaryType.RELATIVE)
-        l_val.append(0.0)
-        u_val.append(1.0)
-    elif name == 'total':
-        b_type.append(BoundaryType.ABSOLUTE)
-        l_val.append(-0.0)
-        u_val.append(0.0)
-    elif name == 'SIZE':
-        b_type.append(BoundaryType.ABSOLUTE)
-        l_val.append(-0.1)
-        u_val.append(0.1)
-    elif name == 'SIZENL':
-        b_type.append(BoundaryType.ABSOLUTE)
-        l_val.append(-0.1)
-        u_val.append(-0.1)
-    elif name in industry_names:
-        b_type.append(BoundaryType.ABSOLUTE)
-        l_val.append(-0.005)
-        u_val.append(0.005)
-    else:
-        b_type.append(BoundaryType.ABSOLUTE)
-        l_val.append(-1.0)
-        u_val.append(1.0)
 # for name in total_risk_names:
 #     if name == 'benchmark':
 #         b_type.append(BoundaryType.RELATIVE)
@@ -590,127 +566,45 @@ for name in total_risk_names:
 #         u_val.append(1.0)
 #     elif name == 'total':
 #         b_type.append(BoundaryType.ABSOLUTE)
-#         l_val.append(.0)
-#         u_val.append(.0)
+#         l_val.append(-0.0)
+#         u_val.append(0.0)
+#     elif name == 'SIZE':
+#         b_type.append(BoundaryType.ABSOLUTE)
+#         l_val.append(-0.1)
+#         u_val.append(0.1)
+#     elif name == 'SIZENL':
+#         b_type.append(BoundaryType.ABSOLUTE)
+#         l_val.append(-0.1)
+#         u_val.append(-0.1)
+#     elif name in industry_names:
+#         b_type.append(BoundaryType.ABSOLUTE)
+#         l_val.append(-0.005)
+#         u_val.append(0.005)
 #     else:
 #         b_type.append(BoundaryType.ABSOLUTE)
-#         l_val.append(-1.005)
-#         u_val.append(1.005)
+#         l_val.append(-1.0)
+#         u_val.append(1.0)
+for name in total_risk_names:
+    if name == 'benchmark':
+        b_type.append(BoundaryType.RELATIVE)
+        l_val.append(0.0)
+        u_val.append(1.0)
+    elif name == 'total':
+        b_type.append(BoundaryType.ABSOLUTE)
+        l_val.append(.0)
+        u_val.append(.0)
+    else:
+        b_type.append(BoundaryType.ABSOLUTE)
+        l_val.append(-1.0)
+        u_val.append(1.0)
 
 bounds = create_box_bounds(total_risk_names, b_type, l_val, u_val)
 
-features = [
-    'AccountsPayablesTDays', 'AccountsPayablesTRate', 'AdminiExpenseRate', 'ARTDays',
-    'ARTRate', 'ASSI', 'BLEV', 'BondsPayableToAsset', 'CashRateOfSales', 'CashToCurrentLiability',
-    'CMRA', 'CTOP', 'CTP5', 'CurrentAssetsRatio', 'CurrentAssetsTRate', 'CurrentRatio', 'DAVOL10',
-    'DAVOL20', 'DAVOL5', 'DDNBT', 'DDNCR', 'DDNSR', 'DebtEquityRatio', 'DebtsAssetRatio', 'DHILO',
-    'DilutedEPS', 'DVRAT', 'EBITToTOR', 'EGRO', 'EMA10', 'EMA120', 'EMA20', 'EMA5', 'EMA60', 'EPS',
-    'EquityFixedAssetRatio', 'EquityToAsset', 'EquityTRate', 'ETOP', 'ETP5', 'FinancialExpenseRate',
-    'FinancingCashGrowRate', 'FixAssetRatio', 'FixedAssetsTRate', 'GrossIncomeRatio', 'HBETA',
-    'HSIGMA', 'IntangibleAssetRatio', 'InventoryTDays', 'InventoryTRate', 'InvestCashGrowRate',
-    'LCAP', 'LFLO', 'LongDebtToAsset', 'LongDebtToWorkingCapital', 'LongTermDebtToAsset',
-    'MA10', 'MA120', 'MA20', 'MA5', 'MA60', 'MAWVAD', 'MFI', 'MLEV', 'NetAssetGrowRate',
-    'NetProfitGrowRate', 'NetProfitRatio', 'NOCFToOperatingNI', 'NonCurrentAssetsRatio',
-    'NPParentCompanyGrowRate', 'NPToTOR', 'OperatingExpenseRate', 'OperatingProfitGrowRate',
-    'OperatingProfitRatio', 'OperatingProfitToTOR', 'OperatingRevenueGrowRate', 'OperCashGrowRate',
-    'OperCashInToCurrentLiability', 'PB', 'PCF', 'PE', 'PS', 'PSY', 'QuickRatio', 'REVS10',
-    'REVS20', 'REVS5', 'ROA', 'ROA5', 'ROE', 'ROE5', 'RSI', 'RSTR12', 'RSTR24', 'SalesCostRatio',
-    'SaleServiceCashToOR', 'SUE', 'TaxRatio', 'TOBT', 'TotalAssetGrowRate', 'TotalAssetsTRate',
-    'TotalProfitCostRatio', 'TotalProfitGrowRate', 'VOL10', 'VOL120', 'VOL20', 'VOL240', 'VOL5',
-    'VOL60', 'WVAD', 'REC', 'DAREC', 'GREC', 'FY12P', 'DAREV', 'GREV', 'SFY12P', 'DASREV', 'GSREV',
-    'FEARNG', 'FSALESG', 'TA2EV', 'CFO2EV', 'ACCA', 'DEGM', 'SUOI', 'EARNMOM', 'FiftyTwoWeekHigh',
-    'Volatility', 'Skewness', 'ILLIQUIDITY', 'BackwardADJ', 'MACD', 'ADTM', 'ATR14', 'ATR6', 'BIAS10',
-    'BIAS20', 'BIAS5', 'BIAS60', 'BollDown', 'BollUp', 'CCI10', 'CCI20', 'CCI5', 'CCI88', 'KDJ_K', 'KDJ_D',
-    'KDJ_J', 'ROC6', 'ROC20', 'SBM', 'STM', 'UpRVI', 'DownRVI', 'RVI', 'SRMI', 'ChandeSD', 'ChandeSU',
-    'CMO', 'DBCD', 'ARC', 'OBV', 'OBV6', 'OBV20', 'TVMA20', 'TVMA6', 'TVSTD20', 'TVSTD6', 'VDEA', 'VDIFF',
-    'VEMA10', 'VEMA12', 'VEMA26', 'VEMA5', 'VMACD', 'VR', 'VROC12', 'VROC6', 'VSTD10', 'VSTD20', 'KlingerOscillator',
-    'MoneyFlow20', 'AD', 'AD20', 'AD6', 'CoppockCurve', 'ASI', 'ChaikinOscillator', 'ChaikinVolatility',
-    'EMV14', 'EMV6', 'plusDI', 'minusDI', 'ADX', 'ADXR', 'Aroon', 'AroonDown', 'AroonUp', 'DEA', 'DIFF', 'DDI', 'DIZ',
-    'DIF', 'MTM', 'MTMMA', 'PVT', 'PVT6', 'PVT12', 'TRIX5', 'TRIX10', 'UOS', 'MA10RegressCoeff12', 'MA10RegressCoeff6',
-    'PLRC6', 'PLRC12', 'SwingIndex', 'Ulcer10', 'Ulcer5', 'Hurst', 'ACD6', 'ACD20', 'EMA12', 'EMA26', 'APBMA',
-    'BBI', 'BBIC', 'TEMA10', 'TEMA5', 'MA10Close', 'AR', 'BR', 'ARBR', 'CR20', 'MassIndex', 'BearPower', 'BullPower',
-    'Elder', 'NVI', 'PVI', 'RC12', 'RC24', 'JDQS20', 'Variance20', 'Variance60', 'Variance120', 'Kurtosis20',
-    'Kurtosis60', 'Kurtosis120', 'Alpha20', 'Alpha60', 'Alpha120', 'Beta20', 'Beta60', 'Beta120', 'SharpeRatio20',
-    'SharpeRatio60', 'SharpeRatio120', 'TreynorRatio20', 'TreynorRatio60', 'TreynorRatio120', 'InformationRatio20',
-    'InformationRatio60', 'InformationRatio120', 'GainVariance20', 'GainVariance60', 'GainVariance120',
-    'LossVariance20',
-    'LossVariance60', 'LossVariance120', 'GainLossVarianceRatio20', 'GainLossVarianceRatio60',
-    'GainLossVarianceRatio120',
-    'RealizedVolatility', 'REVS60', 'REVS120', 'REVS250', 'REVS750', 'REVS5m20', 'REVS5m60', 'REVS5Indu1',
-    'REVS20Indu1',
-    'Volumn1M', 'Volumn3M', 'Price1M', 'Price3M', 'Price1Y', 'Rank1M', 'CashDividendCover', 'DividendCover',
-    'DividendPaidRatio', 'RetainedEarningRatio', 'CashEquivalentPS', 'DividendPS', 'EPSTTM', 'NetAssetPS', 'TORPS',
-    'TORPSLatest', 'OperatingRevenuePS', 'OperatingRevenuePSLatest', 'OperatingProfitPS', 'OperatingProfitPSLatest',
-    'CapitalSurplusFundPS', 'SurplusReserveFundPS', 'UndividedProfitPS', 'RetainedEarningsPS', 'OperCashFlowPS',
-    'CashFlowPS', 'NetNonOIToTP', 'NetNonOIToTPLatest', 'PeriodCostsRate', 'InterestCover', 'NetProfitGrowRate3Y',
-    'NetProfitGrowRate5Y', 'OperatingRevenueGrowRate3Y', 'OperatingRevenueGrowRate5Y', 'NetCashFlowGrowRate',
-    'NetProfitCashCover', 'OperCashInToAsset', 'CashConversionCycle', 'OperatingCycle', 'PEG3Y', 'PEG5Y', 'PEIndu',
-    'PBIndu', 'PSIndu', 'PCFIndu', 'PEHist20', 'PEHist60', 'PEHist120', 'PEHist250', 'StaticPE', 'ForwardPE',
-    'EnterpriseFCFPS', 'ShareholderFCFPS', 'ROEDiluted', 'ROEAvg', 'ROEWeighted', 'ROECut', 'ROECutWeighted',
-    'ROIC', 'ROAEBIT', 'ROAEBITTTM', 'OperatingNIToTP', 'OperatingNIToTPLatest', 'InvestRAssociatesToTP',
-    'InvestRAssociatesToTPLatest',
-    'NPCutToNP', 'SuperQuickRatio', 'TSEPToInterestBearDebt', 'DebtTangibleEquityRatio', 'TangibleAToInteBearDebt',
-    'TangibleAToNetDebt', 'NOCFToTLiability', 'NOCFToInterestBearDebt', 'NOCFToNetDebt', 'TSEPToTotalCapital',
-    'InteBearDebtToTotalCapital', 'NPParentCompanyCutYOY', 'SalesServiceCashToORLatest', 'CashRateOfSalesLatest',
-    'NOCFToOperatingNILatest', 'TotalAssets', 'MktValue', 'NegMktValue', 'TEAP', 'NIAP', 'TotalFixedAssets',
-    'IntFreeCL', 'IntFreeNCL', 'IntCL', 'IntDebt', 'NetDebt', 'NetTangibleAssets', 'WorkingCapital',
-    'NetWorkingCapital',
-    'TotalPaidinCapital', 'RetainedEarnings', 'OperateNetIncome', 'ValueChgProfit', 'NetIntExpense', 'EBIT',
-    'EBITDA', 'EBIAT', 'NRProfitLoss', 'NIAPCut', 'FCFF', 'FCFE', 'DA', 'TRevenueTTM', 'TCostTTM', 'RevenueTTM',
-    'CostTTM', 'GrossProfitTTM', 'SalesExpenseTTM', 'AdminExpenseTTM', 'FinanExpenseTTM', 'AssetImpairLossTTM',
-    'NPFromOperatingTTM', 'NPFromValueChgTTM', 'OperateProfitTTM', 'NonOperatingNPTTM', 'TProfitTTM', 'NetProfitTTM',
-    'NetProfitAPTTM', 'SaleServiceRenderCashTTM', 'NetOperateCFTTM', 'NetInvestCFTTM', 'NetFinanceCFTTM', 'GrossProfit',
-    'Beta252', 'RSTR504', 'EPIBS', 'CETOP', 'DASTD', 'CmraCNE5', 'HsigmaCNE5', 'SGRO', 'EgibsLong', 'STOM', 'STOQ',
-    'STOA', 'NLSIZE']
-
-alpha_features = [
-    'alpha_1', 'alpha_2', 'alpha_3', 'alpha_4', 'alpha_5', 'alpha_6', 'alpha_7', 'alpha_8', 'alpha_9', 'alpha_10',
-    'alpha_11', 'alpha_12', 'alpha_13', 'alpha_14', 'alpha_15', 'alpha_16', 'alpha_17', 'alpha_18', 'alpha_19',
-    'alpha_20',
-    'alpha_21', 'alpha_22', 'alpha_23', 'alpha_24', 'alpha_25', 'alpha_26', 'alpha_27', 'alpha_28', 'alpha_29',
-    'alpha_30',
-    'alpha_31', 'alpha_32', 'alpha_33', 'alpha_34', 'alpha_35', 'alpha_36', 'alpha_37', 'alpha_38', 'alpha_39',
-    'alpha_40',
-    'alpha_41', 'alpha_42', 'alpha_43', 'alpha_44', 'alpha_45', 'alpha_46', 'alpha_47', 'alpha_48', 'alpha_49',
-    'alpha_50',
-    'alpha_51', 'alpha_52', 'alpha_53', 'alpha_54', 'alpha_55', 'alpha_56', 'alpha_57', 'alpha_58', 'alpha_59',
-    'alpha_60',
-    'alpha_61', 'alpha_62', 'alpha_63', 'alpha_64', 'alpha_65', 'alpha_66', 'alpha_67', 'alpha_68', 'alpha_69',
-    'alpha_70',
-    'alpha_71', 'alpha_72', 'alpha_73', 'alpha_74', 'alpha_75', 'alpha_76', 'alpha_77', 'alpha_78', 'alpha_79',
-    'alpha_80',
-    'alpha_81', 'alpha_82', 'alpha_83', 'alpha_84', 'alpha_85', 'alpha_86', 'alpha_87', 'alpha_88', 'alpha_89',
-    'alpha_90',
-    'alpha_91', 'alpha_92', 'alpha_93', 'alpha_94', 'alpha_95', 'alpha_96', 'alpha_97', 'alpha_98', 'alpha_99',
-    'alpha_100',
-    'alpha_101', 'alpha_102', 'alpha_103', 'alpha_104', 'alpha_105', 'alpha_106', 'alpha_107', 'alpha_108', 'alpha_109',
-    'alpha_110',
-    'alpha_111', 'alpha_112', 'alpha_113', 'alpha_114', 'alpha_115', 'alpha_116', 'alpha_117', 'alpha_118', 'alpha_119',
-    'alpha_120',
-    'alpha_121', 'alpha_122', 'alpha_123', 'alpha_124', 'alpha_125', 'alpha_126', 'alpha_127', 'alpha_128', 'alpha_129',
-    'alpha_130',
-    'alpha_131', 'alpha_132', 'alpha_133', 'alpha_134', 'alpha_135', 'alpha_136', 'alpha_137', 'alpha_138', 'alpha_139',
-    'alpha_140',
-    'alpha_141', 'alpha_142', 'alpha_143', 'alpha_144', 'alpha_145', 'alpha_146', 'alpha_147', 'alpha_148', 'alpha_149',
-    'alpha_150',
-    'alpha_151', 'alpha_152', 'alpha_153', 'alpha_154', 'alpha_155', 'alpha_156', 'alpha_157', 'alpha_158', 'alpha_159',
-    'alpha_160',
-    'alpha_171', 'alpha_172', 'alpha_173', 'alpha_174', 'alpha_175', 'alpha_176', 'alpha_177', 'alpha_178', 'alpha_179',
-    'alpha_180',
-    'alpha_181', 'alpha_182', 'alpha_183', 'alpha_184', 'alpha_185', 'alpha_186', 'alpha_187', 'alpha_188', 'alpha_189',
-    'alpha_190',
-    'alpha_191'
-]
-
+# 获取特征名
+features = list(basic_factor_store.keys())
+alpha_features = list(alpha_factor_store.keys())
 features.extend(alpha_features)
-
 label = ['dx']
-
-from datetime import datetime, timedelta
-from m1_xgb import *
-from src.conf.configuration import regress_conf
-import xgboost as xgb
-import gc
 
 
 def create_scenario():
@@ -719,7 +613,6 @@ def create_scenario():
     GPU_device = True
 
     executor = NaiveExecutor()
-    leverags = []
     trade_dates = []
     current_pos = pd.DataFrame()
     previous_pos = pd.DataFrame()
@@ -733,13 +626,11 @@ def create_scenario():
     # take ref_dates[i] as an example
     for i, ref_date in enumerate(back_ref_dates):
         alpha_logger.info('{0} is start'.format(ref_date))
-
         # machine learning model
         # Filter Training data
         # train data
         trade_date_pre = ref_date - timedelta(days=1)
         trade_date_pre_80 = ref_date - timedelta(days=80)
-
         # train = train_data[(train_data.trade_date <= trade_date_pre) & (trade_date_pre_80 <= train_data.trade_date)].dropna()
         # 训练集构造, 选择当天之前(不含当天)的因子数据作为训练集.
         train = train_data[train_data.trade_date <= trade_date_pre].dropna()
@@ -772,7 +663,6 @@ def create_scenario():
         # 测试集, 取当天的因子数据作为输入.
         total_data_test_excess = train_data[train_data.trade_date == ref_date]
         alpha_logger.info('{0} total_data_test_excess: {1}'.format(ref_date, len(total_data_test_excess)))
-
         if len(total_data_test_excess) <= 0:
             alpha_logger.info('{0} HAS NO DATA!!!'.format(ref_date))
             continue
@@ -862,7 +752,6 @@ def create_scenario():
         executor.set_current(current_pos)
         net_rets.append(np.log(1. + ret - transact_cost * turn_over))
         alpha_logger.info('len_net_rets: {}, len_trade_dates: {}'.format(len(net_rets), len(trade_dates)))
-
         alpha_logger.info('{} is finished'.format(ref_date))
 
     # ret_df = pd.DataFrame({'xgb_regress': rets}, index=trade_dates)
@@ -876,7 +765,8 @@ def create_scenario():
 ret_df, tune_record, rets, net_rets = create_scenario()
 
 # 调仓记录保存
-import sqlite3
-
 con = sqlite3.connect('./tune_record.db')
-tune_record.to_sql('tune_record', con=con, if_exists='append', index=False)
+# 约束条件比较严格
+# tune_record.to_sql('tune_record', con=con, if_exists='append', index=False)
+# 约束条件比较宽松
+tune_record.to_sql('tune_record_adj', con=con, if_exists='append', index=False)
