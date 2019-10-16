@@ -19,6 +19,7 @@ from alphamind.execution.naiveexecutor import NaiveExecutor
 data_source = 'postgresql+psycopg2://alpha:alpha@180.166.26.82:8889/alpha'
 engine = SqlEngine(data_source)
 
+strict = True
 universe = Universe('zz500')
 freq = '5b'
 benchmark_code = 905
@@ -557,44 +558,47 @@ total_risk_names = constraint_risk + ['benchmark', 'total']
 b_type = []
 l_val = []
 u_val = []
-# for name in total_risk_names:
-#     if name == 'benchmark':
-#         b_type.append(BoundaryType.RELATIVE)
-#         l_val.append(0.0)
-#         u_val.append(1.0)
-#     elif name == 'total':
-#         b_type.append(BoundaryType.ABSOLUTE)
-#         l_val.append(-0.0)
-#         u_val.append(0.0)
-#     elif name == 'SIZE':
-#         b_type.append(BoundaryType.ABSOLUTE)
-#         l_val.append(-0.1)
-#         u_val.append(0.1)
-#     elif name == 'SIZENL':
-#         b_type.append(BoundaryType.ABSOLUTE)
-#         l_val.append(-0.1)
-#         u_val.append(-0.1)
-#     elif name in industry_names:
-#         b_type.append(BoundaryType.ABSOLUTE)
-#         l_val.append(-0.005)
-#         u_val.append(0.005)
-#     else:
-#         b_type.append(BoundaryType.ABSOLUTE)
-#         l_val.append(-1.0)
-#         u_val.append(1.0)
-for name in total_risk_names:
-    if name == 'benchmark':
-        b_type.append(BoundaryType.RELATIVE)
-        l_val.append(0.0)
-        u_val.append(1.0)
-    elif name == 'total':
-        b_type.append(BoundaryType.ABSOLUTE)
-        l_val.append(.0)
-        u_val.append(.0)
-    else:
-        b_type.append(BoundaryType.ABSOLUTE)
-        l_val.append(-1.0)
-        u_val.append(1.0)
+
+if strict:
+    for name in total_risk_names:
+        if name == 'benchmark':
+            b_type.append(BoundaryType.RELATIVE)
+            l_val.append(0.0)
+            u_val.append(1.0)
+        elif name == 'total':
+            b_type.append(BoundaryType.ABSOLUTE)
+            l_val.append(-0.0)
+            u_val.append(0.0)
+        elif name == 'SIZE':
+            b_type.append(BoundaryType.ABSOLUTE)
+            l_val.append(-0.1)
+            u_val.append(0.1)
+        elif name == 'SIZENL':
+            b_type.append(BoundaryType.ABSOLUTE)
+            l_val.append(-0.1)
+            u_val.append(-0.1)
+        elif name in industry_names:
+            b_type.append(BoundaryType.ABSOLUTE)
+            l_val.append(-0.005)
+            u_val.append(0.005)
+        else:
+            b_type.append(BoundaryType.ABSOLUTE)
+            l_val.append(-1.0)
+            u_val.append(1.0)
+else:
+    for name in total_risk_names:
+        if name == 'benchmark':
+            b_type.append(BoundaryType.RELATIVE)
+            l_val.append(0.0)
+            u_val.append(1.0)
+        elif name == 'total':
+            b_type.append(BoundaryType.ABSOLUTE)
+            l_val.append(.0)
+            u_val.append(.0)
+        else:
+            b_type.append(BoundaryType.ABSOLUTE)
+            l_val.append(-1.0)
+            u_val.append(1.0)
 
 bounds = create_box_bounds(total_risk_names, b_type, l_val, u_val)
 
