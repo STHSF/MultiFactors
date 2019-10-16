@@ -4,6 +4,7 @@ import sys
 sys.path.append('../')
 sys.path.append('../../')
 sys.path.append('../../../')
+import logging
 import pandas as pd
 from PyFin.api import *
 from alphamind.api import *
@@ -521,10 +522,12 @@ alpha_factor_store = {
 
 # 提取Uqer因子
 basic_factor_org = engine.fetch_factor_range(universe, basic_factor_store, dates=ref_dates)
+logging.info('basic_factor_org loading success')
 # basic_factor_orgl = basic_factor_org.set_index(['trade_date', 'code'])
 # 提取alpha191因子
-alpha191_factor_org = engine.fetch_factor_range(universe, alpha_factor_store, dates=ref_dates,
-                                                used_factor_tables=[Alpha191])
+alpha191_factor_org = engine.fetch_factor_range(universe, alpha_factor_store, dates=ref_dates, used_factor_tables=[Alpha191])
+logging.info('alpha191_factor_org loading success')
+
 # alpha191_factor_orgl = alpha191_factor_org.set_index(['trade_date', 'code'])
 
 # 合并所有的因子
@@ -541,6 +544,7 @@ return_data = engine.fetch_dx_return_range(universe, dates=ref_dates, horizon=ho
 benchmark_total = engine.fetch_benchmark_range(dates=ref_dates, benchmark=benchmark_code)
 industry_total = engine.fetch_industry_matrix_range(universe, dates=ref_dates, category=industry_name,
                                                     level=industry_level)
+logging.info('industry_total loading success')
 
 train_data = pd.merge(factor_data, return_data, on=['trade_date', 'code']).dropna()
 
