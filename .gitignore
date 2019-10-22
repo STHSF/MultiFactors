@@ -127,3 +127,5 @@ src/data/dataprepare/zz500_all.pkl
 *.db
 *.csv
 *.pkl
+*.log
+*.out

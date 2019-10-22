@@ -24,7 +24,7 @@ universe = Universe('zz500')
 freq = '5b'
 benchmark_code = 905
 start_date = '2010-01-01'  # 训练集的起始时间
-back_start_date = '2017-01-01'  # 模型回测的起始时间
+back_start_date = '2010-01-01'  # 模型回测的起始时间
 end_date = '2019-10-01'
 ref_dates = makeSchedule(start_date, end_date, freq, 'china.sse')
 back_ref_dates = makeSchedule(back_start_date, end_date, freq, 'china.sse')
@@ -768,6 +768,6 @@ ret_df, tune_record, rets, net_rets = create_scenario()
 # 调仓记录保存
 con = sqlite3.connect('./tune_record.db')
 # 约束条件比较严格
-tune_record.to_sql('tune_record_strict', con=con, if_exists='append', index=False)
+tune_record.to_sql('tune_record_whole_strict', con=con, if_exists='append', index=False)
 # 约束条件比较宽松
-# tune_record.to_sql('tune_record_adj', con=con, if_exists='append', index=False)
+# tune_record.to_sql('tune_record__whole_loose', con=con, if_exists='append', index=False)
