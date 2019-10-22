@@ -19,7 +19,7 @@ from alphamind.execution.naiveexecutor import NaiveExecutor
 data_source = 'postgresql+psycopg2://alpha:alpha@180.166.26.82:8889/alpha'
 engine = SqlEngine(data_source)
 
-strict = True
+strict = False
 universe = Universe('zz500')
 freq = '5b'
 benchmark_code = 905
@@ -770,4 +770,4 @@ con = sqlite3.connect('./tune_record.db')
 # 约束条件比较严格
 tune_record.to_sql('tune_record_strict', con=con, if_exists='append', index=False)
 # 约束条件比较宽松
-# tune_record.to_sql('tune_record_adj', con=con, if_exists='append', index=False)
+tune_record.to_sql('tune_record_loose', con=con, if_exists='append', index=False)
