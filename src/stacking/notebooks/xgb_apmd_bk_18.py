@@ -769,6 +769,8 @@ ret_df, tune_record, rets, net_rets = create_scenario()
 # 调仓记录保存
 con = sqlite3.connect('./tune_record.db')
 # 约束条件比较严格
-# tune_record.to_sql('tune_record_whole_strict', con=con, if_exists='append', index=False)
+table_name = 'tune_record_whole_strict'
 # 约束条件比较宽松
-tune_record.to_sql('tune_record_whole_loose', con=con, if_exists='append', index=False)
+# table_name = 'tune_record_whole_loose'
+alpha_logger.info('save tune_record to {}'.format(table_name))
+tune_record.to_sql(table_name, con=con, if_exists='append', index=False)
