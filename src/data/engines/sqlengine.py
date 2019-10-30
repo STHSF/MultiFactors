@@ -13,6 +13,7 @@ import sqlalchemy.orm as orm
 from src.data.engines.model import Record
 from datetime import datetime
 
+
 class SQLEngine(object):
 
     def __init__(self, db_url):
@@ -32,7 +33,6 @@ class SQLEngine(object):
         return pd.read_sql(query.statement, query.session.bind)
 
     def fetch_data(self, db_sql):
-        # db_sql =
         records = self.session.execute(db_sql)
         return records
 
@@ -43,7 +43,10 @@ class SQLEngine(object):
         :param trade_date:
         :return:
         """
-        trade_date = datetime.strptime(trade_date, '%Y-%m-%d')
+        if type(trade_date) != str:
+            trade_date = datetime.strptime(trade_date, '%Y-%m-%d')
+        else:
+            trade_date = trade_date
         self.session.execute('''delete from `{0}` where trade_date=\'{1}\''''.format(table_name, trade_date))
         self.session.commit()
         self.session.close()
