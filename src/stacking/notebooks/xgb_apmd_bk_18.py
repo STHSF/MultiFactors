@@ -775,4 +775,4 @@ table_name = 'tune_record_whole_strict'
 # table_name = 'tune_record_whole_loose'
 # table_name = 'tune_record_loose'
 alpha_logger.info('save tune_record to {}'.format(table_name))
-tune_record.to_sql(table_name, con=con, if_exists='append', index=False)
+tune_record.to_sql(table_name, con=con, if_exists='replace', index=False)
