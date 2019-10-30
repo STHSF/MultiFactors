@@ -32,6 +32,9 @@ class SQLEngine(object):
         query = self.session.query(Record)
         return pd.read_sql(query.statement, query.session.bind)
 
+    def fetch_record(self, table_name):
+        return pd.read_sql(table_name, self.engine)
+
     def fetch_data(self, db_sql):
         records = self.session.execute(db_sql)
         return records
