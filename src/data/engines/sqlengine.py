@@ -51,6 +51,15 @@ class SQLEngine(object):
         self.session.commit()
         self.session.close()
 
+    def write_data(self, table_name, df_data: pd.DataFrame):
+        """
+        数据写入对应的表中
+        :param table_name:
+        :param df_data:
+        :return:
+        """
+        df_data.to_sql(table_name, self.engine, index=False, if_exists='append', chunksize=100)
+
 
 if __name__ == '__main__':
     engine = SQLEngine('sqlite:////Users/li/PycharmProjects/MultiFactors/src/stacking/notebooks/real_tune_record.db')
