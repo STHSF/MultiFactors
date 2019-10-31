@@ -46,13 +46,19 @@ class SQLEngine(object):
         :param trade_date:
         :return:
         """
-        if type(trade_date) == str:
-            trade_date = datetime.strptime(trade_date, '%Y-%m-%d')
-        else:
-            trade_date = trade_date
+        # if type(trade_date) == str:
+        #     trade_date = datetime.strptime(trade_date, '%Y-%m-%d')
+        # else:
+        #     trade_date = trade_date
         self.session.execute('''delete from `{0}` where trade_date=\'{1}\''''.format(table_name, trade_date))
-        self.session.commit()
-        self.session.close()
+        try:
+            self.session.commit()
+        except Exception as e:
+            self.session.rollback()
+            # 输出异常信息
+            print("del_historical_data(): ======={}=======".format(e))
+        finally:
+            self.session.close()
 
     def write_data(self, table_name, df_data: pd.DataFrame):
         """
@@ -67,10 +73,18 @@ class SQLEngine(object):
 if __name__ == '__main__':
     engine = SQLEngine('sqlite:////Users/li/PycharmProjects/MultiFactors/src/stacking/notebooks/real_tune_record.db')
 
-    engine.del_historical_data('pos_record', '2019-10-15')
+    date = datetime.strptime('2019-10-08', '%Y-%m-%d')
+    # date = '2019-10-08 00:00:00.000000'
 
-    data = engine.fetch_record_meta()
-    print(data)
+    engine.del_historical_data('pos_record', date)
+
+    data = engine.fetch_record('pos_record')
+    # print(type(data['trade_date'][500]))
+    # print(data[data['trade_date'] == (datetime.strptime('2019-10-08', '%Y-%m-%d'))])
+
+    data2 = engine.fetch_record_meta()
+    print(data2)
+    # print(type(data2['trade_date'][500]))
 
     # data = engine.fetch_data('''select * from pos_record where trade_date=\'{}\''''.format(date))
     # print(data.first())
