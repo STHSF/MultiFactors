@@ -657,7 +657,7 @@ def create_scenario():
             xgb_model.set_params(tree_method='gpu_hist', max_depth=5)
         else:
             xgb_model.set_params(max_depth=5)
-        alpha_logger.info(xgb_model.get_params)
+        alpha_logger.info(xgb_model.get_params())
         best_score, best_round, cv_rounds, best_model = xgb_model.fit(x_train, y_train)
         alpha_logger.info('Training time cost {}s'.format(time.time() - tic))
         alpha_logger.info('best_score = {}, best_round = {}'.format(best_score, best_round))
