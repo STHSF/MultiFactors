@@ -129,3 +129,4 @@ src/data/dataprepare/zz500_all.pkl
 *.pkl
 *.log
 *.out
+.DS_Store
