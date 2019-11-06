@@ -72,19 +72,13 @@ class SQLEngine(object):
 
 if __name__ == '__main__':
     engine = SQLEngine('sqlite:////Users/li/PycharmProjects/MultiFactors/src/stacking/notebooks/real_tune_record.db')
-
     date = datetime.strptime('2019-10-08', '%Y-%m-%d')
-    # date = '2019-10-08 00:00:00.000000'
-
-    engine.del_historical_data('pos_record', date)
-
+    engine.del_historical_data('pos_record', str(date))
     data = engine.fetch_record('pos_record')
-    # print(type(data['trade_date'][500]))
-    # print(data[data['trade_date'] == (datetime.strptime('2019-10-08', '%Y-%m-%d'))])
+    print(data)
 
     data2 = engine.fetch_record_meta()
     print(data2)
-    # print(type(data2['trade_date'][500]))
 
     # data = engine.fetch_data('''select * from pos_record where trade_date=\'{}\''''.format(date))
     # print(data.first())
