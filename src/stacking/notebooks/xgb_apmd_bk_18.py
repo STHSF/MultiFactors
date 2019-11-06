@@ -772,12 +772,12 @@ def create_scenario():
 ret_df, tune_record, rets, net_rets = create_scenario()
 
 # 调仓记录保存
-con = sqlite3.connect('./tune_record.db')
+# con = sqlite3.connect('./tune_record.db')
 # 约束条件比较严格
-table_name = 'tune_record_whole_strict'
+# table_name = 'tune_record_whole_strict'
 # table_name = 'tune_record_strict'
 # 约束条件比较宽松
 # table_name = 'tune_record_whole_loose'
 # table_name = 'tune_record_loose'
-alpha_logger.info('save tune_record to {}'.format(table_name))
-tune_record.to_sql(table_name, con=con, if_exists='replace', index=False)
+# alpha_logger.info('save tune_record to {}'.format(table_name))
+# tune_record.to_sql(table_name, con=con, if_exists='replace', index=False)
