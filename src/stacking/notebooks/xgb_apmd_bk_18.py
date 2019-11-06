@@ -714,7 +714,10 @@ def create_scenario():
         del best_model
         gc.collect()
 
-        # 股票过滤, 组合优化之前过滤掉
+        # 股票过滤, 组合优化之前过滤掉(未完成)
+        
+        # 
+        previous_pos = total_data_test_excess[['code']].merge(previous_pos, on='code', how='left').fillna(0)
         # backtest
         try:
             target_pos, _ = er_portfolio_analysis(predict_xgboost,
@@ -725,7 +728,9 @@ def create_scenario():
                                                   benchmark_w,
                                                   method='risk_neutral',
                                                   lbound=lbound,
-                                                  ubound=ubound)
+                                                  ubound=ubound,
+                                                  turn_over_target=0.5,
+                                                  current_pos=previous_pos)
         except:
             target_pos = None
             alpha_logger.info('target_pos: error')
@@ -751,7 +756,7 @@ def create_scenario():
         alpha_logger.info('turn_over: {}'.format(turn_over))
         turn_overs.append(turn_over)
         alpha_logger.info('turn_over: {}'.format(turn_over))
-        executor.set_current(current_pos)
+        previous_pos = executor.set_current(current_pos)
         net_rets.append(np.log(1. + ret - transact_cost * turn_over))
         alpha_logger.info('len_net_rets: {}, len_trade_dates: {}'.format(len(net_rets), len(trade_dates)))
         alpha_logger.info('{} is finished'.format(ref_date))
