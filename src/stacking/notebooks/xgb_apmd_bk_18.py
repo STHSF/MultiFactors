@@ -618,6 +618,7 @@ def create_scenario():
     executor = NaiveExecutor()
     trade_dates = []
     current_pos = pd.DataFrame()
+    total_pos = pd.DataFrame()
     previous_pos = pd.DataFrame()
     tune_record = pd.DataFrame()
     rets = []
@@ -757,6 +758,8 @@ def create_scenario():
         turn_overs.append(turn_over)
         alpha_logger.info('turn_over: {}'.format(turn_over))
         previous_pos = executor.set_current(current_pos)
+        previous_pos['trade_date'] = ref_date
+        total_pos.append(previous_pos, ignore_index=True)
         net_rets.append(np.log(1. + ret - transact_cost * turn_over))
         alpha_logger.info('len_net_rets: {}, len_trade_dates: {}'.format(len(net_rets), len(trade_dates)))
         alpha_logger.info('{} is finished'.format(ref_date))
@@ -766,10 +769,10 @@ def create_scenario():
     ret_df.loc[advanceDateByCalendar('china.sse', ref_dates[-1], freq).strftime('%Y-%m-%d')] = 0.
     ret_df = ret_df.shift(1)
     ret_df.iloc[0] = 0.
-    return ret_df, tune_record, rets, net_rets
+    return ret_df, tune_record, rets, net_rets, total_pos
 
 
-ret_df, tune_record, rets, net_rets = create_scenario()
+ret_df, tune_record, rets, net_rets, total_pos = create_scenario()
 
 # 调仓记录保存
 # con = sqlite3.connect('./tune_record.db')

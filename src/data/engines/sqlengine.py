@@ -32,8 +32,12 @@ class SQLEngine(object):
         query = self.session.query(Record)
         return pd.read_sql(query.statement, query.session.bind)
 
-    def fetch_record(self, table_name):
-        return pd.read_sql(table_name, self.engine)
+    def fetch_record(self, table_name, chunk_size=1000000):
+        df_list = []
+        for chunk in pd.read_sql(table_name, self.engine, chunksize=chunk_size):
+            df_list.append(chunk)
+        df_data = pd.concat(df_list, ignore_index=True)
+        return df_data
 
     def fetch_data(self, db_sql):
         records = self.session.execute(db_sql)
