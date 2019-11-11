@@ -10,7 +10,7 @@
 from PyFin.api import *
 from alphamind.api import *
 
-
+# uqer因子
 basic_factor_store = {
     'AccountsPayablesTDays': CSQuantiles(LAST('AccountsPayablesTDays'), groups='sw1'),
     'AccountsPayablesTRate': CSQuantiles(LAST('AccountsPayablesTRate'), groups='sw1'),
@@ -435,7 +435,7 @@ basic_factor_store = {
     'STOQ': CSQuantiles(LAST('STOQ'), groups='sw1'),
     'STOA': CSQuantiles(LAST('STOA'), groups='sw1'),
     'NLSIZE': CSQuantiles(LAST('NLSIZE'), groups='sw1')}
-
+# alpha191
 alpha_factor_store = {
     'alpha_1': LAST('alpha_1'), 'alpha_2': LAST('alpha_2'), 'alpha_3': LAST('alpha_3'),
     'alpha_4': LAST('alpha_4'), 'alpha_5': LAST('alpha_5'), 'alpha_6': LAST('alpha_6'),
