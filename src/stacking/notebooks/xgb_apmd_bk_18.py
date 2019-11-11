@@ -234,7 +234,7 @@ def create_scenario():
 
         # 股票过滤, 组合优化之前过滤掉(未完成)
         
-        # 
+        # 保证当前持仓和优化前的持仓数据顺序一致
         previous_pos = total_data_test_excess[['code']].merge(previous_pos, on='code', how='left').fillna(0)
         # backtest
         try:
