@@ -4,7 +4,7 @@
 """
 @version: ??
 @author: li
-@file: factors.py
+@file: factor_store.py
 @time: 2019/11/11 11:20 上午
 """
 from PyFin.api import *
