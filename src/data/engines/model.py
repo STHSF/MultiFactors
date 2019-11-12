@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """
-@version: ??
+@version: 0.1
 @author: li
 @file: model.py
 @time: 2019/10/30 10:16 上午

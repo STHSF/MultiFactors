@@ -32,6 +32,8 @@ class XGBooster(object):
         self.xgb_params = args.params
         self.num_boost_round = args.max_round
         self.cv_folds = args.cv_folds
+        self.avg_score = None
+        self.ts_cv_folds = False
         self.early_stop_round = args.early_stop_round
         self.seed = args.seed
         self.save_model_path = args.save_model_path
@@ -48,6 +50,36 @@ class XGBooster(object):
             self.best_round = cv_result[cv_result['test-rmse-mean'].isin([min_rmse])].index[0]
             self.best_score = min_rmse
             self.best_model = xgb.train(self.xgb_params, d_train, self.best_round)
+
+        elif self.ts_cv_folds is not None:
+            # 时间序列k_fold
+            best_score = 0
+            details = []
+            tscv = TimeSeriesSplit(n_splits=self.cv_folds)
+            for n_fold, (tr_idx, val_idx) in enumerate(tscv.split(x_train)):
+                print(f'the {n_fold} training start ...')
+                tr_x, tr_y, val_x, val_y = x_train.iloc[tr_idx], y_train[tr_idx], x_train.iloc[val_idx], y_train[val_idx]
+                d_train = xgb.DMatrix(tr_x, label=tr_y)
+                d_valid = xgb.DMatrix(val_x, label=val_y)
+                watchlist = [(d_train, "train"), (d_valid, "valid")]
+                xgb_model = xgb.train(params=self.xgb_params,
+                                      dtrain=d_train,
+                                      num_boost_round=self.num_boost_round,
+                                      evals=watchlist,
+                                      early_stopping_rounds=self.early_stop_round)
+                details.append((xgb_model.best_score, xgb_model.best_iteration, xgb_model))
+
+                if xgb_model.best_score > best_score:
+                    best_score = xgb_model.best_score
+                    self.best_score = xgb_model.best_score
+                    self.best_model = xgb_model
+                    self.best_round = xgb_model.best_iteration
+                else:
+                    self.best_score = xgb_model.best_score
+                    self.best_model = xgb_model
+                    self.best_round = xgb_model.best_iteration
+                scores.append(xgb_model.best_score)
+            self.avg_score = np.mean(scores)
 
         else:
             print('non_cross_validation。。。。')
@@ -66,10 +98,9 @@ class XGBooster(object):
                                         early_stopping_rounds=self.early_stop_round)
             self.best_round = self.best_model.best_iteration
             self.best_score = self.best_model.best_score
-            cv_result = None
 
         # print('spend time :' + str((time.time() - xgb_start)) + '(s)')
-        return self.best_score, self.best_round, cv_result, self.best_model
+        return self.best_score, self.best_round, self.best_model
 
     def predict(self, bst_model, x_pred):
         dpred = xgb.DMatrix(x_pred)
@@ -164,7 +195,7 @@ def run_cv(x_train, x_test, y_train, y_test):
     data_message = 'X_train.shape={}, X_test.shape = {}'.format(np.shape(x_train), np.shape(x_test))
     print(data_message)
     xgb = XGBooster(regress_conf)
-    best_score, best_round, cv_rounds, best_model = xgb.fit(x_train, y_train)
+    best_score, best_round, best_model = xgb.fit(x_train, y_train)
     print('Training time cost {}s'.format(time.time() - tic))
     # xgb.save_model()
     result_message = 'best_score = {}, best_round = {}'.format(best_score, best_round)

@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """
-@version: ??
+@version: 0.1
 @author: li
 @file: factor_store.py
 @time: 2019/11/11 11:20 上午
