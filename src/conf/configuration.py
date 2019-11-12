@@ -17,6 +17,7 @@ class RegressionConfig(object):
         self.early_stop_round = None
         self.seed = None
         self.save_model_path = None
+        self.ts_cv_folds = None
 
     def xgb_config_r(self):
         # 回归

@@ -33,7 +33,7 @@ class XGBooster(object):
         self.num_boost_round = args.max_round
         self.cv_folds = args.cv_folds
         self.avg_score = None
-        self.ts_cv_folds = False
+        self.ts_cv_folds = args.ts_cv_folds
         self.early_stop_round = args.early_stop_round
         self.seed = args.seed
         self.save_model_path = args.save_model_path
@@ -55,7 +55,7 @@ class XGBooster(object):
             # 时间序列k_fold
             best_score = 0
             details = []
-            tscv = TimeSeriesSplit(n_splits=self.cv_folds)
+            tscv = TimeSeriesSplit(n_splits=self.ts_cv_folds)
             for n_fold, (tr_idx, val_idx) in enumerate(tscv.split(x_train)):
                 print(f'the {n_fold} training start ...')
                 tr_x, tr_y, val_x, val_y = x_train.iloc[tr_idx], y_train[tr_idx], x_train.iloc[val_idx], y_train[val_idx]
