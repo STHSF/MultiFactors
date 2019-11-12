@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """
-@version: ??
+@version: 0.1
 @author: li
 @file: feature_list.py
 @time: 2019/11/11 1:34 下午
