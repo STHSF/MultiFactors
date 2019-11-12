@@ -8,7 +8,7 @@ sys.path.append('../../../')
 import gc, time, sqlite3
 import pandas as pd
 import numpy as np
-from m1_xgb import *
+from src.stacking.m1_xgb import *
 from datetime import datetime, timedelta
 from src.conf.configuration import regress_conf
 from src.stacking import factor_store, feature_list
@@ -176,7 +176,7 @@ def create_scenario():
         else:
             xgb_model.set_params(max_depth=5)
         alpha_logger.info(xgb_model.get_params())
-        best_score, best_round, cv_rounds, best_model = xgb_model.fit(x_train, y_train)
+        best_score, best_round, best_model = xgb_model.fit(x_train, y_train)
         alpha_logger.info('Training time cost {}s'.format(time.time() - tic))
         alpha_logger.info('best_score = {}, best_round = {}'.format(best_score, best_round))
 
