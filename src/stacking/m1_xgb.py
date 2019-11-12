@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """
-@version: ??
+@version: 1.0
 @author: li
 @file: m1_xgb.py
 @time: 2019-03-04 09:36
@@ -21,7 +21,7 @@ import xgboost as xgb
 from src.conf.configuration import regress_conf
 import pandas as pd
 from sklearn.externals import joblib
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, TimeSeriesSplit
 from sklearn.metrics import mean_squared_error, r2_score
 import matplotlib.pyplot as plt
 pd.set_option('display.max_rows', None, 'display.max_columns', None, "display.max_colwidth", 1000, 'display.width', 1000)
