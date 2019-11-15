@@ -81,9 +81,8 @@ class LightGBM(object):
 
         return best_model, best_score, best_round, cv_result
 
-    @staticmethod
-    def predict(bst_model, x_test, y_test=None, result_path=None):
-        if conf.params['objective'] == "multiclass":
+    def predict(self, bst_model, x_test, y_test=None, result_path=None):
+        if self.params['objective'] == "multiclass":
             y_pred = bst_model.predict(x_test).argmax(axis=1)
             print(y_pred)
             print(y_test)
