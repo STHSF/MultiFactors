@@ -35,6 +35,21 @@ class RegressionConfig(object):
         self.seed = 3
         self.save_model_path = '../model/xgb/'
 
+    def lgb_config_r(self):
+        # 将参数写成字典下形式
+        self.params = {
+            'task': 'train',
+            'boosting_type': 'gbdt',  # 设置提升类型
+            'objective': 'regression',  # 目标函数
+            'metric': {'l2', 'auc'},  # 评估函数
+            'num_leaves': 31,  # 叶子节点数
+            'learning_rate': 0.05,  # 学习速率
+            'feature_fraction': 0.9,  # 建树的特征选择比例
+            'bagging_fraction': 0.8,  # 建树的样本采样比例
+            'bagging_freq': 5,  # k 意味着每 k 次迭代执行bagging
+            'verbose': 1  # <0 显示致命的, =0 显示错误 (警告), >0 显示信息
+        }
+
 
 class ClassificationConfig(object):
     def __init__(self):
