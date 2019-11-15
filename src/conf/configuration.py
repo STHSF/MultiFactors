@@ -49,6 +49,10 @@ class RegressionConfig(object):
             'bagging_freq': 5,  # k 意味着每 k 次迭代执行bagging
             'verbose': 1  # <0 显示致命的, =0 显示错误 (警告), >0 显示信息
         }
+        self.max_round = 500
+        self.cv_folds = None
+        self.early_stop_round = 10
+        self.seed = 3
 
 
 class ClassificationConfig(object):
