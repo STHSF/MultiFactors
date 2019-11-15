@@ -18,11 +18,11 @@ import pickle
 import lightgbm as lgb
 import numpy as np
 import pandas as pd
-from src.stacking.configuration import conf
+from src.conf.configuration import classify_conf
 from sklearn.model_selection import train_test_split
 
 
-class LightGBNM(object):
+class LightGBM(object):
     def __init__(self, args):
         self.params = args.params
         self.max_round = args.max_round
@@ -42,7 +42,11 @@ class LightGBNM(object):
             d_train = lgb.Dataset(x_train, label=y_train)
             d_valid = lgb.Dataset(x_valid, label=y_valid)
             watchlist = [d_train, d_valid]
-            best_model = lgb.train(self.params, d_train, valid_sets=watchlist, early_stopping_rounds=self.early_stop_round)
+            best_model = lgb.train(self.params,
+                                   d_train,
+                                   num_boost_round=self.max_round,
+                                   valid_sets=watchlist,
+                                   early_stopping_rounds=self.early_stop_round)
             best_round = best_model.best_iteration
             best_score = best_model.best_score
             cv_result = None
@@ -52,7 +56,7 @@ class LightGBNM(object):
             d_train = lgb.Dataset(x_train, label=y_train)
             cv_result = lgb.cv(self.params,
                                d_train,
-                               self.max_round,
+                               num_boost_round=self.max_round,
                                nfold=self.cv_folds,
                                seed=self.seed,
                                verbose_eval=True,
@@ -72,15 +76,28 @@ class LightGBNM(object):
                 best_score = min_error
                 best_model = lgb.train(self.params, d_train, best_round)
             else:
-                print('ERROR: XGBOOST OBJECTIVE IS NOT CLASSIFY OR REGRESSION')
+                print('ERROR: LightGBM OBJECTIVE IS NOT CLASSIFY OR REGRESSION')
                 exit()
 
         return best_model, best_score, best_round, cv_result
 
     @staticmethod
-    def predict(bst_model, x_pred):
-        pass
-
+    def predict(bst_model, x_test, y_test=None, result_path=None):
+        if conf.params['objective'] == "multiclass":
+            y_pred = bst_model.predict(x_test).argmax(axis=1)
+            print(y_pred)
+            print(y_test)
+            if y_test is not None:
+                auc_bool = y_test.reshape(1, -1) == y_pred
+                print('the accuracy:\t', float(np.sum(auc_bool)) / len(y_pred))
+        else:
+            # 输出概率
+            y_pred_prob = bst_model.predict(x_test)
+            y_pred = y_pred_prob
+        if result_path:
+            df_reult = pd.DataFrame()
+            df_reult['result'] = y_pred
+            df_reult.to_csv(save_result_path, index=False)
 
     def _kfold(self):
         pass
@@ -187,27 +204,19 @@ def run_cv(x_train, x_test, y_test, y_train):
 
 
 if __name__ == '__main__':
-    with open('../data_prepare/train.pkl', 'rb') as pk:
-        train_dataset = pickle.load(pk)
-        train_dataset = np.array(train_dataset)
-        print("len_train_dataset %s" % len(train_dataset))
+    import lightgbm as lgb
+    import pandas as pd
 
-    with open('../data_prepare/label.pkl', 'rb') as pk:
-        label_dataset = pickle.load(pk)
-        label_dataset = np.array(label_dataset)
-        print("len_label_dataset %s" % len(label_dataset))
+    iris = load_iris()
+    data = iris.data
+    target = iris.target
+    X_train, X_test, y_train, y_test = train_test_split(data, target, test_size=0.25)
 
-    label = []
-    for i in label_dataset:
-        if i == -1:
-            label.append(2)
-        else:
-            label.append(i)
+    gbm = lgb.LGBMRegressor(learning_rate=0.03, n_estimators=200, max_depth=8)
+    gbm.fit(X_train, y_train)
 
-    label = np.array(label)
-    x_train, x_test, y_train, y_test = train_test_split(train_dataset[:30000], label[:30000], test_size=0.2, random_state=100)
-    data_message = 'X_train.shape={}, X_test.shape={}'.format(x_train.shape, x_test.shape)
-    print(data_message)
-    run_cv(x_train, x_test,y_test, y_train)
+    # 预测结果
+    y_pred = gbm.predict(X_test, num_iteration=gbm.best_iteration_)
+    print(y_pred)
 
 
