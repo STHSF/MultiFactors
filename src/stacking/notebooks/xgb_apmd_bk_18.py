@@ -8,7 +8,7 @@ sys.path.append('../../../')
 import gc, time, sqlite3
 import pandas as pd
 import numpy as np
-from src.stacking.m1_xgb import *
+from src.stacking.models.m1_xgb import *
 from datetime import datetime, timedelta
 from src.conf.configuration import regress_conf
 from src.stacking import factor_store, feature_list
