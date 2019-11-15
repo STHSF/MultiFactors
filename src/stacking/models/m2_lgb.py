@@ -93,6 +93,7 @@ class LightGBM(object):
             # 输出概率
             y_pred_prob = bst_model.predict(x_test)
             y_pred = y_pred_prob
+            print('y_pre: {}'.format(y_pred))
         if result_path:
             df_reult = pd.DataFrame()
             df_reult['result'] = y_pred
