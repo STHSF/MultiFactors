@@ -15,7 +15,7 @@ sys.path.append('../../../')
 
 import time
 import pickle
-# import lightgbm as lgb
+import lightgbm as lgb
 import numpy as np
 import pandas as pd
 from src.conf.configuration import classify_conf, regress_conf
