@@ -88,7 +88,7 @@ class ClassificationConfig(object):
                        # 'gpu_device_id': 0  # id为0的独显
                        }
 
-        self.max_round = 100
+        self.max_round = 10000
         self.cv_folds = None
         self.early_stop_round = 30
         self.seed = 3
