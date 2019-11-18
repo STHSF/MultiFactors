@@ -151,7 +151,7 @@ def lgb_predict(model, x_test, y_test, save_result_path=None):
             log.logger.info('The Accuracy:\t{}'.format(eva.auc(y_test, y_pred)))
             # 计算真实值和预测值之间的均方根误差
             log.logger.info('The RMSE of prediction is:\t{}'.format(mean_squared_error(y_test, y_pred) ** 0.5))
-            log.logger.info('The RMSE of prediction is:\t{}'.format(eva.rmse(y_test, y_pred) ** 0.5))
+            log.logger.info('The RMSE of prediction is:\t{}'.format(eva.rmse(y_test, y_pred)))
 
     elif regress_conf.params['objective'] == "regression":
         y_pred = model.predict(x_test)
