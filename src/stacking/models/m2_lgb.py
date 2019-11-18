@@ -145,8 +145,10 @@ def lgb_predict(model, x_test, y_test, save_result_path=None):
         print(y_test)
         if y_test is not None:
             auc_bool = y_test.reshape(1, -1) == y_pred
-            log.logger.info('The Accuracy:\t', float(np.sum(auc_bool)) / len(y_pred))
-            log.logger.info('The RMSE of prediction is:\t', mean_squared_error(y_test, y_pred) ** 0.5)  # 计算真实值和预测值之间的均方根误差
+            # AUC计算
+            log.logger.info('The Accuracy:\t{}'.format(float(np.sum(auc_bool)) / len(y_pred)))
+            # 计算真实值和预测值之间的均方根误差
+            log.logger.info('The RMSE of prediction is:\t{}'.format(mean_squared_error(y_test, y_pred) ** 0.5))
 
     elif regress_conf.params['objective'] == "regression":
         y_pred = model.predict(x_test)
