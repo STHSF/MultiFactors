@@ -22,6 +22,8 @@ from src.conf.configuration import classify_conf, regress_conf
 from src.utils import log_util
 from src.utils.Evaluation import RegressionEvaluate
 from sklearn.model_selection import train_test_split
+from sklearn.metrics import mean_squared_error
+
 
 log = log_util.Logger('m2_lightgbm', level='info')
 
