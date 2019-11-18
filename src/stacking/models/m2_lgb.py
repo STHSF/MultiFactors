@@ -79,7 +79,7 @@ class LightGBM(object):
                                    nfold=self.cv_folds,
                                    seed=self.seed,
                                    verbose_eval=True,
-                                   metrics=['multi_error', 'multi_logloss'],
+                                   metrics=['l2', 'auc'],
                                    early_stopping_rounds=self.early_stop_round,
                                    show_stdv=False)
                 print('cv_result %s' % cv_result)
