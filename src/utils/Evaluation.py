@@ -14,6 +14,11 @@ from sklearn import metrics
 class RegressionEvaluate(object):
 
     @staticmethod
+    def auc(y_true, y_pred):
+        auc_bool = y_true.reshape(1, -1) == y_pred
+        return float(np.sum(auc_bool)) / len(y_pred)
+
+    @staticmethod
     def mape(y_true, y_pred):
         return np.mean(np.abs((y_pred - y_true) / y_true)) * 100
 

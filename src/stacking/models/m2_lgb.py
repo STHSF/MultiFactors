@@ -20,7 +20,7 @@ import numpy as np
 import pandas as pd
 from src.conf.configuration import classify_conf, regress_conf
 from src.utils import log_util
-from sklearn.metrics import mean_squared_error
+from src.utils.Evaluation import RegressionEvaluate
 from sklearn.model_selection import train_test_split
 
 log = log_util.Logger('m2_lightgbm', level='info')
@@ -139,16 +139,17 @@ def run_feat_search(X_train, X_test, y_train, feature_names):
 def lgb_predict(model, x_test, y_test, save_result_path=None):
     # x_test = x_test.flatten()
     classify_conf.lgb_config_c()
+    eva = RegressionEvaluate()
     if classify_conf.params['objective'] == "multiclass":
         y_pred = model.predict(x_test).argmax(axis=1)
         print(y_pred)
         print(y_test)
         if y_test is not None:
-            auc_bool = y_test.reshape(1, -1) == y_pred
             # AUC计算
-            log.logger.info('The Accuracy:\t{}'.format(float(np.sum(auc_bool)) / len(y_pred)))
+            log.logger.info('The Accuracy:\t{}'.format(eva.auc(y_test, y_pred)))
             # 计算真实值和预测值之间的均方根误差
             log.logger.info('The RMSE of prediction is:\t{}'.format(mean_squared_error(y_test, y_pred) ** 0.5))
+            log.logger.info('The RMSE of prediction is:\t{}'.format(eva.rmse(y_test, y_pred) ** 0.5))
 
     elif regress_conf.params['objective'] == "regression":
         y_pred = model.predict(x_test)
@@ -185,7 +186,6 @@ def run_cv(x_train, x_test, y_test, y_train):
 if __name__ == '__main__':
     import json
     import pandas as pd
-    from sklearn.metrics import mean_squared_error
     from sklearn.datasets import load_iris
     from sklearn.model_selection import train_test_split
     from sklearn.datasets import make_classification
