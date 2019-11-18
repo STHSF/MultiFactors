@@ -37,7 +37,7 @@ class LightGBM(object):
     def fit(self, x_train, y_train, x_valid=None, y_valid=None):
         best_model, best_round, best_score = None, None, None
         if self.cv_folds is None:
-            log.logger.info('NoN Cross Validation。。。。')
+            log.logger.info('NonCross Validation。。。。')
             if x_valid is None and y_valid is None:
                 x_train, x_valid, y_train, y_valid = train_test_split(x_train, y_train, test_size=0.2)
             else:
@@ -178,7 +178,6 @@ def run_cv(x_train, x_test, y_test, y_train):
 
 if __name__ == '__main__':
     import json
-    # import lightgbm as lgb
     import pandas as pd
     from sklearn.metrics import mean_squared_error
     from sklearn.datasets import load_iris
@@ -189,7 +188,8 @@ if __name__ == '__main__':
     data = iris.data
     target = iris.target
     X_train, X_test, y_train, y_test = train_test_split(data, target, test_size=0.2)
-    regress_conf.lgb_config_r()
+    # regress_conf.lgb_config_r()
+    regress_conf.lgb_config_c()
     log.logger.info('Model Params:\n{}'.format(regress_conf.params))
 
     lgbm = LightGBM(regress_conf)
