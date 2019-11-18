@@ -83,9 +83,9 @@ class ClassificationConfig(object):
                        'bagging_freq': 5,
                        'lambda_l1': 0,
                        'lambda_l2': 0.5,  # L2正则化系数
-                       'device': 'gpu',  # 默认使用集显
-                       'gpu_platform_id': 1,  # 确定是使用集成显卡还是独立显卡，0代表独显，1代表独显
-                       'gpu_device_id': 0  # id为0的独显
+                       # 'device': 'gpu',  # 默认使用集显
+                       # 'gpu_platform_id': 1,  # 确定是使用集成显卡还是独立显卡，0代表独显，1代表独显
+                       # 'gpu_device_id': 0  # id为0的独显
                        }
 
         self.max_round = 100
