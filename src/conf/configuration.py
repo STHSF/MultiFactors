@@ -66,7 +66,6 @@ class ClassificationConfig(object):
         self.early_stop_round = None
         self.seed = None
         self.save_model_path = None
-        self.ts_cv_folds = None
 
     def lgb_config_c(self):
         self.params = {'task': 'train',
@@ -84,7 +83,7 @@ class ClassificationConfig(object):
                        'bagging_freq': 5}
 
         self.max_round = 100
-        self.cv_folds = 4
+        self.cv_folds = False
         self.early_stop_round = 30
         self.seed = 3
         self.save_model_path = 'model/lgb/lgb.txt'
