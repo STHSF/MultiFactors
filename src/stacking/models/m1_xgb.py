@@ -179,7 +179,7 @@ def xgb_predict(model, x_test, y_test=None, save_result_path=None):
     print('r_square_of_pred: %s' % r_square_)
     # print(y_pred)
     # print(y_test)
-    plot_figure(y_pred, y_test)
+    plot_figure(y_pred, y_test, 'xgb_predict')
 
     if save_result_path:
         df_reult = pd.DataFrame(x_test)

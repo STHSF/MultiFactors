@@ -125,26 +125,27 @@ def run_feat_search(X_train, X_test, y_train, feature_names):
 
 
 def lgb_predict(model, x_test, y_test, save_result_path=None):
-    if conf.params['objective'] == "multiclass":
+    regress_conf.lgb_config_r()
+    if regress_conf.params['objective'] == "multiclass":
         y_pred = model.predict(x_test).argmax(axis=1)
         print(y_pred)
         print(y_test)
         if y_test is not None:
             auc_bool = y_test.reshape(1, -1) == y_pred
             print('the accuracy:\t', float(np.sum(auc_bool)) / len(y_pred))
-    else:
-        # 输出概率
-        y_pred_prob = model.predict(x_test)
-        y_pred = y_pred_prob
+    elif regress_conf.params['objective'] == "regression":
+        y_pred = model.predict(x_test)
         print('y_pre: {}'.format(y_pred))
+    else:
+        y_pred = None
+
     if save_result_path:
-        df_reult = pd.DataFrame()
-        df_reult['result'] = y_pred
+        df_reult = pd.DataFrame(y_pred, columns='result')
         df_reult.to_csv(save_result_path, index=False)
 
 
 def run_cv(x_train, x_test, y_test, y_train):
-    conf.lgb_config_c()
+    regress_conf.lgb_config_r()
     tic = time.time()
     data_message = 'x_train.shape={}, x_test.shape={}'.format(x_train.shape, x_test.shape)
     print(data_message)
