@@ -136,8 +136,8 @@ def run_feat_search(X_train, X_test, y_train, feature_names):
 
 
 def lgb_predict(model, x_test, y_test, save_result_path=None):
-    regress_conf.lgb_config_r()
-    if regress_conf.params['objective'] == "multiclass":
+    classify_conf.lgb_config_c()
+    if classify_conf.params['objective'] == "multiclass":
         y_pred = model.predict(x_test).argmax(axis=1)
         print(y_pred)
         print(y_test)
