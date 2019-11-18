@@ -18,6 +18,7 @@ import argparse
 import numpy as np
 from math import *
 import xgboost as xgb
+from src.utils import log_util
 from src.conf.configuration import regress_conf
 import pandas as pd
 from sklearn.externals import joblib
@@ -25,6 +26,8 @@ from sklearn.model_selection import train_test_split, TimeSeriesSplit
 from sklearn.metrics import mean_squared_error, r2_score
 import matplotlib.pyplot as plt
 pd.set_option('display.max_rows', None, 'display.max_columns', None, "display.max_colwidth", 1000, 'display.width', 1000)
+
+log = log_util.Logger('m1_xgboost', level='info')
 
 
 class XGBooster(object):
@@ -42,6 +45,7 @@ class XGBooster(object):
         xgb_start = time.time()
         if self.cv_folds is not None:
             print('cross_validation。。。。')
+            log.logger.info('Cross Validation。。。。')
             d_train = xgb.DMatrix(x_train, label=y_train)
             cv_result = self._kfold(d_train)
             print('cv_result %s' % cv_result)

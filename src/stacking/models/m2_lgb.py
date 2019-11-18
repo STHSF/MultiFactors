@@ -19,7 +19,10 @@ import lightgbm as lgb
 import numpy as np
 import pandas as pd
 from src.conf.configuration import classify_conf, regress_conf
+from src.utils import log_util
 from sklearn.model_selection import train_test_split
+
+log = log_util.Logger('m2_lightgbm', level='info')
 
 
 class LightGBM(object):
@@ -34,7 +37,7 @@ class LightGBM(object):
     def fit(self, x_train, y_train, x_valid=None, y_valid=None):
         best_model, best_round, best_score = None, None, None
         if self.cv_folds is None:
-            print('Non Cross Validation....')
+            log.logger.info('NoN Cross Validation。。。。')
             if x_valid is None and y_valid is None:
                 x_train, x_valid, y_train, y_valid = train_test_split(x_train, y_train, test_size=0.2)
             else:
@@ -51,7 +54,7 @@ class LightGBM(object):
             best_score = best_model.best_score
 
         else:
-            print('Cross Validation')
+            log.logger.info('Cross Validation ........')
             d_train = lgb.Dataset(x_train, label=y_train)
             if self.params['objective'] is 'multiclass':
                 cv_result = lgb.cv(self.params,
@@ -106,18 +109,26 @@ class LightGBM(object):
     def _kfold(self):
         pass
 
-    def set_params(self):
-        pass
+    def set_params(self, **params):
+        self.params.update(params)
 
     def get_params(self):
-        pass
+        return self.params
 
     def save_model(self, best_model):
         if self.save_model_path:
             best_model.save_model(self.save_model_path)
 
-    def load_model(self):
-        pass
+    def load_model(self, model_path=None):
+        if model_path is None and self.save_model_path is None:
+            log.logger.error('Model Load Error, {} or {} is not exit'.format(model_path, self.save_model_path))
+            log.logger.error('Exit.........')
+            exit()
+        if model_path:
+            bst_model = joblib.load(model_path)
+        else:
+            bst_model = joblib.load(self.save_model_path)
+        return bst_model
 
 
 def run_feat_search(X_train, X_test, y_train, feature_names):
@@ -179,7 +190,7 @@ if __name__ == '__main__':
     target = iris.target
     X_train, X_test, y_train, y_test = train_test_split(data, target, test_size=0.2)
     regress_conf.lgb_config_r()
-    print(regress_conf.params)
+    log.logger.info('Model Params:\n{}'.format(regress_conf.params))
 
     lgbm = LightGBM(regress_conf)
     best_model, best_score, best_round = lgbm.fit(X_train, y_train)
