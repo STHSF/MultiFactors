@@ -69,18 +69,24 @@ class ClassificationConfig(object):
 
     def lgb_config_c(self):
         self.params = {'task': 'train',
-                       'boosting_type': 'gbdt',
+                       'boosting': 'gbdt',
                        'objective': 'multiclass',
                        'num_class': 3,
                        'metric': ['multi_error', 'multi_logloss'],
+                       'max_bin': 63,  # 表示 feature 将存入的 bin 的最大数量
                        'metric_freq': 1,
-                       # 'max_bin': 255,
-                       'num_leaves': 31,
-                       'max_depth': 6,
+                       'num_leaves': 31,  # 由于lightGBM是leaves_wise生长，官方说法是要<=2^max_depth,超过此值容易过拟合
+                       'max_depth': 6,  # 树的最大层数为7 ,可以选择一个适中的值，其实4-10都可以。但要注意它越大越容易出现过拟合
                        'learning_rate': 0.05,
-                       'feature_fraction': 0.9,
-                       'bagging_fraction': 0.95,
-                       'bagging_freq': 5}
+                       'feature_fraction': 0.9,  # bagging_fraction相当于样本特征采样，使bagging运行更快的同时可以降拟合
+                       'bagging_fraction': 0.95,  # 用来进行特征的子抽样，可以用来防止过拟合并提高训练速度[0.5, 0.6, 0.7,0.8,0.9]
+                       'bagging_freq': 5,
+                       'lambda_l1': 0,
+                       'lambda_l2': 0.5,  # L2正则化系数
+                       'device': 'gpu',  # 默认使用集显
+                       'gpu_platform_id': 1,  # 确定是使用集成显卡还是独立显卡，0代表独显，1代表独显
+                       'gpu_device_id': 0  # id为0的独显
+                       }
 
         self.max_round = 100
         self.cv_folds = None
