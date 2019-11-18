@@ -150,7 +150,6 @@ def lgb_predict(model, x_test, y_test, save_result_path=None):
             # AUC计算
             log.logger.info('The Accuracy:\t{}'.format(eva.auc(y_test, y_pred)))
             # 计算真实值和预测值之间的均方根误差
-            log.logger.info('The RMSE of prediction is:\t{}'.format(mean_squared_error(y_test, y_pred) ** 0.5))
             log.logger.info('The RMSE of prediction is:\t{}'.format(eva.rmse(y_test, y_pred)))
 
     elif regress_conf.params['objective'] == "regression":
@@ -168,15 +167,13 @@ def run_cv(x_train, x_test, y_test, y_train):
     regress_conf.lgb_config_r()
     tic = time.time()
     data_message = 'x_train.shape={}, x_test.shape={}'.format(x_train.shape, x_test.shape)
-    print(data_message)
-    lgb = LightGBM(regress_conf)
+    log.logger.info(data_message)
 
-    # logger.info(data_message)
+    lgb = LightGBM(regress_conf)
     lgb_model, best_score, best_round = lgb.fit(conf, x_train, y_train)
-    print('Time cost {}s'.format(time.time() - tic))
+    log.logger.info('Time cost {}s'.format(time.time() - tic))
     result_message = 'best_round={}, best_score={}'.format(best_round, best_score)
-    # logger.info(result_message)
-    print(result_message)
+    log.logger.info(result_message)
 
     # predict
     now = time.strftime("%m%d-%H%M%S")
