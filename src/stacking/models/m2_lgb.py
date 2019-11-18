@@ -49,28 +49,38 @@ class LightGBM(object):
                                    early_stopping_rounds=self.early_stop_round)
             best_round = best_model.best_iteration
             best_score = best_model.best_score
-            cv_result = None
 
         else:
             print('Cross Validation')
             d_train = lgb.Dataset(x_train, label=y_train)
-            cv_result = lgb.cv(self.params,
-                               d_train,
-                               num_boost_round=self.max_round,
-                               nfold=self.cv_folds,
-                               seed=self.seed,
-                               verbose_eval=True,
-                               metrics=['multi_error', 'multi_logloss'],
-                               early_stopping_rounds=self.early_stop_round,
-                               show_stdv=False)
-            print('cv_result %s' % cv_result)
-            print('type_cv_result %s' % type(cv_result))
             if self.params['objective'] is 'multiclass':
+                cv_result = lgb.cv(self.params,
+                                   d_train,
+                                   num_boost_round=self.max_round,
+                                   nfold=self.cv_folds,
+                                   seed=self.seed,
+                                   verbose_eval=True,
+                                   metrics=['multi_error', 'multi_logloss'],
+                                   early_stopping_rounds=self.early_stop_round,
+                                   show_stdv=False)
+                print('cv_result %s' % cv_result)
+                print('type_cv_result %s' % type(cv_result))
                 best_round = len(cv_result['multi_error-mean'])
                 best_score = cv_result['multi_error-mean'][-1]
                 best_model = lgb.train(self.params, d_train, best_round)
 
-            elif self.params['objective'] is 'reg:linear':
+            elif self.params['objective'] is 'regression':
+                cv_result = lgb.cv(self.params,
+                                   d_train,
+                                   num_boost_round=self.max_round,
+                                   nfold=self.cv_folds,
+                                   seed=self.seed,
+                                   verbose_eval=True,
+                                   metrics=['multi_error', 'multi_logloss'],
+                                   early_stopping_rounds=self.early_stop_round,
+                                   show_stdv=False)
+                print('cv_result %s' % cv_result)
+                print('type_cv_result %s' % type(cv_result))
                 min_error = cv_result['test-rmse-mean'].min()
                 best_round = cv_result[cv_result['test-rmse-mean'].isin([min_error])].index[0]
                 best_score = min_error
@@ -78,26 +88,20 @@ class LightGBM(object):
             else:
                 print('ERROR: LightGBM OBJECTIVE IS NOT CLASSIFY OR REGRESSION')
                 exit()
+        return best_model, best_score, best_round
 
-        return best_model, best_score, best_round, cv_result
-
-    def predict(self, bst_model, x_test, y_test=None, result_path=None):
-        if self.params['objective'] == "multiclass":
-            y_pred = bst_model.predict(x_test).argmax(axis=1)
-            print(y_pred)
-            print(y_test)
-            if y_test is not None:
-                auc_bool = y_test.reshape(1, -1) == y_pred
-                print('the accuracy:\t', float(np.sum(auc_bool)) / len(y_pred))
+    def predict(self, bst_model, x_test, save_result_path=None):
+        if conf.params['objective'] == "multiclass":
+            pre_data = bst_model.predit(x_test).argmax(axis=1)
         else:
-            # 输出概率
-            y_pred_prob = bst_model.predict(x_test)
-            y_pred = y_pred_prob
-            print('y_pre: {}'.format(y_pred))
-        if result_path:
+            pre_data = bst_model.predit(x_test)
+
+        if save_result_path:
             df_reult = pd.DataFrame()
             df_reult['result'] = y_pred
             df_reult.to_csv(save_result_path, index=False)
+
+        return pre_data
 
     def _kfold(self):
         pass
@@ -108,56 +112,16 @@ class LightGBM(object):
     def get_params(self):
         pass
 
-    def save_model(self):
-        pass
+    def save_model(self, best_model):
+        if self.save_model_path:
+            best_model.save_model(self.save_model_path)
 
     def load_model(self):
         pass
 
 
-def lgb_fit(config, x_train, y_train):
-    params = config.params
-    print('params %s' % params)
-    max_round = config.max_round
-    cv_folds = config.cv_folds
-    early_stop_round = config.early_stop_round
-    seed = config.seed
-    save_model_path = config.save_model_path
-
-    if cv_folds is not None:
-        print('cross_validation')
-        d_train = lgb.Dataset(x_train, label=y_train)
-        cv_result = lgb.cv(params,
-                           d_train,
-                           max_round,
-                           nfold=cv_folds,
-                           seed=seed,
-                           verbose_eval=True,
-                           metrics=['multi_error', 'multi_logloss'],
-                           early_stopping_rounds=early_stop_round,
-                           show_stdv=False)
-        print('cv_result %s' % cv_result)
-        print('type_cv_result %s' % type(cv_result))
-        best_round = len(cv_result['multi_error-mean'])
-        best_auc = cv_result['multi_error-mean'][-1]
-        best_model = lgb.train(params, d_train, best_round)
-
-    else:
-        print('non_cross_validation')
-        x_train, x_valid, y_train, y_valid = train_test_split(x_train, y_train, test_size=0.2, random_state=100)
-        d_train = lgb.Dataset(x_train, label=y_train)
-        d_valid = lgb.Dataset(x_valid, label=y_valid)
-        watchlist = [d_train, d_valid]
-        best_model = lgb.train(params, d_train, valid_sets=watchlist, early_stopping_rounds=early_stop_round)
-        best_round = best_model.best_iteration
-        best_auc = best_model.best_score
-        cv_result = None
-
-    if save_model_path:
-        pass
-        # check_path(save_model_path)
-        # best_model.save_model(save_model_path)
-    return best_model, best_auc, best_round, cv_result
+def run_feat_search(X_train, X_test, y_train, feature_names):
+    pass
 
 
 def lgb_predict(model, x_test, y_test, save_result_path=None):
@@ -165,20 +129,18 @@ def lgb_predict(model, x_test, y_test, save_result_path=None):
         y_pred = model.predict(x_test).argmax(axis=1)
         print(y_pred)
         print(y_test)
-        result = y_test.reshape(1, -1) == y_pred
-        print('the accuracy:\t', float(np.sum(result)) / len(y_pred))
+        if y_test is not None:
+            auc_bool = y_test.reshape(1, -1) == y_pred
+            print('the accuracy:\t', float(np.sum(auc_bool)) / len(y_pred))
     else:
         # 输出概率
         y_pred_prob = model.predict(x_test)
         y_pred = y_pred_prob
+        print('y_pre: {}'.format(y_pred))
     if save_result_path:
         df_reult = pd.DataFrame()
         df_reult['result'] = y_pred
         df_reult.to_csv(save_result_path, index=False)
-
-
-def run_feat_search(X_train, X_test, y_train, feature_names):
-    pass
 
 
 def run_cv(x_train, x_test, y_test, y_train):
@@ -186,8 +148,10 @@ def run_cv(x_train, x_test, y_test, y_train):
     tic = time.time()
     data_message = 'x_train.shape={}, x_test.shape={}'.format(x_train.shape, x_test.shape)
     print(data_message)
+    lgb = LightGBM(regress_conf)
+
     # logger.info(data_message)
-    lgb_model, best_score, best_round, cv_result = lgb_fit(conf, x_train, y_train)
+    lgb_model, best_score, best_round = lgb.fit(conf, x_train, y_train)
     print('Time cost {}s'.format(time.time() - tic))
     result_message = 'best_round={}, best_score={}'.format(best_round, best_score)
     # logger.info(result_message)
@@ -217,16 +181,12 @@ if __name__ == '__main__':
     print(regress_conf.params)
 
     lgbm = LightGBM(regress_conf)
-    best_model, best_score, best_round, cv_result = lgbm.fit(X_train, y_train)
-    lgbm.predict(best_model, X_test, y_test)
-
+    best_model, best_score, best_round = lgbm.fit(X_train, y_train)
+    lgb_predict(best_model, X_test, y_test)
 
     # # 创建成lgb特征的数据集格式
     # lgb_train = lgb.Dataset(X_train, y_train)
     # lgb_eval = lgb.Dataset(X_test, y_test, reference=lgb_train)
-
-
-
 
     # print('Start training...')
     # # 训练 cv and train

@@ -45,9 +45,12 @@ class RegressionConfig(object):
             'metrics': ['multi_error', 'multi_logloss'],
             'num_leaves': 31,  # 叶子节点数
             'learning_rate': 0.05,  # 学习速率
-            'feature_fraction': 0.9,  # 建树的特征选择比例
+            'feature_fraction': 0.9,  # 建树的特征选择比例 # 样本列采样
             'bagging_fraction': 0.8,  # 建树的样本采样比例
             'bagging_freq': 5,  # k 意味着每 k 次迭代执行bagging
+            'lambda_l1': 0,  # L1 正则化
+            'lambda_l2': 0,  # L2 正则化
+            'bagging_seed': 100,  # 随机种子,light中默认为100
             # 'verbose': 1  # <0 显示致命的, =0 显示错误 (警告), >0 显示信息
         }
         self.max_round = 500
