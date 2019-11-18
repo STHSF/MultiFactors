@@ -77,7 +77,7 @@ class ClassificationConfig(object):
                        'metric_freq': 1,
                        # 'max_bin': 255,
                        'num_leaves': 31,
-                       'max_depth': 20,
+                       'max_depth': 6,
                        'learning_rate': 0.05,
                        'feature_fraction': 0.9,
                        'bagging_fraction': 0.95,
