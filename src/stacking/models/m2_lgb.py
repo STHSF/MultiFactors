@@ -189,10 +189,10 @@ if __name__ == '__main__':
     target = iris.target
     X_train, X_test, y_train, y_test = train_test_split(data, target, test_size=0.2)
     # regress_conf.lgb_config_r()
-    regress_conf.lgb_config_c()
-    log.logger.info('Model Params:\n{}'.format(regress_conf.params))
+    classify_conf.lgb_config_c()
+    log.logger.info('Model Params:\n{}'.format(classify_conf.params))
 
-    lgbm = LightGBM(regress_conf)
+    lgbm = LightGBM(classify_conf)
     best_model, best_score, best_round = lgbm.fit(X_train, y_train)
     lgb_predict(best_model, X_test, y_test)
 
