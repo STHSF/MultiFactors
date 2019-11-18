@@ -20,6 +20,7 @@ import numpy as np
 import pandas as pd
 from src.conf.configuration import classify_conf, regress_conf
 from src.utils import log_util
+from sklearn.metrics import mean_squared_error
 from sklearn.model_selection import train_test_split
 
 log = log_util.Logger('m2_lightgbm', level='info')
@@ -66,8 +67,8 @@ class LightGBM(object):
                                    metrics=['multi_error', 'multi_logloss'],
                                    early_stopping_rounds=self.early_stop_round,
                                    show_stdv=False)
-                print('cv_result %s' % cv_result)
-                print('type_cv_result %s' % type(cv_result))
+                log.logger.info('cv_result %s' % cv_result)
+                log.logger.info('type_cv_result %s' % type(cv_result))
                 best_round = len(cv_result['multi_error-mean'])
                 best_score = cv_result['multi_error-mean'][-1]
                 best_model = lgb.train(self.params, d_train, best_round)
@@ -82,8 +83,8 @@ class LightGBM(object):
                                    metrics=['l2', 'auc'],
                                    early_stopping_rounds=self.early_stop_round,
                                    show_stdv=False)
-                print('cv_result %s' % cv_result)
-                print('type_cv_result %s' % type(cv_result))
+                log.logger.info('cv_result %s' % cv_result)
+                log.logger.info('type_cv_result %s' % type(cv_result))
                 min_error = cv_result['test-rmse-mean'].min()
                 best_round = cv_result[cv_result['test-rmse-mean'].isin([min_error])].index[0]
                 best_score = min_error
@@ -143,7 +144,9 @@ def lgb_predict(model, x_test, y_test, save_result_path=None):
         print(y_test)
         if y_test is not None:
             auc_bool = y_test.reshape(1, -1) == y_pred
-            print('the accuracy:\t', float(np.sum(auc_bool)) / len(y_pred))
+            log.logger.info('the accuracy:\t', float(np.sum(auc_bool)) / len(y_pred))
+            log.logger.info('The rmse of prediction is:\t', mean_squared_error(y_test, y_pred) ** 0.5)  # 计算真实值和预测值之间的均方根误差
+
     elif regress_conf.params['objective'] == "regression":
         y_pred = model.predict(x_test)
         print('y_pre: {}'.format(y_pred))
