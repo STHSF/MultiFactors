@@ -170,6 +170,7 @@ def lgb_predict(model, x_test, y_test, save_result_path=None):
 
 
 def run_cv(x_train, x_test, y_test, y_train):
+    # classify configuration
     classify_conf.lgb_config_c()
     classify_conf.cv_folds = 3
     tic = time.time()
@@ -203,11 +204,12 @@ if __name__ == '__main__':
     # regress_conf.lgb_config_r()
     classify_conf.lgb_config_c()
     log.logger.info('Model Params:\n{}'.format(classify_conf.params))
-
+    # # NonCrossValidation Test
     # lgbm = LightGBM(classify_conf)
     # best_model, best_score, best_round = lgbm.fit(X_train, y_train)
     # lgb_predict(best_model, X_test, y_test)
 
+    # # CrossValidation Test
     run_cv(X_train, X_test, y_test, y_train)
 
     # # 创建成lgb特征的数据集格式
