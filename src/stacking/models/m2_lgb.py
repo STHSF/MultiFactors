@@ -168,7 +168,7 @@ def run_cv(x_train, x_test, y_test, y_train):
     log.logger.info(data_message)
 
     lgb = LightGBM(regress_conf)
-    lgb_model, best_score, best_round = lgb.fit(conf, x_train, y_train)
+    lgb_model, best_score, best_round = lgb.fit(x_train, y_train)
     log.logger.info('Time cost {}s'.format(time.time() - tic))
     result_message = 'best_round={}, best_score={}'.format(best_round, best_score)
     log.logger.info(result_message)
