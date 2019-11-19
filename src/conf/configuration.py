@@ -36,7 +36,6 @@ class RegressionConfig(object):
         self.save_model_path = '../model/xgb/'
 
     def lgb_config_r(self):
-        # 将参数写成字典下形式
         self.params = {
             'task': 'train',
             'boosting_type': 'gbdt',  # 设置提升类型

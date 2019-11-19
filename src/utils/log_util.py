@@ -23,7 +23,7 @@ class Logger(object):
         'info': logging.INFO,
         'warning': logging.WARNING,
         'error': logging.ERROR,
-        'crit': logging.CRITICAL
+        'critical': logging.CRITICAL
     }
 
     def __init__(self, log_file_name, level='debug', when='D', backup_count=5,
