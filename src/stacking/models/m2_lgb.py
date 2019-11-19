@@ -184,7 +184,7 @@ def run_cv(x_train, x_test, y_test, y_train):
 
     # predict
     now = time.strftime("%m%d-%H%M%S")
-    result_path = 'result/result_lgb_{}-{:.4f}.csv'.format(now, best_score)
+    result_path = 'result/result_lgb_{}-{:.4f}.csv'.format(now, best_round)
     # check_path(result_path)
     lgb_predict(lgb_model, x_test, y_test, save_result_path=None)
 
