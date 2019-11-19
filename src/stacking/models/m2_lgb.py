@@ -87,8 +87,14 @@ class LightGBM(object):
                                    show_stdv=False)
                 log.logger.info('cv_result %s' % cv_result)
                 log.logger.info('type_cv_result %s' % type(cv_result))
-                min_error = cv_result['test-rmse-mean'].min()
-                best_round = cv_result[cv_result['test-rmse-mean'].isin([min_error])].index[0]
+                if 'l2' in self.params['metric']:
+                    min_error = cv_result['l2-mean'].min()
+                    best_round = cv_result[cv_result['l2-mean'].isin([min_error])].index[0]
+                elif 'rmse' in self.params['metric']:
+                    min_error = cv_result['test-rmse-mean'].min()
+                    best_round = cv_result[cv_result['test-rmse-mean'].isin([min_error])].index[0]
+                else:
+                    min_error = None
                 best_score = min_error
                 best_model = lgb.train(self.params, d_train, best_round)
             else:
