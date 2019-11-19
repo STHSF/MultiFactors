@@ -159,8 +159,8 @@ def lgb_predict(model, x_test, y_test, save_result_path=None):
 
 
 def run_cv(x_train, x_test, y_test, y_train):
-    regress_conf.lgb_config_r()
-    regress_conf.cv_folds = 5
+    classify_conf.lgb_config_c()
+    classify_conf.cv_folds = 5
     tic = time.time()
     data_message = 'x_train.shape={}, x_test.shape={}'.format(x_train.shape, x_test.shape)
     log.logger.info(data_message)
