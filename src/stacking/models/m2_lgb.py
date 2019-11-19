@@ -60,15 +60,7 @@ class LightGBM(object):
             log.logger.info('CrossValidation ........')
             d_train = lgb.Dataset(x_train, label=y_train)
             if self.params['objective'] is 'multiclass':
-                cv_result = lgb.cv(self.params,
-                                   d_train,
-                                   num_boost_round=self.max_round,
-                                   nfold=self.cv_folds,
-                                   seed=self.seed,
-                                   verbose_eval=True,
-                                   metrics=['multi_error', 'multi_logloss'],
-                                   early_stopping_rounds=self.early_stop_round,
-                                   show_stdv=False)
+                cv_result = self._kfold(d_train)
                 log.logger.info('cv_result %s' % cv_result)
                 log.logger.info('type_cv_result %s' % type(cv_result))
                 best_round = len(cv_result['multi_error-mean'])
@@ -76,22 +68,14 @@ class LightGBM(object):
                 best_model = lgb.train(self.params, d_train, best_round)
 
             elif self.params['objective'] is 'regression':
-                cv_result = lgb.cv(self.params,
-                                   d_train,
-                                   num_boost_round=self.max_round,
-                                   nfold=self.cv_folds,
-                                   seed=self.seed,
-                                   verbose_eval=True,
-                                   metrics=['l2', 'auc'],
-                                   early_stopping_rounds=self.early_stop_round,
-                                   show_stdv=False)
+                cv_result = self._kfold(d_train)
                 log.logger.info('cv_result %s' % cv_result)
                 log.logger.info('type_cv_result %s' % type(cv_result))
                 if 'l2' in self.params['metric']:
-                    min_error = min(cv_result['l2-mean'])
+                    min_error = cv_result['l2-mean'].min()
                     best_round = cv_result[cv_result['l2-mean'].isin([min_error])].index[0]
                 elif 'rmse' in self.params['metric']:
-                    min_error = min(cv_result['test-rmse-mean'])
+                    min_error = cv_result['test-rmse-mean'].min()
                     best_round = cv_result[cv_result['test-rmse-mean'].isin([min_error])].index[0]
                 else:
                     min_error = None
@@ -115,8 +99,16 @@ class LightGBM(object):
 
         return pre_data
 
-    def _kfold(self):
-        pass
+    def _kfold(self, d_train):
+        cv_result = lgb.cv(self.params,
+                           d_train,
+                           num_boost_round=self.max_round,
+                           nfold=self.cv_folds,
+                           seed=self.seed,
+                           verbose_eval=True,
+                           early_stopping_rounds=self.early_stop_round,
+                           show_stdv=False)
+        return pd.DataFrame(cv_result)
 
     def set_params(self, **params):
         self.params.update(params)

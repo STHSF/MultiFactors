@@ -111,7 +111,8 @@ class XGBooster(object):
         return bst_model.predict(dpred)
 
     def _kfold(self, dtrain):
-        cv_result = xgb.cv(self.xgb_params, dtrain,
+        cv_result = xgb.cv(self.xgb_params,
+                           dtrain,
                            num_boost_round=self.num_boost_round,
                            nfold=self.cv_folds,
                            seed=self.seed,
