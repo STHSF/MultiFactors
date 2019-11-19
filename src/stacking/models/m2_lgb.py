@@ -38,7 +38,9 @@ class LightGBM(object):
         self.save_model_path = args.save_model_path
 
     def fit(self, x_train, y_train, x_valid=None, y_valid=None):
-        best_model, best_round, best_score = None, None, None
+        best_model = None
+        best_round = None
+        best_score = {}
         if self.cv_folds is None:
             log.logger.info('NonCrossValidation。。。。')
             if x_valid is None and y_valid is None:
@@ -54,7 +56,7 @@ class LightGBM(object):
                                    valid_sets=watchlist,
                                    early_stopping_rounds=self.early_stop_round)
             best_round = best_model.best_iteration
-            best_score = best_model.best_score
+            best_score['best_score'] = best_model.best_score
 
         else:
             log.logger.info('CrossValidation ........')
@@ -63,8 +65,12 @@ class LightGBM(object):
                 cv_result = self._kfold(d_train)
                 log.logger.info('cv_result %s' % cv_result)
                 log.logger.info('type_cv_result %s' % type(cv_result))
-                best_round = len(cv_result['multi_error-mean'])
-                best_score = cv_result['multi_error-mean'][-1]
+                if 'multi_error' in self.params['metric']:
+                    best_round = len(cv_result['multi_error-mean'])
+                    best_score['min_multi_error-mean'] = cv_result['multi_error-mean'][-1]
+                elif 'multi_logloss' in self.params['metric']:
+                    best_score['min_multi_logloss-mean'] = cv_result['multi_logloss-mean'][-1]
+
                 best_model = lgb.train(self.params, d_train, best_round)
 
             elif self.params['objective'] is 'regression':
@@ -72,14 +78,19 @@ class LightGBM(object):
                 log.logger.info('cv_result %s' % cv_result)
                 log.logger.info('type_cv_result %s' % type(cv_result))
                 if 'l2' in self.params['metric']:
-                    min_error = cv_result['l2-mean'].min()
-                    best_round = cv_result[cv_result['l2-mean'].isin([min_error])].index[0]
+                    score = pd.Series(cv_result['l2-mean']).min()
+                    best_round = pd.Series(cv_results['l2-mean']).idxmin()
+                    # best_round = cv_result[cv_result['l2-mean'].isin([score])].index[0]
+                    best_score['min_l2-mean'] = score
                 elif 'rmse' in self.params['metric']:
-                    min_error = cv_result['test-rmse-mean'].min()
-                    best_round = cv_result[cv_result['test-rmse-mean'].isin([min_error])].index[0]
-                else:
-                    min_error = None
-                best_score = min_error
+                    score = pd.Series(cv_result['test-rmse-mean']).min()
+                    best_round = pd.Series(cv_results['test-rmse-mean']).idxmin()
+                    # best_round = cv_result[cv_result['test-rmse-mean'].isin([score])].index[0]
+                    best_score['min_test-rmse-mean'] = score
+                elif 'auc' in self.params['metric']:
+                    best_score['max_auc-mean'] = pd.Series(cv_results['auc-mean']).max()
+                    best_round = pd.Series(cv_results['auc-mean']).idxmax()
+
                 best_model = lgb.train(self.params, d_train, best_round)
             else:
                 print('ERROR: LightGBM OBJECTIVE IS NOT CLASSIFY OR REGRESSION')
@@ -108,7 +119,7 @@ class LightGBM(object):
                            verbose_eval=True,
                            early_stopping_rounds=self.early_stop_round,
                            show_stdv=False)
-        return pd.DataFrame(cv_result)
+        return cv_result
 
     def set_params(self, **params):
         self.params.update(params)

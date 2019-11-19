@@ -44,7 +44,6 @@ class XGBooster(object):
     def fit(self, x_train, y_train, x_val=None, y_val=None):
         xgb_start = time.time()
         if self.cv_folds is not None:
-            print('cross_validation。。。。')
             log.logger.info('Cross Validation。。。。')
             d_train = xgb.DMatrix(x_train, label=y_train)
             cv_result = self._kfold(d_train)
@@ -52,7 +51,7 @@ class XGBooster(object):
             print('type_cv_result %s' % type(cv_result))
             min_rmse = cv_result['test-rmse-mean'].min()
             self.best_round = cv_result[cv_result['test-rmse-mean'].isin([min_rmse])].index[0]
-            self.best_score = min_rmse
+            self.best_score['min_test-rmse-mean'] = min_rmse
             self.best_model = xgb.train(self.xgb_params, d_train, self.best_round)
 
         elif self.ts_cv_folds is not None:
@@ -86,7 +85,7 @@ class XGBooster(object):
             self.avg_score = np.mean(scores)
 
         else:
-            print('non_cross_validation。。。。')
+            log.logger.info('NonCrossValidation。。。。')
             if x_val is None and y_val is None:
                 # 注意这里的shift
                 x_train, x_valid, y_train, y_valid = train_test_sp(x_train, y_train, test_size=0.2, shift=0)
@@ -101,7 +100,7 @@ class XGBooster(object):
                                         evals=watchlist,
                                         early_stopping_rounds=self.early_stop_round)
             self.best_round = self.best_model.best_iteration
-            self.best_score = self.best_model.best_score
+            self.best_score['best_score'] = self.best_model.best_score
 
         # print('spend time :' + str((time.time() - xgb_start)) + '(s)')
         return self.best_score, self.best_round, self.best_model
