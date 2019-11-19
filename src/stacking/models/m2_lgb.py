@@ -20,7 +20,7 @@ import numpy as np
 import pandas as pd
 from src.conf.configuration import classify_conf, regress_conf
 from src.utils import log_util
-from src.utils.Evaluation import RegressionEvaluate
+from src.utils.Evaluation import cls_eva, reg_eva
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error
 
@@ -141,18 +141,13 @@ def run_feat_search(X_train, X_test, y_train, feature_names):
 def lgb_predict(model, x_test, y_test, save_result_path=None):
     # x_test = x_test.flatten()
     classify_conf.lgb_config_c()
-    eva = RegressionEvaluate()
     if classify_conf.params['objective'] == "multiclass":
         y_pred = model.predict(x_test).argmax(axis=1)
         print(y_pred)
         print(y_test)
         if y_test is not None:
             # AUC计算
-            log.logger.info('The Accuracy:\t{}'.format(eva.auc(y_test, y_pred)))
-            # 计算真实值和预测值之间的均方根误差
-            log.logger.info('The RMSE of prediction is:\t{}'.format(eva.rmse(y_test, y_pred)))
-            log.logger.info('The MAE of prediction is:\t{}'.format(eva.mae(y_test, y_pred)))
-            log.logger.info('The SMAPE of prediction is:\t{}'.format(eva.smape(y_test, y_pred)))
+            log.logger.info('The Accuracy:\t{}'.format(cls_eva.auc(y_test, y_pred)))
 
     elif regress_conf.params['objective'] == "regression":
         y_pred = model.predict(x_test)

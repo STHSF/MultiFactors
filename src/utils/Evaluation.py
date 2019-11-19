@@ -14,11 +14,6 @@ from sklearn import metrics
 class RegressionEvaluate(object):
 
     @staticmethod
-    def auc(y_true, y_pred):
-        auc_bool = y_true.reshape(1, -1) == y_pred
-        return float(np.sum(auc_bool)) / len(y_pred)
-
-    @staticmethod
     def mape(y_true, y_pred):
         return np.mean(np.abs((y_pred - y_true) / y_true)) * 100
 
@@ -40,8 +35,15 @@ class RegressionEvaluate(object):
 
 
 class ClassifyEvaluate(object):
-    pass
 
+    @staticmethod
+    def auc(y_true, y_pred):
+        auc_bool = y_true.reshape(1, -1) == y_pred
+        return float(np.sum(auc_bool)) / len(y_pred)
+
+
+cls_eva = ClassifyEvaluate()
+reg_eva = RegressionEvaluate()
 
 if __name__ == '__main__':
     y_true = np.array([1.0, 5.0, 4.0, 3.0, 2.0, 5.0, -3.0])
@@ -58,3 +60,4 @@ if __name__ == '__main__':
     print(eva.mape(y_true, y_pred))  # 76.07142857142858
     # SMAPE
     print(eva.smape(y_true, y_pred))  # 57.76942355889724
+
