@@ -88,10 +88,10 @@ class LightGBM(object):
                 log.logger.info('cv_result %s' % cv_result)
                 log.logger.info('type_cv_result %s' % type(cv_result))
                 if 'l2' in self.params['metric']:
-                    min_error = cv_result['l2-mean'].min()
+                    min_error = min(cv_result['l2-mean'])
                     best_round = cv_result[cv_result['l2-mean'].isin([min_error])].index[0]
                 elif 'rmse' in self.params['metric']:
-                    min_error = cv_result['test-rmse-mean'].min()
+                    min_error = min(cv_result['test-rmse-mean'])
                     best_round = cv_result[cv_result['test-rmse-mean'].isin([min_error])].index[0]
                 else:
                     min_error = None
