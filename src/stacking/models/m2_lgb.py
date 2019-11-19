@@ -143,15 +143,15 @@ def lgb_predict(model, x_test, y_test, save_result_path=None):
     classify_conf.lgb_config_c()
     if classify_conf.params['objective'] == "multiclass":
         y_pred = model.predict(x_test).argmax(axis=1)
-        print(y_pred)
-        print(y_test)
+        log.logger.info(y_pred)
+        log.logger.info(y_test)
         if y_test is not None:
             # AUC计算
             log.logger.info('The Accuracy:\t{}'.format(cls_eva.auc(y_test, y_pred)))
 
     elif regress_conf.params['objective'] == "regression":
         y_pred = model.predict(x_test)
-        print('y_pre: {}'.format(y_pred))
+        log.logger.info('y_pre: {}'.format(y_pred))
     else:
         y_pred = None
 
@@ -162,6 +162,7 @@ def lgb_predict(model, x_test, y_test, save_result_path=None):
 
 def run_cv(x_train, x_test, y_test, y_train):
     regress_conf.lgb_config_r()
+    regress_conf.cv_folds = 5
     tic = time.time()
     data_message = 'x_train.shape={}, x_test.shape={}'.format(x_train.shape, x_test.shape)
     log.logger.info(data_message)
@@ -194,9 +195,11 @@ if __name__ == '__main__':
     classify_conf.lgb_config_c()
     log.logger.info('Model Params:\n{}'.format(classify_conf.params))
 
-    lgbm = LightGBM(classify_conf)
-    best_model, best_score, best_round = lgbm.fit(X_train, y_train)
-    lgb_predict(best_model, X_test, y_test)
+    # lgbm = LightGBM(classify_conf)
+    # best_model, best_score, best_round = lgbm.fit(X_train, y_train)
+    # lgb_predict(best_model, X_test, y_test)
+
+    run_cv(X_train, X_test, y_test, y_train)
 
     # # 创建成lgb特征的数据集格式
     # lgb_train = lgb.Dataset(X_train, y_train)
