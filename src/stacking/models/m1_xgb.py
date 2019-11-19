@@ -44,14 +44,16 @@ class XGBooster(object):
     def fit(self, x_train, y_train, x_val=None, y_val=None):
         xgb_start = time.time()
         if self.cv_folds is not None:
-            log.logger.info('Cross Validation。。。。')
+            log.logger.info('CrossValidation。。。。')
             d_train = xgb.DMatrix(x_train, label=y_train)
             cv_result = self._kfold(d_train)
             print('cv_result %s' % cv_result)
             print('type_cv_result %s' % type(cv_result))
-            min_rmse = cv_result['test-rmse-mean'].min()
-            self.best_round = cv_result[cv_result['test-rmse-mean'].isin([min_rmse])].index[0]
-            self.best_score['min_test-rmse-mean'] = min_rmse
+            # min_rmse = pd.Series(cv_result['test-rmse-mean']).min()
+            # self.best_score['min_test-rmse-mean'] = min_rmse
+            # self.best_round = cv_result[cv_result['test-rmse-mean'].isin([min_rmse])].index[0]
+            self.best_score['min_test-rmse-mean'] = pd.Series(cv_result['test-rmse-mean']).min()
+            self.best_round = pd.Series(cv_result['test-rmse-mean']).idxmin()
             self.best_model = xgb.train(self.xgb_params, d_train, self.best_round)
 
         elif self.ts_cv_folds is not None:

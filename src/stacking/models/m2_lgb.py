@@ -204,6 +204,7 @@ if __name__ == '__main__':
     # regress_conf.lgb_config_r()
     classify_conf.lgb_config_c()
     log.logger.info('Model Params:\n{}'.format(classify_conf.params))
+
     # # NonCrossValidation Test
     # lgbm = LightGBM(classify_conf)
     # best_model, best_score, best_round = lgbm.fit(X_train, y_train)
@@ -211,21 +212,3 @@ if __name__ == '__main__':
 
     # # CrossValidation Test
     run_cv(X_train, X_test, y_test, y_train)
-
-    # # 创建成lgb特征的数据集格式
-    # lgb_train = lgb.Dataset(X_train, y_train)
-    # lgb_eval = lgb.Dataset(X_test, y_test, reference=lgb_train)
-
-    # print('Start training...')
-    # # 训练 cv and train
-    # gbm = lgb.train(params, lgb_train, num_boost_round=20, valid_sets=lgb_eval, early_stopping_rounds=5)
-    #
-    # print('Save model...')
-    # # 保存模型到文件
-    # gbm.save_model('model.txt')
-    #
-    # print('Start predicting...')
-    # # 预测数据集
-    # y_pred = gbm.predict(X_test, num_iteration=gbm.best_iteration)
-    # # 评估模型
-    # print('The rmse of prediction is:', mean_squared_error(y_test, y_pred) ** 0.5)
