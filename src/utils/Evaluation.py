@@ -39,6 +39,10 @@ class RegressionEvaluate(object):
         return metrics.mean_absolute_error(y_true, y_pred)
 
 
+class ClassifyEvaluate(object):
+    pass
+
+
 if __name__ == '__main__':
     y_true = np.array([1.0, 5.0, 4.0, 3.0, 2.0, 5.0, -3.0])
     y_pred = np.array([1.0, 4.5, 3.5, 5.0, 8.0, 4.5, 1.0])

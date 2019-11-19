@@ -40,7 +40,7 @@ class LightGBM(object):
     def fit(self, x_train, y_train, x_valid=None, y_valid=None):
         best_model, best_round, best_score = None, None, None
         if self.cv_folds is None:
-            log.logger.info('NonCross Validation。。。。')
+            log.logger.info('NonCrossValidation。。。。')
             if x_valid is None and y_valid is None:
                 x_train, x_valid, y_train, y_valid = train_test_split(x_train, y_train, test_size=0.2)
             else:
@@ -57,7 +57,7 @@ class LightGBM(object):
             best_score = best_model.best_score
 
         else:
-            log.logger.info('Cross Validation ........')
+            log.logger.info('CrossValidation ........')
             d_train = lgb.Dataset(x_train, label=y_train)
             if self.params['objective'] is 'multiclass':
                 cv_result = lgb.cv(self.params,
