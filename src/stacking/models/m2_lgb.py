@@ -67,9 +67,9 @@ class LightGBM(object):
                 log.logger.info('type_cv_result %s' % type(cv_result))
                 if 'multi_error' in self.params['metric']:
                     best_round = len(cv_result['multi_error-mean'])
-                    best_score['min_multi_error-mean'] = cv_result['multi_error-mean'][-1]
+                    best_score['min_multi_error-mean'] = pd.Series(cv_result['multi_error-mean']).min()
                 elif 'multi_logloss' in self.params['metric']:
-                    best_score['min_multi_logloss-mean'] = cv_result['multi_logloss-mean'][-1]
+                    best_score['min_multi_logloss-mean'] = pd.Series(cv_result['multi_logloss-mean']).min()
 
                 best_model = lgb.train(self.params, d_train, best_round)
 
