@@ -41,6 +41,7 @@ class LightGBM(object):
             log.logger.info('NonCrossValidation。。。。')
             if x_valid is None and y_valid is None:
                 x_train, x_valid, y_train, y_valid = train_test_split(x_train, y_train, test_size=0.2)
+
             else:
                 x_valid, y_valid = x_valid, y_valid
             d_train = lgb.Dataset(x_train, label=y_train)
@@ -64,6 +65,7 @@ class LightGBM(object):
                 if 'multi_error' in self.params['metric']:
                     best_round = len(cv_result['multi_error-mean'])
                     best_score['min_multi_error-mean'] = pd.Series(cv_result['multi_error-mean']).min()
+
                 elif 'multi_logloss' in self.params['metric']:
                     best_score['min_multi_logloss-mean'] = pd.Series(cv_result['multi_logloss-mean']).min()
 
@@ -78,11 +80,13 @@ class LightGBM(object):
                     best_round = pd.Series(cv_result['l2-mean']).idxmin()
                     # best_round = cv_result[cv_result['l2-mean'].isin([score])].index[0]
                     best_score['min_l2-mean'] = score
+
                 elif 'rmse' in self.params['metric']:
                     score = pd.Series(cv_result['test-rmse-mean']).min()
                     best_round = pd.Series(cv_result['test-rmse-mean']).idxmin()
                     # best_round = cv_result[cv_result['test-rmse-mean'].isin([score])].index[0]
                     best_score['min_test-rmse-mean'] = score
+
                 elif 'auc' in self.params['metric']:
                     best_score['max_auc-mean'] = pd.Series(cv_result['auc-mean']).max()
                     best_round = pd.Series(cv_result['auc-mean']).idxmax()
@@ -188,6 +192,7 @@ def run_cv(x_train, x_test, y_test, y_train, conf):
 
 if __name__ == '__main__':
     import pandas as pd
+    import numpy as np
     from sklearn.datasets import load_iris
     from sklearn.model_selection import train_test_split
 
@@ -196,6 +201,8 @@ if __name__ == '__main__':
     data = iris.data
     target = iris.target
     X_train, X_test, y_train, y_test = train_test_split(data, target, test_size=0.2)
+    log.logger.info('type of x_train: {}'.format(type(X_train)))
+    log.logger.info('shape of x_train: {}'.format(np.shape(X_train)))
     classify_conf.lgb_config_c()
     log.logger.info('Model Params:\n{}'.format(classify_conf.params))
 
