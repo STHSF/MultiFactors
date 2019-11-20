@@ -96,4 +96,3 @@ class ClassificationConfig(object):
 
 regress_conf = RegressionConfig()
 classify_conf = ClassificationConfig()
-
