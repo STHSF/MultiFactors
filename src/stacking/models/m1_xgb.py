@@ -18,6 +18,7 @@ import argparse
 import numpy as np
 from math import *
 import xgboost as xgb
+from src.utils import log_util
 from src.conf.configuration import regress_conf
 import pandas as pd
 from sklearn.externals import joblib
@@ -25,6 +26,8 @@ from sklearn.model_selection import train_test_split, TimeSeriesSplit
 from sklearn.metrics import mean_squared_error, r2_score
 import matplotlib.pyplot as plt
 pd.set_option('display.max_rows', None, 'display.max_columns', None, "display.max_colwidth", 1000, 'display.width', 1000)
+
+log = log_util.Logger('m1_xgboost', level='info')
 
 
 class XGBooster(object):
@@ -41,14 +44,16 @@ class XGBooster(object):
     def fit(self, x_train, y_train, x_val=None, y_val=None):
         xgb_start = time.time()
         if self.cv_folds is not None:
-            print('cross_validation。。。。')
+            log.logger.info('CrossValidation。。。。')
             d_train = xgb.DMatrix(x_train, label=y_train)
             cv_result = self._kfold(d_train)
             print('cv_result %s' % cv_result)
             print('type_cv_result %s' % type(cv_result))
-            min_rmse = cv_result['test-rmse-mean'].min()
-            self.best_round = cv_result[cv_result['test-rmse-mean'].isin([min_rmse])].index[0]
-            self.best_score = min_rmse
+            # min_rmse = pd.Series(cv_result['test-rmse-mean']).min()
+            # self.best_score['min_test-rmse-mean'] = min_rmse
+            # self.best_round = cv_result[cv_result['test-rmse-mean'].isin([min_rmse])].index[0]
+            self.best_score['min_test-rmse-mean'] = pd.Series(cv_result['test-rmse-mean']).min()
+            self.best_round = pd.Series(cv_result['test-rmse-mean']).idxmin()
             self.best_model = xgb.train(self.xgb_params, d_train, self.best_round)
 
         elif self.ts_cv_folds is not None:
@@ -82,7 +87,7 @@ class XGBooster(object):
             self.avg_score = np.mean(scores)
 
         else:
-            print('non_cross_validation。。。。')
+            log.logger.info('NonCrossValidation。。。。')
             if x_val is None and y_val is None:
                 # 注意这里的shift
                 x_train, x_valid, y_train, y_valid = train_test_sp(x_train, y_train, test_size=0.2, shift=0)
@@ -97,7 +102,7 @@ class XGBooster(object):
                                         evals=watchlist,
                                         early_stopping_rounds=self.early_stop_round)
             self.best_round = self.best_model.best_iteration
-            self.best_score = self.best_model.best_score
+            self.best_score['best_score'] = self.best_model.best_score
 
         # print('spend time :' + str((time.time() - xgb_start)) + '(s)')
         return self.best_score, self.best_round, self.best_model
@@ -107,7 +112,8 @@ class XGBooster(object):
         return bst_model.predict(dpred)
 
     def _kfold(self, dtrain):
-        cv_result = xgb.cv(self.xgb_params, dtrain,
+        cv_result = xgb.cv(self.xgb_params,
+                           dtrain,
                            num_boost_round=self.num_boost_round,
                            nfold=self.cv_folds,
                            seed=self.seed,
@@ -138,7 +144,7 @@ class XGBooster(object):
 
     def load_model(self, model_path=None):
         if model_path is None and self.save_model_path is None:
-            print('model load error')
+            print('bst_model load error')
             exit()
         if model_path:
             bst_model = joblib.load(model_path)
@@ -179,7 +185,7 @@ def xgb_predict(model, x_test, y_test=None, save_result_path=None):
     print('r_square_of_pred: %s' % r_square_)
     # print(y_pred)
     # print(y_test)
-    plot_figure(y_pred, y_test)
+    plot_figure(y_pred, y_test, 'xgb_predict')
 
     if save_result_path:
         df_reult = pd.DataFrame(x_test)

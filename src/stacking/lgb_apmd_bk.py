@@ -8,7 +8,7 @@ sys.path.append('../../../')
 import gc, time, sqlite3
 import pandas as pd
 import numpy as np
-from src.stacking.m1_xgb import *
+from src.stacking.models.m2_lgb import *
 from datetime import datetime, timedelta
 from src.conf.configuration import regress_conf
 from src.stacking import factor_store, feature_list
@@ -130,7 +130,7 @@ label = ['dx']
 def create_scenario():
     weight_gap = 1
     transact_cost = 0.003
-    GPU_device = True
+    GPU_device = False
 
     executor = NaiveExecutor()
     trade_dates = []
@@ -147,7 +147,7 @@ def create_scenario():
     # take ref_dates[i] as an example
     for i, ref_date in enumerate(back_ref_dates):
         alpha_logger.info('{0} is start'.format(ref_date))
-        # machine learning model
+        # machine learning bst_model
         # Filter Training data
         # train data
         trade_date_pre = ref_date - timedelta(days=1)
@@ -164,19 +164,19 @@ def create_scenario():
         alpha_logger.info('X_train.shape={0}, X_test.shape = {1}'.format(np.shape(x_train), np.shape(y_train)))
 
         # xgb_configuration
-        regress_conf.xgb_config_r()
+        regress_conf.lgb_config_r()
         regress_conf.cv_folds = None
         regress_conf.early_stop_round = 10
         regress_conf.max_round = 800
         tic = time.time()
         # training
-        xgb_model = XGBooster(regress_conf)
+        lgb_model = LightGBM(regress_conf)
         if GPU_device:
-            xgb_model.set_params(tree_method='gpu_hist', max_depth=5)
+            lgb_model.set_params(tree_method='gpu_hist', max_depth=5)
         else:
-            xgb_model.set_params(max_depth=5)
-        alpha_logger.info(xgb_model.get_params())
-        best_score, best_round, best_model = xgb_model.fit(x_train, y_train)
+            lgb_model.set_params(max_depth=5)
+        alpha_logger.info(lgb_model.get_params())
+        best_score, best_round, best_model = lgb_model.fit(x_train, y_train)
         alpha_logger.info('Training time cost {}s'.format(time.time() - tic))
         alpha_logger.info('best_score = {}, best_round = {}'.format(best_score, best_round))
 
@@ -224,11 +224,11 @@ def create_scenario():
 
         # predict
         x_pred = total_data_test_excess[features]
-        predict_xgboost = xgb_model.predict(best_model, x_pred)
-        a = np.shape(predict_xgboost)
-        predict_xgboost = np.reshape(predict_xgboost, (a[0], -1)).astype(np.float64)
-        alpha_logger.info('shape_of_predict_xgboost: {}'.format(np.shape(predict_xgboost)))
-        del xgb_model
+        predict_data = lgb_model.predict(best_model, x_pred)
+        a = np.shape(predict_data)
+        predict_data = np.reshape(predict_data, (a[0], -1)).astype(np.float64)
+        alpha_logger.info('shape_of_predict_lightGBM: {}'.format(np.shape(predict_data)))
+        del lgb_model
         del best_model
         gc.collect()
 
@@ -238,7 +238,7 @@ def create_scenario():
         previous_pos = total_data_test_excess[['code']].merge(previous_pos, on='code', how='left').fillna(0)
         # backtest
         try:
-            target_pos, _ = er_portfolio_analysis(predict_xgboost,
+            target_pos, _ = er_portfolio_analysis(predict_data,
                                                   total_data_test_excess['industry'].values,
                                                   None,
                                                   constraints,
@@ -282,7 +282,7 @@ def create_scenario():
         alpha_logger.info('{} is finished'.format(ref_date))
 
     # ret_df = pd.DataFrame({'xgb_regress': rets}, index=trade_dates)
-    ret_df = pd.DataFrame({'xgb_regress': rets, 'net_xgb_regress': net_rets}, index=trade_dates)
+    ret_df = pd.DataFrame({'lgb_regress': rets, 'net_lgb_regress': net_rets}, index=trade_dates)
     ret_df.loc[advanceDateByCalendar('china.sse', ref_dates[-1], freq).strftime('%Y-%m-%d')] = 0.
     ret_df = ret_df.shift(1)
     ret_df.iloc[0] = 0.

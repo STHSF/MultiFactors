@@ -13,7 +13,8 @@ from uqer import DataAPI
 import uqer
 import sqlalchemy as sa
 from sqlalchemy import select, and_
-from adjust_trade_date import AdjustTradeDate
+from src.data.dataprepare.adjust_trade_date import AdjustTradeDate
+
 
 class StockPool(object):
     def __init__(self, **kwargs):
@@ -58,7 +59,7 @@ class StockPool(object):
             index_df = index_df.merge(industry_df, on=['code'])
             return index_df
     
-    def fetch_industry_uqer(self, trade_date, industry = []):
+    def fetch_industry_uqer(self, trade_date, industry=[]):
         industry_sets = DataAPI.IndustryGet(
                             industryVersion=u"SW",industryVersionCD=u"",
                             industryLevel=u"1", isNew=u"1", prntIndustryID=u"",
@@ -67,9 +68,9 @@ class StockPool(object):
             industry_sets = industry_sets.set_index('indexSymbol').loc[industry]
         
         equ = DataAPI.EquIndustryGet(industryVersionCD=u"010303",
-                                      industryID1=list(set(industry_sets['industryID'])),
-                                      intoDate=trade_date.strftime('%Y%m%d'),
-                                      field=u"secID,industryID1",pandas="1")
+                                     industryID1=list(set(industry_sets['industryID'])),
+                                     intoDate=trade_date.strftime('%Y%m%d'),
+                                     field=u"secID,industryID1",pandas="1")
         equ.rename(columns={'industryID1':'industryID'}, inplace=True)
         industry_sets = industry_sets.reset_index().merge(equ, on=['industryID'])[['indexSymbol',
                                                                                    'industryName',

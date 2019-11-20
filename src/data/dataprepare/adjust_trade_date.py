@@ -10,6 +10,7 @@ import datetime
 from uqer import DataAPI
 import uqer
 
+
 class AdjustTradeDate(object):
     def __init__(self, **kwargs):
         self._conn = kwargs.get('engine', None)
@@ -44,8 +45,7 @@ class AdjustTradeDate(object):
     
 if __name__ == '__main__':
     uqer_token = config.uqer_token
-    adjust_trade = AdjustTradeDate(uqer_token = uqer_token)
+    adjust_trade = AdjustTradeDate(uqer_token=uqer_token)
     start_date = datetime.datetime(2016, 5, 29).date()
     end_date = datetime.datetime(2018, 8, 29).date()
     print(adjust_trade.custom_fetch_date(start_date, end_date, 3))
-    

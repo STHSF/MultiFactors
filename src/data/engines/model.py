@@ -4,7 +4,7 @@
 """
 @version: 0.1
 @author: li
-@file: model.py
+@file: bst_model.py
 @time: 2019/10/30 10:16 上午
 """
 
