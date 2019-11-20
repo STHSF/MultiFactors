@@ -88,7 +88,7 @@ class ClassificationConfig(object):
                        }
 
         self.max_round = 10000
-        self.cv_folds = 5
+        self.cv_folds = None
         self.early_stop_round = 30
         self.seed = 3
         self.save_model_path = 'bst_model/lgb/lgb.txt'
