@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """
-@version: ??
+@version: 1.0
 @author: li
 @file: log_test.py
 @time: 2018-12-26 16:33

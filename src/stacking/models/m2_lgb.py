@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """
-@version: ??
+@version: 1.0
 @author: li
 @file: m2_lgb.py
 @time: 2019-03-04 11:03
@@ -15,6 +15,7 @@ sys.path.append('../../../')
 
 import time
 import pickle
+import joblib
 import lightgbm as lgb
 import numpy as np
 import pandas as pd
@@ -79,17 +80,17 @@ class LightGBM(object):
                 log.logger.info('type_cv_result %s' % type(cv_result))
                 if 'l2' in self.params['metric']:
                     score = pd.Series(cv_result['l2-mean']).min()
-                    best_round = pd.Series(cv_results['l2-mean']).idxmin()
+                    best_round = pd.Series(cv_result['l2-mean']).idxmin()
                     # best_round = cv_result[cv_result['l2-mean'].isin([score])].index[0]
                     best_score['min_l2-mean'] = score
                 elif 'rmse' in self.params['metric']:
                     score = pd.Series(cv_result['test-rmse-mean']).min()
-                    best_round = pd.Series(cv_results['test-rmse-mean']).idxmin()
+                    best_round = pd.Series(cv_result['test-rmse-mean']).idxmin()
                     # best_round = cv_result[cv_result['test-rmse-mean'].isin([score])].index[0]
                     best_score['min_test-rmse-mean'] = score
                 elif 'auc' in self.params['metric']:
-                    best_score['max_auc-mean'] = pd.Series(cv_results['auc-mean']).max()
-                    best_round = pd.Series(cv_results['auc-mean']).idxmax()
+                    best_score['max_auc-mean'] = pd.Series(cv_result['auc-mean']).max()
+                    best_round = pd.Series(cv_result['auc-mean']).idxmax()
 
                 best_model = lgb.train(self.params, d_train, best_round)
             else:
@@ -98,14 +99,14 @@ class LightGBM(object):
         return best_model, best_score, best_round
 
     def predict(self, bst_model, x_test, save_result_path=None):
-        if conf.params['objective'] == "multiclass":
+        if self.params['objective'] == "multiclass":
             pre_data = bst_model.predit(x_test).argmax(axis=1)
         else:
             pre_data = bst_model.predit(x_test)
 
         if save_result_path:
             df_reult = pd.DataFrame()
-            df_reult['result'] = y_pred
+            df_reult['result'] = pre_data
             df_reult.to_csv(save_result_path, index=False)
 
         return pre_data
@@ -147,19 +148,18 @@ def run_feat_search(X_train, X_test, y_train, feature_names):
     pass
 
 
-def lgb_predict(model, x_test, y_test, save_result_path=None):
+def lgb_predict(bst_model, x_test, y_test, conf, save_result_path=None):
     # x_test = x_test.flatten()
-    classify_conf.lgb_config_c()
-    if classify_conf.params['objective'] == "multiclass":
-        y_pred = model.predict(x_test).argmax(axis=1)
+    if conf.params['objective'] == "multiclass":
+        y_pred = bst_model.predict(x_test).argmax(axis=1)
         log.logger.info(y_pred)
         log.logger.info(y_test)
         if y_test is not None:
             # AUC计算
             log.logger.info('The Accuracy:\t{}'.format(cls_eva.auc(y_test, y_pred)))
 
-    elif regress_conf.params['objective'] == "regression":
-        y_pred = model.predict(x_test)
+    elif conf.params['objective'] == "regression":
+        y_pred = bst_model.predict(x_test)
         log.logger.info('y_pre: {}'.format(y_pred))
     else:
         y_pred = None
@@ -169,15 +169,12 @@ def lgb_predict(model, x_test, y_test, save_result_path=None):
         df_reult.to_csv(save_result_path, index=False)
 
 
-def run_cv(x_train, x_test, y_test, y_train):
-    # classify configuration
-    classify_conf.lgb_config_c()
-    classify_conf.cv_folds = 3
+def run_cv(x_train, x_test, y_test, y_train, conf):
     tic = time.time()
     data_message = 'x_train.shape={}, x_test.shape={}'.format(x_train.shape, x_test.shape)
     log.logger.info(data_message)
 
-    lgb = LightGBM(classify_conf)
+    lgb = LightGBM(conf)
     lgb_model, best_score, best_round = lgb.fit(x_train, y_train)
     log.logger.info('Time cost {}s'.format(time.time() - tic))
     result_message = 'best_round={}, best_score={}'.format(best_round, best_score)
@@ -187,7 +184,7 @@ def run_cv(x_train, x_test, y_test, y_train):
     now = time.strftime("%m%d-%H%M%S")
     result_path = 'result/result_lgb_{}-{:.4f}.csv'.format(now, best_round)
     # check_path(result_path)
-    lgb_predict(lgb_model, x_test, y_test, save_result_path=None)
+    lgb_predict(lgb_model, x_test, y_test, conf, save_result_path=None)
 
 
 if __name__ == '__main__':
@@ -197,18 +194,21 @@ if __name__ == '__main__':
     from sklearn.model_selection import train_test_split
     from sklearn.datasets import make_classification
 
+    # CLASSIFY TEST
     iris = load_iris()
     data = iris.data
     target = iris.target
     X_train, X_test, y_train, y_test = train_test_split(data, target, test_size=0.2)
-    # regress_conf.lgb_config_r()
     classify_conf.lgb_config_c()
     log.logger.info('Model Params:\n{}'.format(classify_conf.params))
 
     # # NonCrossValidation Test
     # lgbm = LightGBM(classify_conf)
     # best_model, best_score, best_round = lgbm.fit(X_train, y_train)
-    # lgb_predict(best_model, X_test, y_test)
+    # lgb_predict(best_model, X_test, y_test, classify_conf)
 
     # # CrossValidation Test
-    run_cv(X_train, X_test, y_test, y_train)
+    classify_conf.cv_folds = 5
+    run_cv(X_train, X_test, y_test, y_train, classify_conf)
+
+    # REGRESSION TEST

@@ -144,7 +144,7 @@ class XGBooster(object):
 
     def load_model(self, model_path=None):
         if model_path is None and self.save_model_path is None:
-            print('model load error')
+            print('bst_model load error')
             exit()
         if model_path:
             bst_model = joblib.load(model_path)

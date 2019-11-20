@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """
-@version: ??
+@version: 1.0
 @author: li
 @file: configuration.py
 @time: 2019-03-04 10:13
@@ -33,7 +33,7 @@ class RegressionConfig(object):
         self.cv_folds = 10
         self.early_stop_round = 500
         self.seed = 3
-        self.save_model_path = '../model/xgb/'
+        self.save_model_path = '../bst_model/xgb/'
 
     def lgb_config_r(self):
         self.params = {
@@ -91,7 +91,7 @@ class ClassificationConfig(object):
         self.cv_folds = 5
         self.early_stop_round = 30
         self.seed = 3
-        self.save_model_path = 'model/lgb/lgb.txt'
+        self.save_model_path = 'bst_model/lgb/lgb.txt'
 
 
 regress_conf = RegressionConfig()

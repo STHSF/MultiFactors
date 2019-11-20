@@ -147,7 +147,7 @@ def create_scenario():
     # take ref_dates[i] as an example
     for i, ref_date in enumerate(back_ref_dates):
         alpha_logger.info('{0} is start'.format(ref_date))
-        # machine learning model
+        # machine learning bst_model
         # Filter Training data
         # train data
         trade_date_pre = ref_date - timedelta(days=1)
