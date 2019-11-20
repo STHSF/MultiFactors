@@ -14,16 +14,11 @@ sys.path.append('../../')
 sys.path.append('../../../')
 
 import time
-import pickle
 import joblib
 import lightgbm as lgb
-import numpy as np
-import pandas as pd
 from src.conf.configuration import classify_conf, regress_conf
 from src.utils import log_util
 from src.utils.Evaluation import cls_eva, reg_eva
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import mean_squared_error
 
 
 log = log_util.Logger('m2_lightgbm', level='info')
@@ -150,6 +145,7 @@ def run_feat_search(X_train, X_test, y_train, feature_names):
 
 def lgb_predict(bst_model, x_test, y_test, conf, save_result_path=None):
     # x_test = x_test.flatten()
+
     if conf.params['objective'] == "multiclass":
         y_pred = bst_model.predict(x_test).argmax(axis=1)
         log.logger.info(y_pred)
