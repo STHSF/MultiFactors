@@ -165,8 +165,11 @@ def lgb_predict(bst_model, x_test, y_test, conf, save_result_path=None):
         y_pred = None
 
     if save_result_path:
-        df_reult = pd.DataFrame(y_pred, columns='result')
-        df_reult.to_csv(save_result_path, index=False)
+        if not isinstance(y_pred, pd.DataFrame):
+            df_result = pd.DataFrame(y_pred, columns='result')
+        else:
+            df_result = y_pred
+        df_result.to_csv(save_result_path, index=False)
 
 
 def run_cv(x_train, x_test, y_test, y_train, conf):
@@ -188,11 +191,9 @@ def run_cv(x_train, x_test, y_test, y_train, conf):
 
 
 if __name__ == '__main__':
-    import json
     import pandas as pd
     from sklearn.datasets import load_iris
     from sklearn.model_selection import train_test_split
-    from sklearn.datasets import make_classification
 
     # CLASSIFY TEST
     iris = load_iris()

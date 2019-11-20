@@ -74,7 +74,7 @@ class ClassificationConfig(object):
                        'metric': ['multi_error', 'multi_logloss'],
                        'max_bin': 63,  # 表示 feature 将存入的 bin 的最大数量
                        'metric_freq': 1,
-                       'num_leaves': 31,  # 由于lightGBM是leaves_wise生长，官方说法是要<=2^max_depth,超过此值容易过拟合
+                       'num_leaves': 31,  # 由于lightGBM是leaves_wise生长，官方说法是要num_leaves<=2^max_depth,超过此值容易过拟合
                        'max_depth': 6,  # 树的最大层数为7 ,可以选择一个适中的值，其实4-10都可以。但要注意它越大越容易出现过拟合
                        'learning_rate': 0.05,
                        'feature_fraction': 0.9,  # bagging_fraction相当于样本特征采样，使bagging运行更快的同时可以降拟合
