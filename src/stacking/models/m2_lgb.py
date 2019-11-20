@@ -203,12 +203,12 @@ if __name__ == '__main__':
     log.logger.info('Model Params:\n{}'.format(classify_conf.params))
 
     # # NonCrossValidation Test
-    # lgbm = LightGBM(classify_conf)
-    # best_model, best_score, best_round = lgbm.fit(X_train, y_train)
-    # lgb_predict(best_model, X_test, y_test, classify_conf)
+    lgbm = LightGBM(classify_conf)
+    best_model, best_score, best_round = lgbm.fit(X_train, y_train)
+    lgb_predict(best_model, X_test, y_test, classify_conf)
 
     # # CrossValidation Test
-    classify_conf.cv_folds = 5
-    run_cv(X_train, X_test, y_test, y_train, classify_conf)
+    # classify_conf.cv_folds = 5
+    # run_cv(X_train, X_test, y_test, y_train, classify_conf)
 
     # REGRESSION TEST
