@@ -35,14 +35,16 @@ class XGBooster(object):
         self.xgb_params = args.params
         self.num_boost_round = args.max_round
         self.cv_folds = args.cv_folds
-        self.avg_score = None
         self.ts_cv_folds = args.ts_cv_folds
         self.early_stop_round = args.early_stop_round
         self.seed = args.seed
         self.save_model_path = args.save_model_path
 
     def fit(self, x_train, y_train, x_val=None, y_val=None):
-        xgb_start = time.time()
+        # xgb_start = time.time()
+        best_model = None
+        best_round = None
+        best_score = {}
         if self.cv_folds is not None:
             log.logger.info('CrossValidation。。。。')
             d_train = xgb.DMatrix(x_train, label=y_train)
@@ -52,15 +54,21 @@ class XGBooster(object):
             # min_rmse = pd.Series(cv_result['test-rmse-mean']).min()
             # self.best_score['min_test-rmse-mean'] = min_rmse
             # self.best_round = cv_result[cv_result['test-rmse-mean'].isin([min_rmse])].index[0]
-            self.best_score['min_test-rmse-mean'] = pd.Series(cv_result['test-rmse-mean']).min()
-            self.best_round = pd.Series(cv_result['test-rmse-mean']).idxmin()
-            self.best_model = xgb.train(self.xgb_params, d_train, self.best_round)
+            best_score['min_test-rmse-mean'] = pd.Series(cv_result['test-rmse-mean']).min()
+            best_round = pd.Series(cv_result['test-rmse-mean']).idxmin()
+            best_model = xgb.train(self.xgb_params, d_train, best_round)
 
         elif self.ts_cv_folds is not None:
+            log.logger.info('TimeSeriesCrossValidation。。。。')
             # 时间序列k_fold
-            best_score = 0
+            bst_score = 0
             details = []
+            scores = []
             tscv = TimeSeriesSplit(n_splits=self.ts_cv_folds)
+            if self.xgb_params['objective'] is not 'reg:linear':
+                log.logger.error('Objective ERROR........')
+                exit()
+
             for n_fold, (tr_idx, val_idx) in enumerate(tscv.split(x_train)):
                 print(f'the {n_fold} training start ...')
                 tr_x, tr_y, val_x, val_y = x_train.iloc[tr_idx], y_train[tr_idx], x_train.iloc[val_idx], y_train[val_idx]
@@ -74,17 +82,15 @@ class XGBooster(object):
                                       early_stopping_rounds=self.early_stop_round)
                 details.append((xgb_model.best_score, xgb_model.best_iteration, xgb_model))
 
-                if xgb_model.best_score > best_score:
-                    best_score = xgb_model.best_score
-                    self.best_score = xgb_model.best_score
-                    self.best_model = xgb_model
-                    self.best_round = xgb_model.best_iteration
+                if xgb_model.best_score > bst_score:
+                    bst_score = xgb_model.best_score
+                    best_model = xgb_model
+                    best_round = xgb_model.best_iteration
                 else:
-                    self.best_score = xgb_model.best_score
-                    self.best_model = xgb_model
-                    self.best_round = xgb_model.best_iteration
+                    best_model = xgb_model
+                    best_round = xgb_model.best_iteration
                 scores.append(xgb_model.best_score)
-            self.avg_score = np.mean(scores)
+            best_score['avg_score'] = np.mean(scores)
 
         else:
             log.logger.info('NonCrossValidation。。。。')
@@ -96,16 +102,15 @@ class XGBooster(object):
             d_train = xgb.DMatrix(x_train, label=y_train)
             d_valid = xgb.DMatrix(x_valid, label=y_valid)
             watchlist = [(d_train, "train"), (d_valid, "valid")]
-            self.best_model = xgb.train(params=self.xgb_params,
-                                        dtrain=d_train,
-                                        num_boost_round=self.num_boost_round,
-                                        evals=watchlist,
-                                        early_stopping_rounds=self.early_stop_round)
-            self.best_round = self.best_model.best_iteration
-            self.best_score['best_score'] = self.best_model.best_score
-
+            best_model = xgb.train(params=self.xgb_params,
+                                   dtrain=d_train,
+                                   num_boost_round=self.num_boost_round,
+                                   evals=watchlist,
+                                   early_stopping_rounds=self.early_stop_round)
+            best_round = best_model.best_iteration
+            best_score['best_score'] = best_model.best_score
         # print('spend time :' + str((time.time() - xgb_start)) + '(s)')
-        return self.best_score, self.best_round, self.best_model
+        return best_score, best_round, best_model
 
     def predict(self, bst_model, x_pred):
         dpred = xgb.DMatrix(x_pred)
@@ -123,8 +128,9 @@ class XGBooster(object):
                            shuffle=True)
         return cv_result
 
-    def plot_feature_importances(self):
-        feat_imp = pd.Series(self.best_model.get_fscore()).sort_values(ascending=False)
+    @staticmethod
+    def plot_feature_importance(best_model):
+        feat_imp = pd.Series(best_model.get_fscore()).sort_values(ascending=False)
         feat_imp.plot(title='Feature Importances')
         plt.ylabel('Feature Importance Score')
 
@@ -134,13 +140,13 @@ class XGBooster(object):
     def set_params(self, **params):
         self.xgb_params.update(params)
 
-    def save_model(self, model_path=None):
+    def save_model(self, best_model,model_path=None):
         # now = time.strftime('%Y-%m-%d %H:%M')
         model_name = 'xgboost_{}.bat'.format(now)
         if model_path:
-            joblib.dump(self.best_model, model_path + model_name)
+            joblib.dump(best_model, model_path + model_name)
         else:
-            joblib.dump(self.best_model, self.save_model_path + model_name)
+            joblib.dump(best_model, self.save_model_path + model_name)
 
     def load_model(self, model_path=None):
         if model_path is None and self.save_model_path is None:
@@ -183,8 +189,8 @@ def xgb_predict(model, x_test, y_test=None, save_result_path=None):
     r_square = 1 - mean_squared_error(y_test, y_pred)/ np.var(y_test)
     print('r_square_of_pred: %s' % r_square)
     print('r_square_of_pred: %s' % r_square_)
-    # print(y_pred)
-    # print(y_test)
+    # print(y_pred), print(y_test)
+    # PLOT
     plot_figure(y_pred, y_test, 'xgb_predict')
 
     if save_result_path:
@@ -208,7 +214,7 @@ def run_cv(x_train, x_test, y_train, y_test):
     print(result_message)
 
     # now = time.strftime('%Y-%m-%d %H:%M')
-    result_saved_path = '../result/result_{}-{:.4f}.csv'.format(now, best_score)
+    result_saved_path = '../result/result_{}-{:.4f}.csv'.format(now, best_round)
     # xgb_predict(best_model, x_test, y_test, save_result_path=result_saved_path)
     xgb_predict(best_model, x_test, y_test, save_result_path=None)
 
@@ -240,7 +246,7 @@ now = time.strftime('%Y-%m-%d %H:%M')
 
 if __name__ == '__main__':
     # 输入数据为dataframe格式
-    train_sample_df = pd.read_csv('../data/dataset/training_sample.csv')
+    train_sample_df = pd.read_csv('../../data/dataset/training_sample.csv')
     print(train_sample_df.head())
     train_dataset_df = train_sample_df[['alpha_1', 'alpha_2', 'alpha_3', 'alpha_4', 'alpha_5',
                                         'alpha_6', 'alpha_7', 'alpha_8', 'alpha_9', 'alpha_10']]
