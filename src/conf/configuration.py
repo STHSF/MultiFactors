@@ -27,11 +27,12 @@ class RegressionConfig(object):
             'max_depth': 5,
             'eta': 1,
             'silent': 1,
+            'rate_drop': 0.4,
             'objective': 'reg:linear',
-            'eval_metric': 'rmse'}
+            'eval_metric': ['rmse', 'logloss']}
         self.max_round = 500
-        self.cv_folds = 10
-        self.early_stop_round = 500
+        self.cv_folds = None
+        self.early_stop_round = 100
         self.seed = 3
         self.save_model_path = '../bst_model/xgb/'
 
