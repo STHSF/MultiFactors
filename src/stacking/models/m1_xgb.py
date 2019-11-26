@@ -281,5 +281,5 @@ if __name__ == '__main__':
     regress_conf.params.update(params_op)
     log.logger.info("params after: {}".format(regress_conf.params))
     # 模型训练
-    run_cv(x_train.values, x_test.values, y_train.values, y_test.values, regress_conf)
+    # run_cv(x_train.values, x_test.values, y_train.values, y_test.values, regress_conf)
 

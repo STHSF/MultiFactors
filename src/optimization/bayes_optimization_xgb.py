@@ -23,7 +23,41 @@ from src.utils import log_util
 log = log_util.Logger('BayesOptimizationXGBoost', level='info')
 
 
-class BayesOptimizationXGB(object):
+class BayesOptimizationBase(object):
+
+    @staticmethod
+    def bayesian_optimization(function, opt_parameters, gp_params=None):
+        """
+        BayesianOptimization
+        :param opt_parameters: 待优化的模型参数
+        :param gp_params: 贝叶斯优化模型的参数
+        :return:
+        """
+        if gp_params is None:
+            # gp_params = {"init_points": 10, "n_iter": 50, "acq": 'ucb', "xi": 0.0, "alpha": 1e-4, "kappa": 10}
+            # gp_params = {"init_points": 2, "n_iter": 50, "acq": 'ei', "xi": 0.0, "alpha": 1e-4}
+            gp_params = {"init_points": 2, "n_iter": 2, "acq": 'ei', "xi": 0.0, "alpha": 1e-4}
+
+        BO = BayesianOptimization(function, opt_parameters)
+        BO.maximize(**gp_params)
+        return BO.max
+
+    def train_opt(self, parameters, gp_params=None):
+        """
+        Train Optimization model
+        :param parameters: 待优化的模型参数
+        :param gp_params: 贝叶斯优化模型的参数
+        :return:
+        """
+        with warnings.catch_warnings():
+            warnings.filterwarnings('ignore')
+            best_solution = self.bayesian_optimization(parameters, gp_params)
+        params_opt = best_solution["params"]
+        log.logger.info('Best Optimization Parameters: {}' .format(params_opt))
+        return params_opt
+
+
+class BayesOptimizationXGB(BayesOptimizationBase):
     """
     基于贝叶斯优化的XGBoost参数寻优过程
     注意不同的eval_metric使用的best_score不一样，需要自己调整。
@@ -38,6 +72,7 @@ class BayesOptimizationXGB(object):
         :param y_test: test label
         :param kfolds: cv folds
         """
+        super(BayesOptimizationXGB, self).__init__()
         self.BestScore = 1.  # best_score保存的时候需要注意选用的eval_metric，一般都是指标越小越好， 如果是auc，则是越大越好
         self.BestIter = 0.
         self.X_train = X_train
@@ -159,37 +194,13 @@ class BayesOptimizationXGB(object):
         return (best_score * 2) - 1
 
     def bayesian_optimization(self, opt_parameters, gp_params=None):
-        """
-        BayesianOptimization
-        :param opt_parameters: 待优化的模型参数
-        :param gp_params: 贝叶斯优化模型的参数
-        :return:
-        """
-        if gp_params is None:
-            # gp_params = {"init_points": 10, "n_iter": 50, "acq": 'ucb', "xi": 0.0, "alpha": 1e-4, "kappa": 10}
-            # gp_params = {"init_points": 2, "n_iter": 50, "acq": 'ei', "xi": 0.0, "alpha": 1e-4}
-            gp_params = {"init_points": 2, "n_iter": 2, "acq": 'ei', "xi": 0.0, "alpha": 1e-4}
-
         if self.folds is None and self.X_test is not None and self.y_test is not None:
-            BO = BayesianOptimization(self.xgb_no, opt_parameters)
+            function = self.xgb_no
         else:
-            BO = BayesianOptimization(self.xgb_cv, opt_parameters)
+            function = self.xgb_cv
+        BO = BayesianOptimization(function, opt_parameters)
         BO.maximize(**gp_params)
         return BO.max
-
-    def train_opt(self, parameters, gp_params=None):
-        """
-        Train Optimization model
-        :param parameters: 待优化的模型参数
-        :param gp_params: 贝叶斯优化模型的参数
-        :return:
-        """
-        with warnings.catch_warnings():
-            warnings.filterwarnings('ignore')
-            best_solution = self.bayesian_optimization(parameters, gp_params)
-        params_opt = best_solution["params"]
-        log.logger.info('Best XGBOOST opt_parameters: %s' % params_opt)
-        return params_opt
 
 
 if __name__ == '__main__':
@@ -201,37 +212,6 @@ if __name__ == '__main__':
     target = iris.target
     X_train, X_test, y_train, y_test = train_test_split(data, target, test_size=0.1)
     log.logger.info(np.shape(X_train), np.shape(X_test), np.shape(y_train), np.shape(y_test))
-
-    # XGB_BO = BayesianOptimization(xgb_cv,
-    #                               {'max_depth': (2, 12),
-    #                                'gamma': (0.001, 10.0),
-    #                                'min_child_weight': (0, 20),
-    #                                'max_delta_step': (0, 10),
-    #                                'subsample': (0.4, 1.0),
-    #                                'colsample_bytree': (0.4, 1.0)
-    #                               })
-    #
-    # XGB_BO = BayesianOptimization(xgb_no,
-    #                               {'max_depth': (2, 12),
-    #                                'gamma': (0.001, 10.0),
-    #                                'min_child_weight': (0, 20),
-    #                                'max_delta_step': (0, 10),
-    #                                'subsample': (0.4, 1.0),
-    #                                'colsample_bytree': (0.4, 1.0)
-    #                               })
-    #
-    # with warnings.catch_warnings():
-    #     warnings.filterwarnings('ignore')
-    #     # XGB_BO.maximize(init_points=2, n_iter=5, acq='ei', xi=0.0)
-    #     XGB_BO.maximize(init_points=10, n_iter=50, acq='ei', xi=0.0)
-    #     # XGB_BO.maximize(init_points=10, n_iter=50, acq='ei', xi=0.01)
-    #     # XGB_BO.maximize(init_points=10, n_iter=50, acq='ucb', kappa=10)
-    #     # XGB_BO.maximize(init_points=10, n_iter=50, acq='ucb', kappa=1)
-    #
-    # params = XGB_BO.max["params"]
-    # print(params)
-    # print('Maximum XGBOOST value: %f' % XGB_BO.res)
-    # print('Best XGBOOST opt_parameters: ', XGB_BO.max)
 
     opti_parameters = {'max_depth': (2, 12),
                        'gamma': (0.001, 10.0),
