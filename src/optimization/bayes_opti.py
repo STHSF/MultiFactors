@@ -132,4 +132,4 @@ if __name__ == '__main__':
 
     function, parameters = xgb_optimization(5, watchlist)
     function(eta=1, gamma=10, max_depth=5)
-    # train_opt(X_train, y_train, X_test, y_test, function, parameters)
+    # train_opt(X_train, y_train, X_test, y_test, function, opt_parameters)
