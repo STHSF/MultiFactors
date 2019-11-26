@@ -27,10 +27,10 @@ class RegressionConfig(object):
             'max_depth': 5,
             'eta': 1,
             'silent': 1,
-            'rate_drop': 0.4,
+            'rate_drop': 0.1,
             'objective': 'reg:linear',
             'eval_metric': ['rmse', 'logloss']}
-        self.max_round = 500
+        self.max_round = 800
         self.cv_folds = None
         self.early_stop_round = 100
         self.seed = 3
