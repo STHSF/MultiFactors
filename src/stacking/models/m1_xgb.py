@@ -200,18 +200,17 @@ def xgb_predict(model, x_test, y_test=None, save_result_path=None):
         df_reult.to_csv(save_result_path, index=False)
 
 
-def run_cv(x_train, x_test, y_train, y_test):
+def run_cv(x_train, x_test, y_train, y_test, regress_conf):
     x_train = x_train
-    regress_conf.xgb_config_r()
     tic = time.time()
     data_message = 'X_train.shape={}, X_test.shape = {}'.format(np.shape(x_train), np.shape(x_test))
-    print(data_message)
+    log.logger.info(data_message)
     xgb = XGBooster(regress_conf)
     best_score, best_round, best_model = xgb.fit(x_train, y_train)
-    print('Training time cost {}s'.format(time.time() - tic))
+    log.logger.info('Training time cost {}s'.format(time.time() - tic))
     # xgb.save_model()
     result_message = 'best_score = {}, best_round = {}'.format(best_score, best_round)
-    print(result_message)
+    log.logger.info(result_message)
 
     # now = time.strftime('%Y-%m-%d %H:%M')
     result_saved_path = '../result/result_{}-{:.4f}.csv'.format(now, best_round)
@@ -264,6 +263,23 @@ if __name__ == '__main__':
 
     # 样本预处理
 
+    # 参数寻优
+    from src.optimization.bayes_optimization_xgb import *
+    opt_parameters = {'max_depth': (2, 12),
+                      'gamma': (0.001, 10.0),
+                      'min_child_weight': (0, 20),
+                      'max_delta_step': (0, 10),
+                      'subsample': (0.4, 1.0),
+                      'colsample_bytree': (0.4, 1.0)
+                      }
+    gp_params = {"init_points": 2, "n_iter": 2, "acq": 'ei', "xi": 0.0, "alpha": 1e-4}
+    bayes_opt_xgb = BayesOptimizationXGB(x_train.values,y_train.values, x_test.values, y_test.values)
+    params_op = bayes_opt_xgb.train_opt(opt_parameters, gp_params)
+
+    regress_conf.xgb_config_r()
+    log.logger.info("params before: {}".format(regress_conf.params))
+    regress_conf.params.update(params_op)
+    log.logger.info("params after: {}".format(regress_conf.params))
     # 模型训练
-    run_cv(x_train.values, x_test.values, y_train.values, y_test.values)
+    run_cv(x_train.values, x_test.values, y_train.values, y_test.values, regress_conf)
 

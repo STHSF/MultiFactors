@@ -111,7 +111,6 @@ class BayesOptimizationXGB(object):
         :param colsample_bytree:
         :return:
         """
-
         data_train = xgb.DMatrix(self.X_train, label=self.y_train)
         data_test = xgb.DMatrix(self.X_test, label=self.y_test)
         watchlist = [(data_test, 'eval'), (data_train, 'train')]
@@ -129,11 +128,26 @@ class BayesOptimizationXGB(object):
                   'max_delta_step': int(max_delta_step),
                   'seed': 1001}
 
+        params = {
+            'objective': 'reg:linear',
+            'eval_metric': ['rmse', 'logloss'],
+            'booster': 'dart',
+            'nthread': 4,
+            'silent': 0,
+            'eta': 0.1,
+            'max_depth': int(max_depth),
+            'gamma': int(gamma),
+            'subsample': max(min(subsample, 1), 0),
+            'colsample_bytree': max(min(colsample_bytree, 1), 0),
+            'min_child_weight': int(min_child_weight),
+            'max_delta_step': int(max_delta_step),
+            'seed': 1001}
+
         best_model = xgb.train(params=params,
                                dtrain=data_train,
-                               num_boost_round=20000,
+                               num_boost_round=20,
                                evals=watchlist,
-                               early_stopping_rounds=100)
+                               early_stopping_rounds=10)
         best_round = best_model.best_iteration
         best_score = best_model.best_score
         log.logger.info(' Stopped after %d iterations with train_-score = %f train_-gini = %f' %
