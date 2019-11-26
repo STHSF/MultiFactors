@@ -273,7 +273,7 @@ if __name__ == '__main__':
                       'colsample_bytree': (0.4, 1.0)
                       }
     gp_params = {"init_points": 2, "n_iter": 2, "acq": 'ei', "xi": 0.0, "alpha": 1e-4}
-    bayes_opt_xgb = BayesOptimizationXGB(x_train.values,y_train.values, x_test.values, y_test.values)
+    bayes_opt_xgb = BayesOptimizationXGB(x_train.values, y_train.values, x_test.values, y_test.values)
     params_op = bayes_opt_xgb.train_opt(opt_parameters, gp_params)
 
     regress_conf.xgb_config_r()
