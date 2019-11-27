@@ -114,11 +114,11 @@ class BayesOptimizationLGBM(BayesOptimizationBase):
         :return:
         """
         d_train = lgb.Dataset(self.X_train, label=self.y_train)
-        if self.X_valid is not None and self.y_valid is not None:
+        if self.X_valid is None or self.y_valid is None:
+            watchlist = [d_train]
+        else:
             d_valid = lgb.Dataset(self.X_valid, label=self.y_valid)
             watchlist = [d_train, d_valid]
-        else:
-            watchlist = [d_train]
 
         params = {'task': 'train',
                   'boosting': 'gbdt',
