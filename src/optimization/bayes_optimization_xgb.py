@@ -71,7 +71,6 @@ class BayesOptimizationXGB(BayesOptimizationBase):
                   'max_delta_step': int(max_delta_step),
                   'seed': 1001}
 
-        log.logger.info('params: \n{}'.format(params))
         xgbc = xgb.cv(paramt,
                       data_train,
                       num_boost_round=20000,
@@ -79,8 +78,8 @@ class BayesOptimizationXGB(BayesOptimizationBase):
                       nfold=self.folds,
                       early_stopping_rounds=100,
                       verbose_eval=True,
-                      show_stdv=True
-                      )
+                      show_stdv=True)
+        log.logger.info('params: \n{}'.format(params))
         val_score = xgbc['test-merror-mean'].iloc[-1]
         train_score = xgbc['train-merror-mean'].iloc[-1]
         log.logger.info(
@@ -144,7 +143,6 @@ class BayesOptimizationXGB(BayesOptimizationBase):
         #     'min_child_weight': int(min_child_weight),
         #     'max_delta_step': int(max_delta_step),
         #     'seed': 1001}
-        log.logger.info('params: \n{}'.format(params))
         best_model = xgb.train(params=params,
                                dtrain=data_train,
                                num_boost_round=20,
@@ -152,6 +150,7 @@ class BayesOptimizationXGB(BayesOptimizationBase):
                                early_stopping_rounds=10)
         best_round = best_model.best_iteration
         best_score = best_model.best_score
+        log.logger.info('params: \n{}'.format(params))
         log.logger.info(' Stopped after %d iterations with train-score = %f train-gini = %f' %
                         (best_round, best_score, (best_score * 2 - 1)))
         if best_score < self.BestScore:
