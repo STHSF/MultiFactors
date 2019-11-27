@@ -85,7 +85,7 @@ class BayesOptimizationLGBM(BayesOptimizationBase):
                            nfold=self.folds,
                            verbose_eval=True,
                            early_stopping_rounds=self.early_stop_round,
-                           show_stdv=False)
+                           show_stdv=True)
 
         # train_score = xgbc['train-merror-mean'].iloc[-1]
         print(cv_result)
