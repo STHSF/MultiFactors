@@ -84,14 +84,8 @@ class BayesOptimizationLGBM(BayesOptimizationBase):
         best_round = len(cv_result['multi_error-mean'])
         val_score = pd.Series(cv_result['multi_error-mean']).min()
 
-        # log.logger.info(
-        #     'Stopped after %d iterations with train-score = %f val-score = %f ( diff = %f ) train_-gini = %f '
-        #     'val-gini = %f' % (len(xgbc),
-        #                        train_score,
-        #                        val_score,
-        #                        (train_score - val_score),
-        #                        (train_score * 2 - 1),
-        #                        (val_score * 2 - 1)))
+        log.logger.info('Stopped after %d iterations with train-score = %f val-gini = %f' %
+                        (best_round, val_score, (val_score * 2 - 1)))
 
         if val_score < self.BestScore:
             # multi_error指标越小越好，使用AUC则是指标越大越好
@@ -186,15 +180,15 @@ if __name__ == '__main__':
     X_train, X_test, y_train, y_test = train_test_split(data, target, test_size=0.1)
     log.logger.info('{},{},{},{}'.format(np.shape(X_train), np.shape(X_test), np.shape(y_train), np.shape(y_test)))
 
-    opti_parameters = {'max_depth': (2, 12),
-                       'gamma': (0.001, 10.0),
-                       'min_child_weight': (0, 20),
-                       'max_delta_step': (0, 10),
-                       'subsample': (0.01, 0.99),
-                       'colsample_bytree': (0.01, 0.99)
-                       }
+    opt_parameters = {'max_depth': (2, 12),
+                      'gamma': (0.001, 10.0),
+                      'min_child_weight': (0, 20),
+                      'max_delta_step': (0, 10),
+                      'subsample': (0.01, 0.99),
+                      'colsample_bytree': (0.01, 0.99)
+                      }
 
     gp_params = {"init_points": 2, "n_iter": 2, "acq": 'ei', "xi": 0.0, "alpha": 1e-4}
     opt_lgb = BayesOptimizationLGBM(X_train, y_train, X_test, y_test)
-    params_op = opt_lgb.train_opt(opti_parameters, gp_params)
+    params_op = opt_lgb.train_opt(opt_parameters, gp_params)
     log.logger.info('BestScore: {}, BestIter: {}'.format(opt_lgb.BestScore, opt_lgb.BestIter))
