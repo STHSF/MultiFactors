@@ -216,7 +216,7 @@ if __name__ == '__main__':
 
     gp_params = {"init_points": 2, "n_iter": 2, "acq": 'ei', "xi": 0.0, "alpha": 1e-4}
     opt_lgb = BayesOptimizationLGBM(X_train, y_train, X_test, y_test)
-    params_op = opt_lgb.train_opt(opti_parameters, gp_params)
+    params_op = opt_lgb.train_opt(opt_parameters, gp_params)
 
     classify_conf.params.update(params_op)
     log.logger.info('Model Params pre:\n{}'.format(classify_conf.params))
