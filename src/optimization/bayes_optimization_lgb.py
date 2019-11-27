@@ -88,6 +88,7 @@ class BayesOptimizationLGBM(BayesOptimizationBase):
                            show_stdv=False)
 
         # train_score = xgbc['train-merror-mean'].iloc[-1]
+        print(cv_result)
         best_round = len(cv_result['multi_error-mean'])
         val_score = pd.Series(cv_result['multi_error-mean']).min()
 
