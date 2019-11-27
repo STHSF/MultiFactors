@@ -137,8 +137,7 @@ class BayesOptimizationLGBM(BayesOptimizationBase):
         best_round = best_model.best_iteration
         best_score = best_model.best_score
 
-        log.logger.info(' Stopped after %d iterations with train-score = %f train-gini = %f' %
-                        (best_round, best_score, (best_score * 2 - 1)))
+        log.logger.info(' Stopped after %d iterations with train-score = %f train-gini = %f' % (best_round, best_score, (best_score * 2 - 1)))
         if best_score < self.BestScore:
             # m_error指标越小越好，使用AUC则是指标越大越好
             self.BestScore = best_score
@@ -188,11 +187,12 @@ if __name__ == '__main__':
     log.logger.info('{},{},{},{}'.format(np.shape(X_train), np.shape(X_test), np.shape(y_train), np.shape(y_test)))
 
     opti_parameters = {'max_depth': (2, 12),
-                       'gamma': (0.001, 10.0),
-                       'min_child_weight': (0, 20),
-                       'max_delta_step': (0, 10),
-                       'subsample': (0.01, 0.99),
-                       'colsample_bytree': (0.01, 0.99)}
+                       # 'gamma': (0.001, 10.0),
+                       # 'min_child_weight': (0, 20),
+                       # 'max_delta_step': (0, 10),
+                       # 'subsample': (0.01, 0.99),
+                       # 'colsample_bytree': (0.01, 0.99)
+                       }
 
     # gp_params = {"init_points": 2, "n_iter": 2, "acq": 'ei', "xi": 0.0, "alpha": 1e-4}
     opt_lgb = BayesOptimizationLGBM(X_train, y_train, X_test, y_test)
