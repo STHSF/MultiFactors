@@ -15,51 +15,9 @@ import warnings
 import xgboost as xgb
 from src.utils import log_util
 from bayes_opt import BayesianOptimization
+from src.optimization.bayes_optimization_base import BayesOptimizationBase
 
 log = log_util.Logger('BayesOptimizationXGBoost', level='info')
-
-
-class BayesOptimizationBase(object):
-    """
-    BayesOptimizationTool
-    """
-    def __init__(self):
-        self.function = self.optimization_function
-
-    def optimization_function(self):
-        """
-        目标函数
-        :return:
-        """
-        return
-
-    @staticmethod
-    def bayesian_optimization(function, opt_parameters, gp_params):
-        """
-        BayesianOptimization
-        :param function: 目标函数
-        :param opt_parameters: 待优化的模型参数
-        :param gp_params: 贝叶斯优化模型的参数
-        :return:
-        """
-        bayesian_opt_model = BayesianOptimization(function, opt_parameters)
-        bayesian_opt_model.maximize(**gp_params)
-        return bayesian_opt_model.max
-
-    def train_opt(self, parameters, gp_params):
-        """
-        Train Optimization model
-        :param parameters: 待优化的模型参数
-        :param gp_params: 贝叶斯优化模型的参数
-        :return:
-        """
-        with warnings.catch_warnings():
-            warnings.filterwarnings('ignore')
-            best_solution = self.bayesian_optimization(self.function, parameters, gp_params)
-        params_opt = best_solution["params"]
-
-        log.logger.info('Best Optimization Parameters: {}' .format(params_opt))
-        return params_opt
 
 
 class BayesOptimizationXGB(BayesOptimizationBase):
