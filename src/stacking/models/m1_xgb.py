@@ -274,12 +274,14 @@ if __name__ == '__main__':
     log.logger.info("params before: {}".format(regress_conf.params))
     # 超参数寻优
     from src.optimization.bayes_optimization_xgb import *
-    opt_parameters = {'max_depth': (2, 12),
-                      'gamma': (0.001, 10.0),
-                      'min_child_weight': (0, 20),
-                      'max_delta_step': (0, 10),
-                      'subsample': (0.01, 0.99),
-                      'colsample_bytree': (0.01, 0.99)
+
+    opt_parameters = {'max_depth': (4, 10),
+                      'num_leaves': (5, 130),
+                      'min_data_in_leaf': (10, 150),
+                      'feature_fraction': (0.7, 1.0),
+                      'bagging_fraction': (0.7, 1.0),
+                      'lambda_l1': (0, 6),
+                      'lambda_l2': (0, 6)
                       }
     gp_params = {"init_points": 2, "n_iter": 2, "acq": 'ei', "xi": 0.0, "alpha": 1e-4}
     bayes_opt_xgb = BayesOptimizationXGB(x_train.values, y_train.values, x_test.values, y_test.values)
