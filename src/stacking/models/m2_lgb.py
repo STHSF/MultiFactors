@@ -202,7 +202,23 @@ if __name__ == '__main__':
     log.logger.info('type of x_train: {}'.format(type(X_train)))
     log.logger.info('shape of x_train: {}'.format(np.shape(X_train)))
     classify_conf.lgb_config_c()
-    log.logger.info('Model Params:\n{}'.format(classify_conf.params))
+    log.logger.info('Model Params pre:\n{}'.format(classify_conf.params))
+
+    # Hyper Parameters Optimization
+    opt_parameters = {'max_depth': (2, 12),
+                      'gamma': (0.001, 10.0),
+                      'min_child_weight': (0, 20),
+                      'max_delta_step': (0, 10),
+                      'subsample': (0.01, 0.99),
+                      'colsample_bytree': (0.01, 0.99)
+                       }
+
+    gp_params = {"init_points": 2, "n_iter": 2, "acq": 'ei', "xi": 0.0, "alpha": 1e-4}
+    opt_lgb = BayesOptimizationLGBM(X_train, y_train, X_test, y_test)
+    params_op = opt_lgb.train_opt(opti_parameters, gp_params)
+
+    classify_conf.params.update(params_op)
+    log.logger.info('Model Params pre:\n{}'.format(classify_conf.params))
 
     # # NonCrossValidation Test
     lgbm = LightGBM(classify_conf)
@@ -212,5 +228,4 @@ if __name__ == '__main__':
     # # CrossValidation Test
     # classify_conf.cv_folds = 5
     # run_cv(X_train, X_test, y_test, y_train, classify_conf)
-
     # REGRESSION TEST
