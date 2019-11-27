@@ -79,10 +79,11 @@ class BayesOptimizationLGBM(BayesOptimizationBase):
                            verbose_eval=True,
                            early_stopping_rounds=self.early_stop_round,
                            show_stdv=False)
+        print(cv_result)
 
-        train_score = xgbc['train-merror-mean'].iloc[-1]
-        best_round = len(cv_result['multi_error-mean'])
-        val_score = pd.Series(cv_result['multi_error-mean']).min()
+        # train_score = xgbc['train-merror-mean'].iloc[-1]
+        # best_round = len(cv_result['multi_error-mean'])
+        # val_score = pd.Series(cv_result['multi_error-mean']).min()
 
         # log.logger.info(
         #     'Stopped after %d iterations with train-score = %f val-score = %f ( diff = %f ) train_-gini = %f '
@@ -93,10 +94,10 @@ class BayesOptimizationLGBM(BayesOptimizationBase):
         #                        (train_score * 2 - 1),
         #                        (val_score * 2 - 1)))
 
-        if val_score < self.BestScore:
-            # multi_error指标越小越好，使用AUC则是指标越大越好
-            self.BestScore = val_score
-            self.BestIter = best_round
+        # if val_score < self.BestScore:
+        #     # multi_error指标越小越好，使用AUC则是指标越大越好
+        #     self.BestScore = val_score
+        #     self.BestIter = best_round
         return (val_score * 2) - 1
 
     def xgb_no(self, max_depth, gamma, min_child_weight, max_delta_step, subsample, colsample_bytree):
@@ -137,7 +138,7 @@ class BayesOptimizationLGBM(BayesOptimizationBase):
         best_round = best_model.best_iteration
         # 不同的metric可能有不同的best_score类型，使用时需要注意。
         best_score = best_model.best_score['valid_1']['multi_logloss']
-        # log.logger.info(' Stopped after %d iterations with train-score = %f ' % (best_round, best_score))
+        log.logger.info(' Stopped after %d iterations with train-score = %f ' % (best_round, best_score))
         if best_score < self.BestScore:
             # m_error指标越小越好，使用AUC则是指标越大越好
             self.BestScore = best_score
@@ -195,6 +196,6 @@ if __name__ == '__main__':
                        }
 
     # gp_params = {"init_points": 2, "n_iter": 2, "acq": 'ei', "xi": 0.0, "alpha": 1e-4}
-    opt_lgb = BayesOptimizationLGBM(X_train, y_train, X_test, y_test)
+    opt_lgb = BayesOptimizationLGBM(X_train, y_train, X_test, y_test, 3)
     params_op = opt_lgb.train_opt(opti_parameters, gp_params=None)
     log.logger.info('BestScore: {}, BestIter: {}'.format(opt_lgb.BestScore, opt_lgb.BestIter))
