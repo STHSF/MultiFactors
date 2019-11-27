@@ -22,11 +22,11 @@ log = log_util.Logger('BayesOptimizationLightGBM', level='info')
 
 class BayesOptimizationLGBM(BayesOptimizationBase):
     """
-    基于贝叶斯优化的XGBoost参数寻优过程
+    基于贝叶斯优化的lightGBM参数寻优过程
     注意不同的eval_metric使用的best_score不一样，需要自己调整。
     """
 
-    def __init__(self, X_train, y_train, X_test=None, y_test=None, kfolds=None):
+    def __init__(self, X_train, y_train, X_valid=None, y_valid=None, kfolds=None):
         """
         init
         :param X_train: train target
@@ -35,7 +35,7 @@ class BayesOptimizationLGBM(BayesOptimizationBase):
         :param y_test: test label
         :param kfolds: cv folds
         """
-        super(BayesOptimizationXGB, self).__init__()
+        super(BayesOptimizationLGBM, self).__init__()
         self.BestScore = 1.  # best_score保存的时候需要注意选用的eval_metric，一般都是指标越小越好， 如果是auc，则是越大越好
         self.BestIter = 0.
         self.X_train = X_train
