@@ -206,4 +206,5 @@ if __name__ == '__main__':
     gp_params = {"init_points": 2, "n_iter": 2, "acq": 'ei', "xi": 0.0, "alpha": 1e-4}
     opt_lgb = BayesOptimizationLGBM(X_train, y_train, X_test, y_test)
     params_op = opt_lgb.train_opt(opt_parameters, gp_params)
+    log.logger.info('Best params: \n{}'.format(params_op))
     log.logger.info('BestScore: {}, BestIter: {}'.format(opt_lgb.BestScore, opt_lgb.BestIter))
