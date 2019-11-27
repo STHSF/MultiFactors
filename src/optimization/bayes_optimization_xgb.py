@@ -56,9 +56,8 @@ class BayesOptimizationXGB(BayesOptimizationBase):
         :param colsample_bytree:
         :return:
         """
-
         data_train = xgb.DMatrix(self.X_train, label=self.y_train)
-        paramt = {'eta': 0.1,
+        params = {'eta': 0.1,
                   'objective': 'multi:softmax',
                   'num_class': 3,
                   'nthread': 4,
@@ -72,16 +71,16 @@ class BayesOptimizationXGB(BayesOptimizationBase):
                   'max_delta_step': int(max_delta_step),
                   'seed': 1001}
 
-        xgbc = xgb.cv(
-            paramt,
-            data_train,
-            num_boost_round=20000,
-            stratified=True,
-            nfold=self.folds,
-            early_stopping_rounds=100,
-            verbose_eval=True,
-            show_stdv=True
-        )
+        log.logger.info('params: \n{}'.format(params))
+        xgbc = xgb.cv(paramt,
+                      data_train,
+                      num_boost_round=20000,
+                      stratified=True,
+                      nfold=self.folds,
+                      early_stopping_rounds=100,
+                      verbose_eval=True,
+                      show_stdv=True
+                      )
         val_score = xgbc['test-merror-mean'].iloc[-1]
         train_score = xgbc['train-merror-mean'].iloc[-1]
         log.logger.info(
@@ -145,7 +144,7 @@ class BayesOptimizationXGB(BayesOptimizationBase):
         #     'min_child_weight': int(min_child_weight),
         #     'max_delta_step': int(max_delta_step),
         #     'seed': 1001}
-
+        log.logger.info('params: \n{}'.format(params))
         best_model = xgb.train(params=params,
                                dtrain=data_train,
                                num_boost_round=20,
@@ -211,7 +210,7 @@ if __name__ == '__main__':
                        'subsample': (0.01, 0.99),
                        'colsample_bytree': (0.01, 0.99)}
 
-    # gp_params = {"init_points": 2, "n_iter": 2, "acq": 'ei', "xi": 0.0, "alpha": 1e-4}
+    gp_params = {"init_points": 2, "n_iter": 20, "acq": 'ei', "xi": 0.0, "alpha": 1e-4}
     opt_xgb = BayesOptimizationXGB(X_train, y_train, X_test, y_test)
     params_op = opt_xgb.train_opt(opti_parameters, gp_params=None)
     log.logger.info('BestScore: {}, BestIter: {}'.format(opt_xgb.BestScore, opt_xgb.BestIter))
