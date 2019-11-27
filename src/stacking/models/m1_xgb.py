@@ -189,7 +189,7 @@ def xgb_predict(model, x_test, y_test=None, save_result_path=None):
     r_square = 1 - mean_squared_error(y_test, y_pred)/ np.var(y_test)
     print('r_square_of_pred: %s' % r_square)
     print('r_square_of_pred: %s' % r_square_)
-    # print(y_pred), print(y_test)
+    print(y_pred), print(y_test)
     # PLOT
     plot_figure(y_pred, y_test, 'xgb_predict')
 
@@ -261,25 +261,26 @@ if __name__ == '__main__':
     # x_test.to_csv('../result/x_test_{}.csv'.format(now), index=0)
     # y_test.to_csv('../result/y_test_{}.csv'.format(now), index=0)
 
-    # 样本预处理
+    # 样本预处理(标准化等)
 
-    # 参数寻优
+    # 超参数
+    regress_conf.xgb_config_r()
+    log.logger.info("params before: {}".format(regress_conf.params))
+    # 超参数寻优
     from src.optimization.bayes_optimization_xgb import *
     opt_parameters = {'max_depth': (2, 12),
                       'gamma': (0.001, 10.0),
                       'min_child_weight': (0, 20),
                       'max_delta_step': (0, 10),
-                      'subsample': (0.4, 1.0),
-                      'colsample_bytree': (0.4, 1.0)
+                      'subsample': (0.01, 0.99),
+                      'colsample_bytree': (0.01, 0.99)
                       }
     gp_params = {"init_points": 2, "n_iter": 2, "acq": 'ei', "xi": 0.0, "alpha": 1e-4}
     bayes_opt_xgb = BayesOptimizationXGB(x_train.values, y_train.values, x_test.values, y_test.values)
     params_op = bayes_opt_xgb.train_opt(opt_parameters, gp_params)
 
-    regress_conf.xgb_config_r()
-    log.logger.info("params before: {}".format(regress_conf.params))
     regress_conf.params.update(params_op)
     log.logger.info("params after: {}".format(regress_conf.params))
     # 模型训练
-    # run_cv(x_train.values, x_test.values, y_train.values, y_test.values, regress_conf)
+    run_cv(x_train.values, x_test.values, y_train.values, y_test.values, regress_conf)
 
