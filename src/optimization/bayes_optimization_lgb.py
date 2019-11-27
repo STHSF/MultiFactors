@@ -47,7 +47,7 @@ class BayesOptimizationLGBM(BayesOptimizationBase):
         self.max_round = 2000
         self.early_stop_round = 100
 
-    def xgb_cv(self, max_depth, gamma, min_child_weight, max_delta_step, subsample, colsample_bytree):
+    def lgb_cv(self, max_depth, gamma, min_child_weight, max_delta_step, subsample, colsample_bytree):
         """
         XGBoost model with NonCrossValidation
         :param max_depth:
@@ -80,7 +80,6 @@ class BayesOptimizationLGBM(BayesOptimizationBase):
                            verbose_eval=True,
                            early_stopping_rounds=self.early_stop_round,
                            show_stdv=False)
-        print(cv_result)
 
         # train_score = xgbc['train-merror-mean'].iloc[-1]
         best_round = len(cv_result['multi_error-mean'])
@@ -101,7 +100,7 @@ class BayesOptimizationLGBM(BayesOptimizationBase):
             self.BestIter = best_round
         return (val_score * 2) - 1
 
-    def xgb_no(self, max_depth, gamma, min_child_weight, max_delta_step, subsample, colsample_bytree):
+    def lgb_no(self, max_depth, gamma, min_child_weight, max_delta_step, subsample, colsample_bytree):
         """
         XGBoost model with NonCrossValidation
         :param max_depth:
@@ -160,9 +159,9 @@ class BayesOptimizationLGBM(BayesOptimizationBase):
             gp_params = {"init_points": 2, "n_iter": 2, "acq": 'ei', "xi": 0.0, "alpha": 1e-4}
 
         if self.folds is None:
-            self.function = self.xgb_no
+            self.function = self.lgb_no
         else:
-            self.function = self.xgb_cv
+            self.function = self.lgb_cv
 
         params_opt = super().train_opt(parameters, gp_params)
         # 注意优化参数的实际取值范围, 与需要优化的参数一一对应即可
