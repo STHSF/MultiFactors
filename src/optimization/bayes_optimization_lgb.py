@@ -96,7 +96,7 @@ class BayesOptimizationLGBM(BayesOptimizationBase):
         if val_score < self.BestScore:
             # multi_error指标越小越好，使用AUC则是指标越大越好
             self.BestScore = val_score
-            self.BestIter = len(xgbc)
+            self.BestIter = best_round
         return (val_score * 2) - 1
 
     def xgb_no(self, max_depth, gamma, min_child_weight, max_delta_step, subsample, colsample_bytree):
