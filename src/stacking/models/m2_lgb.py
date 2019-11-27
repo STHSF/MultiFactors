@@ -191,6 +191,7 @@ def run_cv(x_train, x_test, y_test, y_train, conf):
 if __name__ == '__main__':
     import pandas as pd
     import numpy as np
+    from src.optimization.bayes_optimization_lgb import BayesOptimizationLGBM
     from sklearn.datasets import load_iris
     from sklearn.model_selection import train_test_split
 
