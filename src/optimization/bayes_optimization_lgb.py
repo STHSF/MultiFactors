@@ -99,7 +99,7 @@ class BayesOptimizationLGBM(BayesOptimizationBase):
             # multi_error指标越小越好，使用AUC则是指标越大越好
             self.BestScore = val_score
             self.BestIter = best_round
-        return val_score
+        return -val_score
 
     def lgb_no(self, max_depth, num_leaves, min_data_in_leaf, feature_fraction, bagging_fraction, lambda_l1, lambda_l2):
         """
@@ -138,6 +138,7 @@ class BayesOptimizationLGBM(BayesOptimizationBase):
                   "lambda_l1": lambda_l1,
                   "lambda_l2": lambda_l2,
                   }
+        log.logger.info('parameters: \n{}'.format(params))
         best_model = lgb.train(params,
                                d_train,
                                num_boost_round=self.max_round,
@@ -151,7 +152,7 @@ class BayesOptimizationLGBM(BayesOptimizationBase):
             # m_error指标越小越好，使用AUC则是指标越大越好
             self.BestScore = best_score
             self.BestIter = best_round
-        return best_score
+        return -best_score
 
     def train_opt(self, parameters, gp_params=None):
         """
