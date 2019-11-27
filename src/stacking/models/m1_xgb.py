@@ -252,35 +252,39 @@ if __name__ == '__main__':
     label_dataset_df = train_sample_df[['dx_2']]
 
     x_train, x_test, y_train, y_test = train_test_sp(train_dataset_df[:30000], label_dataset_df[:30000])
-    print('x_train_pre: %s' % x_train.head())
-    print('y_train_pre: %s' % y_train.head())
-    print('x_test_pre: %s' % x_test.head())
-    print('y_test_pre: %s' % y_test.head())
+    print('x_train_pre: \n%s' % x_train.head())
+    # print('y_train_pre: %s' % y_train.head())
+    # print('x_test_pre: %s' % x_test.head())
+    # print('y_test_pre: %s' % y_test.head())
 
     # 数据统计用
     # x_test.to_csv('../result/x_test_{}.csv'.format(now), index=0)
     # y_test.to_csv('../result/y_test_{}.csv'.format(now), index=0)
 
     # 样本预处理(标准化等)
+    x_train_mean = x_train.mean()
+    x_train_std = x_train.std()
+    x_train = (x_train - x_train_mean) / x_train_std
+    print(x_train.head())
 
-    # 超参数
-    regress_conf.xgb_config_r()
-    log.logger.info("params before: {}".format(regress_conf.params))
-    # 超参数寻优
-    from src.optimization.bayes_optimization_xgb import *
-    opt_parameters = {'max_depth': (2, 12),
-                      'gamma': (0.001, 10.0),
-                      'min_child_weight': (0, 20),
-                      'max_delta_step': (0, 10),
-                      'subsample': (0.01, 0.99),
-                      'colsample_bytree': (0.01, 0.99)
-                      }
-    gp_params = {"init_points": 2, "n_iter": 2, "acq": 'ei', "xi": 0.0, "alpha": 1e-4}
-    bayes_opt_xgb = BayesOptimizationXGB(x_train.values, y_train.values, x_test.values, y_test.values)
-    params_op = bayes_opt_xgb.train_opt(opt_parameters, gp_params)
-
-    regress_conf.params.update(params_op)
-    log.logger.info("params after: {}".format(regress_conf.params))
-    # 模型训练
-    run_cv(x_train.values, x_test.values, y_train.values, y_test.values, regress_conf)
+    # # 超参数
+    # regress_conf.xgb_config_r()
+    # log.logger.info("params before: {}".format(regress_conf.params))
+    # # 超参数寻优
+    # from src.optimization.bayes_optimization_xgb import *
+    # opt_parameters = {'max_depth': (2, 12),
+    #                   'gamma': (0.001, 10.0),
+    #                   'min_child_weight': (0, 20),
+    #                   'max_delta_step': (0, 10),
+    #                   'subsample': (0.01, 0.99),
+    #                   'colsample_bytree': (0.01, 0.99)
+    #                   }
+    # gp_params = {"init_points": 2, "n_iter": 2, "acq": 'ei', "xi": 0.0, "alpha": 1e-4}
+    # bayes_opt_xgb = BayesOptimizationXGB(x_train.values, y_train.values, x_test.values, y_test.values)
+    # params_op = bayes_opt_xgb.train_opt(opt_parameters, gp_params)
+    #
+    # regress_conf.params.update(params_op)
+    # log.logger.info("params after: {}".format(regress_conf.params))
+    # # 模型训练
+    # run_cv(x_train.values, x_test.values, y_train.values, y_test.values, regress_conf)
 

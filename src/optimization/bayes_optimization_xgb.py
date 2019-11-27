@@ -152,8 +152,12 @@ class BayesOptimizationXGB(BayesOptimizationBase):
         :return:
         """
         data_train = xgb.DMatrix(self.X_train, label=self.y_train)
-        data_test = xgb.DMatrix(self.X_test, label=self.y_test)
-        watchlist = [(data_test, 'eval'), (data_train, 'train')]
+        if self.X_test is not None and y_test is not None:
+            data_test = xgb.DMatrix(self.X_test, label=self.y_test)
+            watchlist = [(data_test, 'eval'), (data_train, 'train')]
+        else:
+            watchlist = [(data_train, 'train')]
+
         params = {'objective': 'multi:softmax',
                   'num_class': 3,
                   'nthread': 4,
@@ -198,7 +202,7 @@ class BayesOptimizationXGB(BayesOptimizationBase):
             self.BestIter = best_round
         return (best_score * 2) - 1
 
-    def train_opt(self, parameters, gp_params):
+    def train_opt(self, parameters, gp_params=None):
         """
         贝叶斯优化模型训练
         :param parameters: 待优化参数
@@ -211,7 +215,7 @@ class BayesOptimizationXGB(BayesOptimizationBase):
             # gp_params = {"init_points": 2, "n_iter": 50, "acq": 'ei', "xi": 0.0, "alpha": 1e-4}
             gp_params = {"init_points": 2, "n_iter": 2, "acq": 'ei', "xi": 0.0, "alpha": 1e-4}
 
-        if self.folds is None and self.X_test is not None and self.y_test is not None:
+        if self.folds is None:
             self.function = self.xgb_no
         else:
             self.function = self.xgb_cv
