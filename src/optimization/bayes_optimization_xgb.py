@@ -152,7 +152,7 @@ class BayesOptimizationXGB(BayesOptimizationBase):
         :return:
         """
         data_train = xgb.DMatrix(self.X_train, label=self.y_train)
-        if self.X_test is not None and y_test is not None:
+        if self.X_test is not None and self.y_test is not None:
             data_test = xgb.DMatrix(self.X_test, label=self.y_test)
             watchlist = [(data_test, 'eval'), (data_train, 'train')]
         else:
