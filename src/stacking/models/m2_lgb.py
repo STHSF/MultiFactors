@@ -147,7 +147,6 @@ def run_feat_search(X_train, X_test, y_train, feature_names):
 
 def lgb_predict(bst_model, x_test, y_test, conf, save_result_path=None):
     # x_test = x_test.flatten()
-
     if conf.params['objective'] == "multiclass":
         y_pred = bst_model.predict(x_test).argmax(axis=1)
         log.logger.info(y_pred)
