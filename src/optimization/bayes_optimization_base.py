@@ -57,7 +57,6 @@ class BayesOptimizationBase(object):
 
 
 if __name__ == '__main__':
-
     def black_box_function(x, y):
         score = -x ** 2 - (y - 1) ** 2 + 1
         return score
@@ -67,6 +66,7 @@ if __name__ == '__main__':
     #
     pbounds = {'x': (2, 4), 'y': (-3, 3)}
     gp_p = {'init_points': 2, 'n_iter': 3}
+
     params = bayes_opt.train_opt(pbounds, gp_p)
     print(params)
 
