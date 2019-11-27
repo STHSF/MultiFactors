@@ -82,8 +82,8 @@ class BayesOptimizationLGBM(BayesOptimizationBase):
         print(cv_result)
 
         # train_score = xgbc['train-merror-mean'].iloc[-1]
-        # best_round = len(cv_result['multi_error-mean'])
-        # val_score = pd.Series(cv_result['multi_error-mean']).min()
+        best_round = len(cv_result['multi_error-mean'])
+        val_score = pd.Series(cv_result['multi_error-mean']).min()
 
         # log.logger.info(
         #     'Stopped after %d iterations with train-score = %f val-score = %f ( diff = %f ) train_-gini = %f '
@@ -94,10 +94,10 @@ class BayesOptimizationLGBM(BayesOptimizationBase):
         #                        (train_score * 2 - 1),
         #                        (val_score * 2 - 1)))
 
-        # if val_score < self.BestScore:
-        #     # multi_error指标越小越好，使用AUC则是指标越大越好
-        #     self.BestScore = val_score
-        #     self.BestIter = best_round
+        if val_score < self.BestScore:
+            # multi_error指标越小越好，使用AUC则是指标越大越好
+            self.BestScore = val_score
+            self.BestIter = best_round
         return (val_score * 2) - 1
 
     def xgb_no(self, max_depth, gamma, min_child_weight, max_delta_step, subsample, colsample_bytree):
