@@ -46,7 +46,7 @@ def create_scenario(train_data, features, label, ref_dates, freq, regress_conf, 
     for i, ref_date in enumerate(ref_dates):
         alpha_logger.info('{0} is start'.format(ref_date))
 
-        # machine learning model
+        # machine learning bst_model
         # Filter Training data
         # train data
         trade_date_pre = ref_date - timedelta(days=1)
@@ -71,7 +71,7 @@ def create_scenario(train_data, features, label, ref_dates, freq, regress_conf, 
             xgb_model.set_params(max_depth=5)
 
         print(xgb_model.get_params)
-        best_score, best_round, cv_rounds, best_model = xgb_model.fit(x_train, y_train)
+        best_score, best_round, best_model = xgb_model.fit(x_train, y_train)
         alpha_logger.info('Training time cost {}s'.format(time.time() - tic))
         alpha_logger.info('best_score = {}, best_round = {}'.format(best_score, best_round))
 

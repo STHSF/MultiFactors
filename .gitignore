@@ -127,3 +127,12 @@ src/data/dataprepare/zz500_all.pkl
 *.db
 *.csv
 *.pkl
+*.log
+*.out
+.DS_Store
+*.sh
+/src/optimization/bayes_optimization_xgb_bak.py
+/src/optimization/bayes_optimization_xgb_bk.py
+/src/stacking/log/
+/src/log/
+*./log

@@ -1,0 +1,10 @@
+2019-11-21 10:04:29,616 - /Users/li/PycharmProjects/MultiFactors/src/stacking/models/m1_xgb.py[line:50] - INFO: CrossValidation。。。。
+2019-11-21 10:06:39,155 - /Users/li/PycharmProjects/MultiFactors/src/stacking/models/m1_xgb.py[line:50] - INFO: CrossValidation。。。。
+2019-11-21 10:07:26,566 - /Users/li/PycharmProjects/MultiFactors/src/stacking/models/m1_xgb.py[line:50] - INFO: CrossValidation。。。。
+2019-11-21 10:33:58,632 - /Users/li/PycharmProjects/MultiFactors/src/stacking/models/m1_xgb.py[line:96] - INFO: NonCrossValidation。。。。
+2019-11-21 10:34:37,451 - /Users/li/PycharmProjects/MultiFactors/src/stacking/models/m1_xgb.py[line:96] - INFO: NonCrossValidation。。。。
+2019-11-21 10:37:50,934 - /Users/li/PycharmProjects/MultiFactors/src/stacking/models/m1_xgb.py[line:96] - INFO: NonCrossValidation。。。。
+2019-11-21 10:38:17,067 - /Users/li/PycharmProjects/MultiFactors/src/stacking/models/m1_xgb.py[line:96] - INFO: NonCrossValidation。。。。
+2019-11-21 10:38:53,317 - /Users/li/PycharmProjects/MultiFactors/src/stacking/models/m1_xgb.py[line:96] - INFO: NonCrossValidation。。。。
+2019-11-21 10:45:23,683 - /Users/li/PycharmProjects/MultiFactors/src/stacking/models/m1_xgb.py[line:96] - INFO: NonCrossValidation。。。。
+2019-11-21 10:45:53,911 - /Users/li/PycharmProjects/MultiFactors/src/stacking/models/m1_xgb.py[line:96] - INFO: NonCrossValidation。。。。
