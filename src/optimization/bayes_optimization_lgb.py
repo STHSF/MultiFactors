@@ -12,6 +12,7 @@ sys.path.append('../')
 sys.path.append('../../')
 sys.path.append('../../../')
 import warnings
+import pandas as pd
 import xgboost as xgb
 import lightgbm as lgb
 from src.utils import log_util
