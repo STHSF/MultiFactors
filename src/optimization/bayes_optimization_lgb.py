@@ -193,12 +193,12 @@ if __name__ == '__main__':
     log.logger.info('{},{},{},{}'.format(np.shape(X_train), np.shape(X_test), np.shape(y_train), np.shape(y_test)))
 
     opt_parameters = {'max_depth': (4, 10),
-                      'num_leaves': (5, 130),
+                      'num_leaves': (30, 60),
                       'min_data_in_leaf': (10, 150),
                       'feature_fraction': (0.7, 1.0),
                       'bagging_fraction': (0.7, 1.0),
-                      'lambda_l1': (0, 1),
-                      'lambda_l2': (0, 1)
+                      'lambda_l1': (0, 1.0),
+                      'lambda_l2': (0, 1.0)
                       }
 
     gp_params = {"init_points": 2, "n_iter": 2, "acq": 'ei', "xi": 0.0, "alpha": 1e-4}
