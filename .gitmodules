@@ -1,0 +1,3 @@
+[submodule "src/stacking/models/libsvm"]
+	path = src/stacking/models/libsvm
+	url = https://github.com/cjlin1/libsvm.git

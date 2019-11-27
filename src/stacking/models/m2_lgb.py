@@ -7,12 +7,10 @@
 @file: m2_lgb.py
 @time: 2019-03-04 11:03
 """
-
 import sys
 sys.path.append('../')
 sys.path.append('../../')
 sys.path.append('../../../')
-
 import time
 import joblib
 import lightgbm as lgb
@@ -21,7 +19,7 @@ from src.utils import log_util
 from src.utils.Evaluation import cls_eva, reg_eva
 
 
-log = log_util.Logger('m2_lightgbm', level='info')
+log = log_util.Logger('LightGBM', level='info')
 
 
 class LightGBM(object):
