@@ -99,7 +99,7 @@ class BayesOptimizationLGBM(BayesOptimizationBase):
             # multi_error指标越小越好，使用AUC则是指标越大越好
             self.BestScore = val_score
             self.BestIter = best_round
-        return (val_score * 2) - 1
+        return val_score
 
     def lgb_no(self, max_depth, num_leaves, min_data_in_leaf, feature_fraction, bagging_fraction, lambda_l1, lambda_l2):
         """
@@ -145,13 +145,13 @@ class BayesOptimizationLGBM(BayesOptimizationBase):
                                early_stopping_rounds=self.early_stop_round)
         best_round = best_model.best_iteration
         # 不同的metric可能有不同的best_score类型，使用时需要注意。
-        best_score = best_model.best_score['valid_1']['multi_logloss']
+        best_score = best_model.best_score['valid_1']['multi_error']
         log.logger.info(' Stopped after %d iterations with train-score = %f ' % (best_round, best_score))
         if best_score < self.BestScore:
             # m_error指标越小越好，使用AUC则是指标越大越好
             self.BestScore = best_score
             self.BestIter = best_round
-        return (best_score * 2) - 1
+        return best_score
 
     def train_opt(self, parameters, gp_params=None):
         """
