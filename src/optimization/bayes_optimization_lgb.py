@@ -135,7 +135,7 @@ class BayesOptimizationLGBM(BayesOptimizationBase):
                                valid_sets=watchlist,
                                early_stopping_rounds=self.early_stop_round)
         best_round = best_model.best_iteration
-        best_score = best_model.best_score
+        best_score = best_model.best_score['valid_1']['multi_logloss']
         print(best_score)
         # log.logger.info(' Stopped after %d iterations with train-score = %f ' % (best_round, best_score))
         if best_score < self.BestScore:
