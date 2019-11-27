@@ -214,7 +214,7 @@ if __name__ == '__main__':
                       'lambda_l2': (0, 6)
                       }
 
-    gp_params = {"init_points": 2, "n_iter": 2, "acq": 'ei', "xi": 0.0, "alpha": 1e-4}
+    gp_params = {"init_points": 2, "n_iter": 20, "acq": 'ei', "xi": 0.0, "alpha": 1e-4}
     opt_lgb = BayesOptimizationLGBM(X_train, y_train, X_test, y_test)
     params_op = opt_lgb.train_opt(opt_parameters, gp_params)
 
