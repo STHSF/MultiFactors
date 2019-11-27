@@ -124,9 +124,10 @@ class BayesOptimizationLGBM(BayesOptimizationBase):
                   'objective': 'multiclass',
                   'num_class': 3,
                   'metric': ['multi_error', 'multi_logloss'],
-                  'learning_rate': 0.01,
-                  "bagging_freq": 1,
-                  "verbosity": -1,
+                  'max_bin': 63,  # 表示 feature 将存入的 bin 的最大数量
+                  'metric_freq': 1,
+                  'learning_rate': 0.05,
+                  'bagging_freq': 5,
                   'num_leaves': int(num_leaves),
                   'min_data_in_leaf': int(min_data_in_leaf),
                   'max_depth': int(max_depth),
