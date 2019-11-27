@@ -11,6 +11,7 @@ import sys
 sys.path.append('../')
 sys.path.append('../../')
 sys.path.append('../../../')
+import pdb
 import warnings
 import pandas as pd
 import lightgbm as lgb
@@ -90,7 +91,7 @@ class BayesOptimizationLGBM(BayesOptimizationBase):
         log.logger.info('cv_result: \n{}'.format(cv_result))
         best_round = len(cv_result['multi_error-mean'])
         val_score = pd.Series(cv_result['multi_error-mean']).min()
-
+        pdb.set_trace()
         log.logger.info('Stopped after %d iterations with train-score = %f val-gini = %f' %
                         (best_round, val_score, (val_score * 2 - 1)))
 
