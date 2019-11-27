@@ -13,7 +13,6 @@ sys.path.append('../../')
 sys.path.append('../../../')
 import warnings
 import pandas as pd
-import xgboost as xgb
 import lightgbm as lgb
 from src.utils import log_util
 from src.optimization.bayes_optimization_base import BayesOptimizationBase
@@ -196,6 +195,6 @@ if __name__ == '__main__':
                        }
 
     gp_params = {"init_points": 2, "n_iter": 2, "acq": 'ei', "xi": 0.0, "alpha": 1e-4}
-    opt_lgb = BayesOptimizationLGBM(X_train, y_train, X_test, y_test, 3)
+    opt_lgb = BayesOptimizationLGBM(X_train, y_train, X_test, y_test)
     params_op = opt_lgb.train_opt(opti_parameters, gp_params)
     log.logger.info('BestScore: {}, BestIter: {}'.format(opt_lgb.BestScore, opt_lgb.BestIter))
