@@ -46,15 +46,17 @@ class BayesOptimizationLGBM(BayesOptimizationBase):
         self.max_round = 2000
         self.early_stop_round = 100
 
-    def lgb_cv(self, max_depth, gamma, min_child_weight, max_delta_step, subsample, colsample_bytree):
+    def lgb_cv(self, max_depth, num_leaves, min_data_in_leaf, feature_fraction, bagging_fraction, lambda_l1, lambda_l2):
         """
         XGBoost model with NonCrossValidation
         :param max_depth:
-        :param gamma:
-        :param min_child_weight:
-        :param max_delta_step:
-        :param subsample:
-        :param colsample_bytree:
+        :param lambda_l2:
+        :param lambda_l1:
+        :param bagging_fraction:
+        :param feature_fraction:
+        :param min_data_in_leaf:
+        :param num_leaves:
+        :param max_depth:
         :return:
         """
 
@@ -64,13 +66,18 @@ class BayesOptimizationLGBM(BayesOptimizationBase):
                   'objective': 'multiclass',
                   'num_class': 3,
                   'metric': ['multi_error', 'multi_logloss'],
+                  'learning_rate': 0.01,
+                  "bagging_freq": 1,
+                  "verbosity": -1,
+                  'num_leaves': int(num_leaves),
+                  'min_data_in_leaf': int(min_data_in_leaf),
                   'max_depth': int(max_depth),
-                  'gamma': int(gamma),
-                  'subsample': max(min(subsample, 1), 0),
-                  'colsample_bytree': max(min(colsample_bytree, 1), 0),
-                  'min_child_weight': int(min_child_weight),
-                  'max_delta_step': int(max_delta_step),
-                  'seed': 1001}
+                  "feature_fraction": feature_fraction,
+                  "bagging_fraction": bagging_fraction,
+                  "bagging_seed": 11,
+                  "lambda_l1": lambda_l1,
+                  "lambda_l2": lambda_l2,
+                  }
 
         cv_result = lgb.cv(params,
                            d_train,
@@ -93,15 +100,16 @@ class BayesOptimizationLGBM(BayesOptimizationBase):
             self.BestIter = best_round
         return (val_score * 2) - 1
 
-    def lgb_no(self, max_depth, gamma, min_child_weight, max_delta_step, subsample, colsample_bytree):
+    def lgb_no(self, max_depth, num_leaves, min_data_in_leaf, feature_fraction, bagging_fraction, lambda_l1, lambda_l2):
         """
         XGBoost model with NonCrossValidation
+        :param lambda_l2:
+        :param lambda_l1:
+        :param bagging_fraction:
+        :param feature_fraction:
+        :param min_data_in_leaf:
+        :param num_leaves:
         :param max_depth:
-        :param gamma:
-        :param min_child_weight:
-        :param max_delta_step:
-        :param subsample:
-        :param colsample_bytree:
         :return:
         """
         d_train = lgb.Dataset(self.X_train, label=self.y_train)
@@ -116,13 +124,18 @@ class BayesOptimizationLGBM(BayesOptimizationBase):
                   'objective': 'multiclass',
                   'num_class': 3,
                   'metric': ['multi_error', 'multi_logloss'],
+                  'learning_rate': 0.01,
+                  "bagging_freq": 1,
+                  "verbosity": -1,
+                  'num_leaves': int(num_leaves),
+                  'min_data_in_leaf': int(min_data_in_leaf),
                   'max_depth': int(max_depth),
-                  'gamma': int(gamma),
-                  'subsample': max(min(subsample, 1), 0),
-                  'colsample_bytree': max(min(colsample_bytree, 1), 0),
-                  'min_child_weight': int(min_child_weight),
-                  'max_delta_step': int(max_delta_step),
-                  'seed': 1001}
+                  "feature_fraction": feature_fraction,
+                  "bagging_fraction": bagging_fraction,
+                  "bagging_seed": 11,
+                  "lambda_l1": lambda_l1,
+                  "lambda_l2": lambda_l2,
+                  }
         best_model = lgb.train(params,
                                d_train,
                                num_boost_round=self.max_round,
@@ -159,11 +172,8 @@ class BayesOptimizationLGBM(BayesOptimizationBase):
         params_opt = super().train_opt(parameters, gp_params)
         # 注意优化参数的实际取值范围, 与需要优化的参数一一对应即可
         params_opt['max_depth'] = int(params_opt['max_depth'])
-        params_opt['gamma'] = int(params_opt['gamma'])
-        params_opt['min_child_weight'] = int(params_opt['min_child_weight'])
-        params_opt['max_delta_step'] = int(params_opt['max_delta_step'])
-        params_opt['subsample'] = max(min(params_opt['subsample'], 1), 0)
-        params_opt['colsample_bytree'] = max(min(params_opt['colsample_bytree'], 1), 0)
+        params_opt['num_leaves'] = int(params_opt['num_leaves'])
+        params_opt['min_data_in_leaf'] = int(params_opt['min_data_in_leaf'])
         return params_opt
 
 
@@ -180,12 +190,13 @@ if __name__ == '__main__':
     X_train, X_test, y_train, y_test = train_test_split(data, target, test_size=0.1)
     log.logger.info('{},{},{},{}'.format(np.shape(X_train), np.shape(X_test), np.shape(y_train), np.shape(y_test)))
 
-    opt_parameters = {'max_depth': (2, 12),
-                      'gamma': (0.001, 10.0),
-                      'min_child_weight': (0, 20),
-                      'max_delta_step': (0, 10),
-                      'subsample': (0.01, 0.99),
-                      'colsample_bytree': (0.01, 0.99)
+    opt_parameters = {'max_depth': (4, 10),
+                      'num_leaves': (5, 130),
+                      'min_data_in_leaf': (10, 150),
+                      'feature_fraction': (0.7, 1.0),
+                      'bagging_fraction': (0.7, 1.0),
+                      'lambda_l1': (0, 6),
+                      'lambda_l2': (0, 6)
                       }
 
     gp_params = {"init_points": 2, "n_iter": 2, "acq": 'ei', "xi": 0.0, "alpha": 1e-4}
