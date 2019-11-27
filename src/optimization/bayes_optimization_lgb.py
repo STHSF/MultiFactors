@@ -87,7 +87,7 @@ class BayesOptimizationLGBM(BayesOptimizationBase):
                            early_stopping_rounds=self.early_stop_round,
                            show_stdv=True)
 
-        log.logger.info(cv_result)
+        log.logger.info('cv_result: \n{}'.format(cv_result))
         best_round = len(cv_result['multi_error-mean'])
         val_score = pd.Series(cv_result['multi_error-mean']).min()
 
