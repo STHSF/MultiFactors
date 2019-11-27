@@ -94,6 +94,5 @@ class ClassificationConfig(object):
         self.seed = 3
         self.save_model_path = 'bst_model/lgb/lgb.txt'
 
-
 regress_conf = RegressionConfig()
 classify_conf = ClassificationConfig()

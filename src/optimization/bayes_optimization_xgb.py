@@ -24,6 +24,7 @@ class BayesOptimizationXGB(BayesOptimizationBase):
     """
     基于贝叶斯优化的XGBoost参数寻优过程
     注意不同的eval_metric使用的best_score不一样，需要自己调整。
+    同样注意贝叶斯优化为最大化目标值，所以在选取best_score的指标时，需要注意方向。
     """
 
     def __init__(self, X_train, y_train, X_test=None, y_test=None, kfolds=None):
@@ -96,7 +97,7 @@ class BayesOptimizationXGB(BayesOptimizationBase):
             # merror指标越小越好，使用AUC则是指标越大越好
             self.BestScore = val_score
             self.BestIter = len(xgbc)
-        return (val_score * 2) - 1
+        return -val_score
 
     def xgb_no(self, max_depth, gamma, min_child_weight, max_delta_step, subsample, colsample_bytree):
         """
@@ -130,20 +131,20 @@ class BayesOptimizationXGB(BayesOptimizationBase):
                   'max_delta_step': int(max_delta_step),
                   'seed': 1001}
 
-        params = {
-            'objective': 'reg:linear',
-            'eval_metric': ['rmse', 'logloss'],
-            'booster': 'dart',
-            'nthread': 4,
-            'silent': 0,
-            'eta': 0.1,
-            'max_depth': int(max_depth),
-            'gamma': int(gamma),
-            'subsample': max(min(subsample, 1), 0),
-            'colsample_bytree': max(min(colsample_bytree, 1), 0),
-            'min_child_weight': int(min_child_weight),
-            'max_delta_step': int(max_delta_step),
-            'seed': 1001}
+        # params = {
+        #     'objective': 'reg:linear',
+        #     'eval_metric': ['rmse', 'logloss'],
+        #     'booster': 'dart',
+        #     'nthread': 4,
+        #     'silent': 0,
+        #     'eta': 0.1,
+        #     'max_depth': int(max_depth),
+        #     'gamma': int(gamma),
+        #     'subsample': max(min(subsample, 1), 0),
+        #     'colsample_bytree': max(min(colsample_bytree, 1), 0),
+        #     'min_child_weight': int(min_child_weight),
+        #     'max_delta_step': int(max_delta_step),
+        #     'seed': 1001}
 
         best_model = xgb.train(params=params,
                                dtrain=data_train,
@@ -158,7 +159,8 @@ class BayesOptimizationXGB(BayesOptimizationBase):
             # m_error指标越小越好，使用AUC则是指标越大越好
             self.BestScore = best_score
             self.BestIter = best_round
-        return (best_score * 2) - 1
+        # 注意，贝叶斯优化的目标是最大化best_score, 如果模型的best_score为error或者logloss时，优化目标改为相反数
+        return -best_score
 
     def train_opt(self, parameters, gp_params=None):
         """

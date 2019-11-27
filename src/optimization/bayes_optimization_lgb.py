@@ -25,6 +25,7 @@ class BayesOptimizationLGBM(BayesOptimizationBase):
     """
     基于贝叶斯优化的lightGBM参数寻优过程
     注意不同的eval_metric使用的best_score不一样，需要自己调整。
+    同样注意贝叶斯优化为最大化目标值，所以在选取best_score的指标时，需要注意方向。
     """
 
     def __init__(self, X_train, y_train, X_valid=None, y_valid=None, kfolds=None):
@@ -99,7 +100,7 @@ class BayesOptimizationLGBM(BayesOptimizationBase):
             # multi_error指标越小越好，使用AUC则是指标越大越好
             self.BestScore = val_score
             self.BestIter = best_round
-        return val_score
+        return -val_score
 
     def lgb_no(self, max_depth, num_leaves, min_data_in_leaf, feature_fraction, bagging_fraction, lambda_l1, lambda_l2):
         """
@@ -152,7 +153,7 @@ class BayesOptimizationLGBM(BayesOptimizationBase):
             # m_error指标越小越好，使用AUC则是指标越大越好
             self.BestScore = best_score
             self.BestIter = best_round
-        return best_score
+        return -best_score
 
     def train_opt(self, parameters, gp_params=None):
         """
@@ -194,7 +195,7 @@ if __name__ == '__main__':
     log.logger.info('{},{},{},{}'.format(np.shape(X_train), np.shape(X_test), np.shape(y_train), np.shape(y_test)))
 
     opt_parameters = {'max_depth': (4, 10),
-                      'num_leaves': (30, 60),
+                      'num_leaves': (10, 130),
                       'min_data_in_leaf': (10, 150),
                       'feature_fraction': (0.7, 1.0),
                       'bagging_fraction': (0.7, 1.0),
