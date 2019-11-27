@@ -44,6 +44,8 @@ class BayesOptimizationXGB(BayesOptimizationBase):
         self.X_test = X_test
         self.y_test = y_test
         self.folds = kfolds
+        self.max_round = 1000
+        self.early_stop_round = 100
 
     def xgb_cv(self, max_depth, gamma, min_child_weight, max_delta_step, subsample, colsample_bytree):
         """
@@ -73,10 +75,10 @@ class BayesOptimizationXGB(BayesOptimizationBase):
 
         xgbc = xgb.cv(paramt,
                       data_train,
-                      num_boost_round=20000,
+                      num_boost_round=self.max_round,
                       stratified=True,
                       nfold=self.folds,
-                      early_stopping_rounds=100,
+                      early_stopping_rounds=self.early_stop_round,
                       verbose_eval=True,
                       show_stdv=True)
         log.logger.info('params: \n{}'.format(params))
@@ -145,9 +147,9 @@ class BayesOptimizationXGB(BayesOptimizationBase):
         #     'seed': 1001}
         best_model = xgb.train(params=params,
                                dtrain=data_train,
-                               num_boost_round=20,
+                               num_boost_round=self.max_round,
                                evals=watchlist,
-                               early_stopping_rounds=10)
+                               early_stopping_rounds=self.early_stop_round)
         best_round = best_model.best_iteration
         best_score = best_model.best_score
         log.logger.info('params: \n{}'.format(params))
