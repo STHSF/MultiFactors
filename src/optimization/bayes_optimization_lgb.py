@@ -137,7 +137,7 @@ class BayesOptimizationLGBM(BayesOptimizationBase):
         best_round = best_model.best_iteration
         best_score = best_model.best_score
 
-        log.logger.info(' Stopped after %d iterations with train-score = %f train-gini = %f' % (best_round, best_score, (best_score * 2 - 1)))
+        log.logger.info(' Stopped after %d iterations with train-score = %f ' % (best_round, best_score))
         if best_score < self.BestScore:
             # m_error指标越小越好，使用AUC则是指标越大越好
             self.BestScore = best_score
