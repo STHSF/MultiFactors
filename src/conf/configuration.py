@@ -108,7 +108,7 @@ class ClassificationConfig(object):
 
         self.max_round = 10000
         self.cv_folds = None
-        self.early_stop_round = 300
+        self.early_stop_round = 3000
         self.seed = 3
 
 
