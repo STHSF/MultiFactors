@@ -39,7 +39,7 @@ class RegressionConfig(object):
     def lgb_config_r(self):
         self.params = {
             'task': 'train',
-            'boosting_type': 'gbdt',  # 设置提升类型
+            'boosting': 'gbdt',  # 设置提升类型
             'objective': 'regression',  # 目标函数
             'metric': {'l2', 'auc'},  # 评估函数
             'num_leaves': 31,  # 叶子节点数

@@ -201,10 +201,10 @@ if __name__ == '__main__':
     opt_parameters = {'max_depth': (4, 10),
                       'num_leaves': (10, 130),
                       'min_data_in_leaf': (10, 150),
-                      'feature_fraction': (0.7, 1.0),
-                      'bagging_fraction': (0.7, 1.0),
-                      'lambda_l1': (0, 1.0),
-                      'lambda_l2': (0, 1.0)
+                      'feature_fraction': (0.1, 1.0),
+                      'bagging_fraction': (0.1, 1.0),
+                      'lambda_l1': (0, 10),
+                      'lambda_l2': (0, 10)
                       }
 
     gp_params = {"init_points": 2, "n_iter": 2, "acq": 'ei', "xi": 0.0, "alpha": 1e-4}
