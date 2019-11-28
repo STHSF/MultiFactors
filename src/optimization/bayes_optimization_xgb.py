@@ -43,8 +43,8 @@ class BayesOptimizationXGB(BayesOptimizationBase):
         self.X_test = X_test
         self.y_test = y_test
         self.folds = kfolds
-        self.max_round = 1000
-        self.early_stop_round = 100
+        self.max_round = 10000
+        self.early_stop_round = 300
 
     def xgb_cv(self, max_depth, gamma, min_child_weight, max_delta_step, subsample, colsample_bytree):
         """
@@ -85,7 +85,7 @@ class BayesOptimizationXGB(BayesOptimizationBase):
         val_score = cv_result['test-mlogloss-mean'].iloc[-1]
         train_score = cv_result['train-mlogloss-mean'].iloc[-1]
         log.logger.info(
-            'Stopped after %d iterations with train-score = %f val-score = %f ( diff = %f ) train_-gini = %f '
+            'Stopped after %d iterations with train-score= %f val-score= %f (diff= %f) train-gini= %f '
             'val-gini = %f' % (len(cv_result),
                                train_score,
                                val_score,
