@@ -196,7 +196,7 @@ if __name__ == '__main__':
     import numpy as np
     from sklearn.datasets import load_iris
     from sklearn.model_selection import train_test_split
-    from src.stacking.models.m1_xgb import *
+    from src.stacking.models.m1_xgb import XGBooster, xgb_predict
     from src.conf.configuration import classify_conf
 
     iris = load_iris()
