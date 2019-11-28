@@ -50,7 +50,7 @@ class RegressionConfig(object):
             'lambda_l1': 0.90,  # L1 正则化
             'lambda_l2': 0.95,  # L2 正则化
             'bagging_seed': 100,  # 随机种子,light中默认为100
-            'verbose': 1  # <0 显示致命的, =0 显示错误 (警告), >0 显示信息
+            'verbosity': -1  # <0 显示致命的, =0 显示错误 (警告), >0 显示信息
         }
         self.max_round = 500
         self.cv_folds = None
@@ -70,7 +70,7 @@ class ClassificationConfig(object):
 
     def lgb_config_c(self):
         self.params = {'task': 'train',
-                       'boosting': 'dart',
+                       'boosting': 'gbdt',
                        'objective': 'multiclass',
                        'num_class': 3,
                        'metric': ['multi_error', 'multi_logloss'],
@@ -84,6 +84,7 @@ class ClassificationConfig(object):
                        'bagging_freq': 5,
                        'lambda_l1': 0.9,
                        'lambda_l2': 0.95,  # L2正则化系数
+                       'verbosity': -1,
                        # 'device': 'gpu',  # 默认使用集显
                        # 'gpu_platform_id': 1,  # 确定是使用集成显卡还是独立显卡，0代表独显，1代表独显
                        # 'gpu_device_id': 0  # id为0的独显
