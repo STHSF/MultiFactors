@@ -130,6 +130,7 @@ class BayesOptimizationLGBM(BayesOptimizationBase):
                   'metric_freq': 1,
                   'learning_rate': 0.05,
                   'bagging_freq': 5,
+                  'verbosity': -1,
                   'num_leaves': int(num_leaves),
                   'min_data_in_leaf': int(min_data_in_leaf),
                   'max_depth': int(max_depth),
