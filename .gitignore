@@ -136,3 +136,4 @@ src/data/dataprepare/zz500_all.pkl
 /src/stacking/log/
 /src/log/
 *./log
+/src/optimization/bayes_opti.py

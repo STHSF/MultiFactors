@@ -66,6 +66,7 @@ class ClassificationConfig(object):
         self.early_stop_round = None
         self.seed = None
         self.save_model_path = None
+        self.ts_cv_folds = None
 
     def lgb_config_c(self):
         self.params = {'task': 'train',
@@ -93,6 +94,22 @@ class ClassificationConfig(object):
         self.early_stop_round = 30
         self.seed = 3
         self.save_model_path = 'bst_model/lgb/lgb.txt'
+
+    def xgb_config_c(self):
+        self.params = {'objective': 'multi:softmax',
+                       'num_class': 3,
+                       'nthread': 4,
+                       'silent': 0,
+                       'eta': 0.1,
+                       "eval_metric": ["mlogloss", "merror"],
+                       'learning_rate': 0.01,
+                       'max_depth': 5,
+                       }
+
+        self.max_round = 10000
+        self.cv_folds = None
+        self.early_stop_round = 30
+        self.seed = 3
 
 
 regress_conf = RegressionConfig()
