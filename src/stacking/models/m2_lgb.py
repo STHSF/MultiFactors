@@ -49,7 +49,7 @@ class LightGBM(object):
             best_model = lgb.train(self.params,
                                    d_train,
                                    num_boost_round=self.max_round,
-                                   evals_result=watchlist,
+                                   valid_sets=watchlist,
                                    early_stopping_rounds=self.early_stop_round,
                                    verbose_eval=False,
                                    )
