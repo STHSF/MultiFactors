@@ -49,8 +49,10 @@ class LightGBM(object):
             best_model = lgb.train(self.params,
                                    d_train,
                                    num_boost_round=self.max_round,
-                                   valid_sets=watchlist,
-                                   early_stopping_rounds=self.early_stop_round)
+                                   evals_result=watchlist,
+                                   early_stopping_rounds=self.early_stop_round,
+                                   verbose_eval=False,
+                                   )
             best_round = best_model.best_iteration
             best_score['best_score'] = best_model.best_score
             log.logger.info('best_score: \n{}'.format(best_model.best_score))
