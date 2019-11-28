@@ -118,7 +118,7 @@ class LightGBM(object):
                            num_boost_round=self.max_round,
                            nfold=self.cv_folds,
                            seed=self.seed,
-                           verbose_eval=True,
+                           verbose_eval=False,
                            early_stopping_rounds=self.early_stop_round,
                            show_stdv=False)
         return cv_result
