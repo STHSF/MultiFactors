@@ -85,7 +85,7 @@ class BayesOptimizationLGBM(BayesOptimizationBase):
                            d_train,
                            num_boost_round=self.max_round,
                            nfold=self.folds,
-                           verbose_eval=True,
+                           verbose_eval=False,
                            early_stopping_rounds=self.early_stop_round,
                            show_stdv=True)
 
@@ -211,7 +211,7 @@ if __name__ == '__main__':
                       'lambda_l2': (0, 10)
                       }
 
-    gp_params = {"init_points": 2, "n_iter": 2, "acq": 'ei', "xi": 0.0, "alpha": 1e-4}
+    gp_params = {"init_points": 10, "n_iter": 50, "acq": 'ei', "xi": 0.0, "alpha": 1e-4}
     opt_lgb = BayesOptimizationLGBM(X_train, y_train, X_test, y_test)
     params_op = opt_lgb.train_opt(opt_parameters, gp_params)
     log.logger.info('Best params: \n{}'.format(params_op))
