@@ -70,7 +70,7 @@ class ClassificationConfig(object):
 
     def lgb_config_c(self):
         self.params = {'task': 'train',
-                       'boosting': 'gbdt',
+                       'boosting': 'dart',
                        'objective': 'multiclass',
                        'num_class': 3,
                        'metric': ['multi_error', 'multi_logloss'],
