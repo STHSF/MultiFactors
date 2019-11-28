@@ -33,6 +33,12 @@ class RegressionEvaluate(object):
     def mae(y_true, y_pred):
         return metrics.mean_absolute_error(y_true, y_pred)
 
+    @staticmethod
+    def r_square_error(y_true, y_pred):
+        r_square_error_ = metrics.r2_score(y_true, y_pred)
+        _r_square_error = 1 - metrics.mean_squared_error(y_true, y_pred) / np.var(y_true)
+        return _r_square_error
+
 
 class ClassifyEvaluate(object):
 

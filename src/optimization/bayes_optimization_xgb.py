@@ -130,7 +130,6 @@ class BayesOptimizationXGB(BayesOptimizationBase):
                   'min_child_weight': int(min_child_weight),
                   'max_delta_step': int(max_delta_step),
                   'seed': 1001}
-
         # params = {
         #     'objective': 'reg:linear',
         #     'eval_metric': ['rmse', 'logloss'],
@@ -197,12 +196,15 @@ if __name__ == '__main__':
     import numpy as np
     from sklearn.datasets import load_iris
     from sklearn.model_selection import train_test_split
+    from src.stacking.models.m1_xgb import *
+    from src.conf.configuration import classify_conf
 
     iris = load_iris()
     data = iris.data
     target = iris.target
     X_train, X_test, y_train, y_test = train_test_split(data, target, test_size=0.1)
     log.logger.info('{},{},{},{}'.format(np.shape(X_train), np.shape(X_test), np.shape(y_train), np.shape(y_test)))
+    classify_conf.xgb_config_c()
 
     opti_parameters = {'max_depth': (2, 12),
                        'gamma': (0.001, 10.0),
@@ -216,3 +218,12 @@ if __name__ == '__main__':
     params_op = opt_xgb.train_opt(opti_parameters, gp_params=None)
     log.logger.info('Best params: \n{}'.format(params_op))
     log.logger.info('BestScore: {}, BestIter: {}'.format(opt_xgb.BestScore, opt_xgb.BestIter))
+
+    # update hyperparameters
+    classify_conf.params.update(params_op)
+    # train model
+    xgb = XGBooster(classify_conf)
+    best_score, best_round, best_model = xgb.fit(X_train, y_train)
+    # eval
+    xgb_predict(best_model, classify_conf, X_test, y_test)
+

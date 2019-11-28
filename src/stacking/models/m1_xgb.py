@@ -24,6 +24,7 @@ import pandas as pd
 from sklearn.externals import joblib
 from sklearn.model_selection import train_test_split, TimeSeriesSplit
 from sklearn.metrics import mean_squared_error, r2_score
+from src.utils.Evaluation import cls_eva, reg_eva
 import matplotlib.pyplot as plt
 pd.set_option('display.max_rows', None, 'display.max_columns', None, "display.max_colwidth", 1000, 'display.width', 1000)
 
@@ -177,21 +178,36 @@ def ic_cal(y_pred: np.ndarray, y_test: np.ndarray) -> float:
     return np.corrcoef(y_pred, y_test)[0, 1]
 
 
-def xgb_predict(model, x_test, y_test=None, save_result_path=None):
+def xgb_predict(model, conf, x_test, y_test=None, save_result_path=None):
+
     d_test = xgb.DMatrix(x_test)
-    # 输出
-    y_pred = model.predict(d_test)
-    if y_test is None:
-        return y_pred
-    rmse = np.sqrt(mean_squared_error(y_test, y_pred))
-    print('rmse_of_pred: %s' % rmse)
-    r_square_ = r2_score(y_test, y_pred)
-    r_square = 1 - mean_squared_error(y_test, y_pred)/ np.var(y_test)
-    print('r_square_of_pred: %s' % r_square)
-    print('r_square_of_pred: %s' % r_square_)
-    print(y_pred), print(y_test)
-    # PLOT
-    plot_figure(y_pred, y_test, 'xgb_predict')
+
+    if conf.params['objective'] == 'multi:softmax':
+        y_pred = model.predict(d_test)
+        if y_test is None:
+            log.logger.info(y_test)
+        else:
+            log.logger.info(y_test)
+            log.logger.info(y_pred)
+            log.logger.info('The Accuracy:\t{}'.format(cls_eva.auc(y_test, y_pred)))
+    elif conf.params['objective'] == "regression":
+        y_pred = model.predict(d_test)
+        if y_test is None:
+            log.logger.info('y_pre: {}'.format(y_pred))
+        else:
+            log.logger.info('y_pre: {}'.format(y_pred))
+            log.logger.info('y_test: {}'.format(y_test))
+
+            rmse = reg_eva.rmse(y_test, y_pred)
+            print('rmse: %s' % rmse)
+            r2_sc = reg_eva.r_square_error(y_test, y_pred)
+            print('r_square_error: %s' % r2_sc)
+            print(y_pred), print(y_test)
+            # PLOT
+            plot_figure(y_pred, y_test, 'xgb_regression')
+    else:
+        log.logger.error('CAN NOT FIND OBJECTIVE PARAMS')
+        y_pred = None
 
     if save_result_path:
         df_reult = pd.DataFrame(x_test)
