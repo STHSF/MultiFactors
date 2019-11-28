@@ -198,21 +198,22 @@ if __name__ == '__main__':
     classify_conf.lgb_config_c()
     log.logger.info('Model Params pre:\n{}'.format(classify_conf.params))
 
-    # opt_parameters = {'max_depth': (4, 10),
-    #                   'num_leaves': (10, 130),
-    #                   'min_data_in_leaf': (10, 150),
-    #                   'feature_fraction': (0.7, 1.0),
-    #                   'bagging_fraction': (0.7, 1.0),
-    #                   'lambda_l1': (0, 1.0),
-    #                   'lambda_l2': (0, 1.0)}
-    #
-    # gp_params = {"init_points": 2, "n_iter": 2, "acq": 'ei', "xi": 0.0, "alpha": 1e-4}
-    # opt_lgb = BayesOptimizationLGBM(X_train, y_train, X_test, y_test)
-    # params_op = opt_lgb.train_opt(opt_parameters, gp_params)
-    # log.logger.info('Best params: \n{}'.format(params_op))
-    # log.logger.info('BestScore: {}, BestIter: {}'.format(opt_lgb.BestScore, opt_lgb.BestIter))
-    # classify_conf.params.update(params_op)
-    # log.logger.info('Model Params:\n{}'.format(classify_conf.params))
+    opt_parameters = {'max_depth': (4, 10),
+                      'num_leaves': (10, 130),
+                      'min_data_in_leaf': (10, 150),
+                      'feature_fraction': (0.7, 1.0),
+                      'bagging_fraction': (0.7, 1.0),
+                      'lambda_l1': (0, 1.0),
+                      'lambda_l2': (0, 1.0)
+                      }
+
+    gp_params = {"init_points": 2, "n_iter": 2, "acq": 'ei', "xi": 0.0, "alpha": 1e-4}
+    opt_lgb = BayesOptimizationLGBM(X_train, y_train, X_test, y_test)
+    params_op = opt_lgb.train_opt(opt_parameters, gp_params)
+    log.logger.info('Best params: \n{}'.format(params_op))
+    log.logger.info('BestScore: {}, BestIter: {}'.format(opt_lgb.BestScore, opt_lgb.BestIter))
+    classify_conf.params.update(params_op)
+    log.logger.info('Model Params:\n{}'.format(classify_conf.params))
 
     # # NonCrossValidation Test
     lgbm = LightGBM(classify_conf)
