@@ -129,13 +129,13 @@ class BayesOptimizationLGBM(BayesOptimizationBase):
                   'max_bin': 63,  # 表示 feature 将存入的 bin 的最大数量
                   'metric_freq': 1,
                   'learning_rate': 0.05,
-                  'bagging_freq': 5,
                   'verbosity': -1,
                   'num_leaves': int(num_leaves),
                   'min_data_in_leaf': int(min_data_in_leaf),
                   'max_depth': int(max_depth),
                   "feature_fraction": feature_fraction,
                   "bagging_fraction": bagging_fraction,
+                  'bagging_freq': 5,
                   "bagging_seed": 11,
                   "lambda_l1": lambda_l1,
                   "lambda_l2": lambda_l2,
@@ -145,7 +145,10 @@ class BayesOptimizationLGBM(BayesOptimizationBase):
                                d_train,
                                num_boost_round=self.max_round,
                                valid_sets=watchlist,
-                               early_stopping_rounds=self.early_stop_round)
+                               early_stopping_rounds=self.early_stop_round,
+                               verbose_eval=False,
+                               )
+
         best_round = best_model.best_iteration
         # 不同的metric可能有不同的best_score类型，使用时需要注意。
         best_score = best_model.best_score['valid_1']['multi_error']
