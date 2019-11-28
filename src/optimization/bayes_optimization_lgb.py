@@ -186,13 +186,17 @@ if __name__ == '__main__':
     log.logger.info('Classify Parameter Optimization Test')
     import numpy as np
     from sklearn.datasets import load_iris
+    from src.stacking.models.m2_lgb import *
     from sklearn.model_selection import train_test_split
+    from src.conf.configuration import classify_conf, regress_conf
 
     iris = load_iris()
     data = iris.data
     target = iris.target
     X_train, X_test, y_train, y_test = train_test_split(data, target, test_size=0.1)
     log.logger.info('{},{},{},{}'.format(np.shape(X_train), np.shape(X_test), np.shape(y_train), np.shape(y_test)))
+    classify_conf.lgb_config_c()
+    log.logger.info('Model Params pre:\n{}'.format(classify_conf.params))
 
     opt_parameters = {'max_depth': (4, 10),
                       'num_leaves': (10, 130),
@@ -208,5 +212,10 @@ if __name__ == '__main__':
     log.logger.info('Best params: \n{}'.format(params_op))
     log.logger.info('BestScore: {}, BestIter: {}'.format(opt_lgb.BestScore, opt_lgb.BestIter))
 
-
+    classify_conf.params.update(params_op)
+    log.logger.info('Model Params:\n{}'.format(classify_conf.params))
+    # # NonCrossValidation Test
+    lgbm = LightGBM(classify_conf)
+    best_model, best_score, best_round = lgbm.fit(X_train, y_train)
+    lgb_predict(best_model, X_test, y_test, classify_conf)
 
