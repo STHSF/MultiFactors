@@ -213,7 +213,7 @@ if __name__ == '__main__':
                       'colsample_bytree': (0.01, 0.99)}
 
     gp_params = {"init_points": 2, "n_iter": 20, "acq": 'ei', "xi": 0.0, "alpha": 1e-4}
-    opt_xgb = BayesOptimizationXGB(X_train, y_train, X_test, y_test)
+    opt_xgb = BayesOptimizationXGB(X_train, y_train, X_test, y_test, kfolds=5)
     params_op = opt_xgb.train_opt(opt_parameters, gp_params=None)
     log.logger.info('Best params: \n{}'.format(params_op))
     log.logger.info('BestScore: {}, BestIter: {}'.format(opt_xgb.BestScore, opt_xgb.BestIter))
