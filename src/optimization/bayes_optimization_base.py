@@ -25,7 +25,7 @@ class BayesOptimizationBase(object):
 
     def black_box_function(self):
         """
-        初始化目标函数
+        初始化目标函数， 贝叶斯优化会最大化目标函数的返回值，所以在定义优化目标函数的时候注意返回值的方向。
         """
         return
 
