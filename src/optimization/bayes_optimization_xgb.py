@@ -70,22 +70,23 @@ class BayesOptimizationXGB(BayesOptimizationBase):
                   'colsample_bytree': max(min(colsample_bytree, 1), 0),
                   'min_child_weight': int(min_child_weight),
                   'max_delta_step': int(max_delta_step),
-                  'seed': 1001}
+                  'seed': 30}
 
-        xgbc = xgb.cv(params,
-                      data_train,
-                      num_boost_round=self.max_round,
-                      stratified=True,
-                      nfold=self.folds,
-                      early_stopping_rounds=self.early_stop_round,
-                      verbose_eval=True,
-                      show_stdv=True)
+        cv_result = xgb.cv(params,
+                           data_train,
+                           num_boost_round=self.max_round,
+                           stratified=True,
+                           nfold=self.folds,
+                           early_stopping_rounds=self.early_stop_round,
+                           verbose_eval=True,
+                           show_stdv=True)
+
         log.logger.info('params: \n{}'.format(params))
-        val_score = xgbc['test-merror-mean'].iloc[-1]
-        train_score = xgbc['train-merror-mean'].iloc[-1]
+        val_score = cv_result['test-mlogloss-mean'].iloc[-1]
+        train_score = cv_result['train-mlogloss-mean'].iloc[-1]
         log.logger.info(
             'Stopped after %d iterations with train-score = %f val-score = %f ( diff = %f ) train_-gini = %f '
-            'val-gini = %f' % (len(xgbc),
+            'val-gini = %f' % (len(cv_result),
                                train_score,
                                val_score,
                                (train_score - val_score),
@@ -95,7 +96,7 @@ class BayesOptimizationXGB(BayesOptimizationBase):
         if val_score < self.BestScore:
             # merror指标越小越好，使用AUC则是指标越大越好
             self.BestScore = val_score
-            self.BestIter = len(xgbc)
+            self.BestIter = len(cv_result)
         return -val_score
 
     def xgb_no(self, max_depth, gamma, min_child_weight, max_delta_step, subsample, colsample_bytree):
