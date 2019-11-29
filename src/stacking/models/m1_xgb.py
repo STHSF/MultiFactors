@@ -38,7 +38,7 @@ class XGBooster(object):
         self.cv_folds = args.cv_folds
         self.ts_cv_folds = args.ts_cv_folds
         self.early_stop_round = args.early_stop_round
-        self.seed = args.seed
+        self.cv_seed = args.cv_seed
         self.save_model_path = args.save_model_path
 
     def fit(self, x_train, y_train, x_val=None, y_val=None):
@@ -102,8 +102,8 @@ class XGBooster(object):
                 x_valid, y_valid = x_val, y_val
             d_train = xgb.DMatrix(x_train, label=y_train)
             d_valid = xgb.DMatrix(x_valid, label=y_valid)
-            watchlist = [(d_train, "train")]
-            # watchlist = [(d_train, "train"), (d_valid, "valid")]
+            # watchlist = [(d_train, "train")]
+            watchlist = [(d_train, "train"), (d_valid, "valid")]
             best_model = xgb.train(params=self.xgb_params,
                                    dtrain=d_train,
                                    num_boost_round=self.num_boost_round,
@@ -123,7 +123,7 @@ class XGBooster(object):
                            dtrain,
                            num_boost_round=self.num_boost_round,
                            nfold=self.cv_folds,
-                           seed=self.seed,
+                           seed=self.cv_seed,
                            verbose_eval=True,
                            early_stopping_rounds=self.early_stop_round,
                            show_stdv=False,

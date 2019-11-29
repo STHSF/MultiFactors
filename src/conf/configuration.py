@@ -13,16 +13,16 @@ class RegressionConfig(object):
     def __init__(self):
         self.params = {}
         self.max_round = None
-        self.cv_folds = None
         self.early_stop_round = None
-        self.seed = None
+        self.cv_folds = None
+        self.cv_seed = None
         self.save_model_path = None
         self.ts_cv_folds = None
 
     def xgb_config_r(self):
         # 回归
-        self.params = {'booster': 'dart',
-                       'objective': 'reg:linear',
+        self.params = {'booster': 'gbtree',
+                       'objective': 'reg:squarederror',
                        'eval_metric': ['rmse', 'logloss'],
                        'learning_rate': 0.01,
                        'max_depth': 5,
@@ -30,9 +30,9 @@ class RegressionConfig(object):
                        'silent': 1,
                        }
         self.max_round = 10000
-        self.cv_folds = None
         self.early_stop_round = 1000
-        self.seed = 100
+        self.cv_folds = None
+        self.cv_seed = 100
         self.save_model_path = '../bst_model/xgb/'
 
     def lgb_config_r(self):
@@ -52,9 +52,9 @@ class RegressionConfig(object):
             'verbosity': -1  # <0 显示致命的, =0 显示错误 (警告), >0 显示信息
         }
         self.max_round = 500
-        self.cv_folds = None
         self.early_stop_round = 10
-        self.seed = 3
+        self.cv_folds = None
+        self.cv_seed = 3
 
 
 class ClassificationConfig(object):

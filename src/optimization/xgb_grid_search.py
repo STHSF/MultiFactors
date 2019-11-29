@@ -38,7 +38,7 @@ if __name__ == '__main__':
 
     cv_params = {'n_estimators': [400, 500, 600, 700, 800]}
 
-    # other_params = {'learning_rate': 0.1, 'n_estimators': 500, 'max_depth': 5, 'min_child_weight': 1, 'seed': 0,
+    # other_params = {'learning_rate': 0.1, 'n_estimators': 500, 'max_depth': 5, 'min_child_weight': 1, 'cv_seed': 0,
     #                 'subsample': 0.8, 'colsample_bytree': 0.8, 'gamma': 0, 'reg_alpha': 0, 'reg_lambda': 1}
 
     other_params = {"objective": "multi:softmax",
