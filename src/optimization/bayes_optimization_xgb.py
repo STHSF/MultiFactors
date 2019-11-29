@@ -117,33 +117,33 @@ class BayesOptimizationXGB(BayesOptimizationBase):
         else:
             watchlist = [(data_train, 'train')]
 
-        params = {'objective': 'multi:softmax',
-                  'num_class': 3,
-                  'nthread': 4,
-                  'silent': 0,
-                  'eta': 0.1,
-                  "eval_metric": ["mlogloss", "merror"],
-                  'max_depth': int(max_depth),
-                  'gamma': int(gamma),
-                  'subsample': max(min(subsample, 1), 0),
-                  'colsample_bytree': max(min(colsample_bytree, 1), 0),
-                  'min_child_weight': int(min_child_weight),
-                  'max_delta_step': int(max_delta_step),
-                  'cv_seed': 1001}
-        # params = {
-        #     'objective': 'reg:linear',
-        #     'eval_metric': ['rmse', 'logloss'],
-        #     'booster': 'dart',
-        #     'nthread': 4,
-        #     'silent': 0,
-        #     'eta': 0.1,
-        #     'max_depth': int(max_depth),
-        #     'gamma': int(gamma),
-        #     'subsample': max(min(subsample, 1), 0),
-        #     'colsample_bytree': max(min(colsample_bytree, 1), 0),
-        #     'min_child_weight': int(min_child_weight),
-        #     'max_delta_step': int(max_delta_step),
-        #     'cv_seed': 1001}
+        # params = {'objective': 'multi:softmax',
+        #           'num_class': 3,
+        #           'nthread': 4,
+        #           'silent': 0,
+        #           'eta': 0.1,
+        #           "eval_metric": ["mlogloss", "merror"],
+        #           'max_depth': int(max_depth),
+        #           'gamma': int(gamma),
+        #           'subsample': max(min(subsample, 1), 0),
+        #           'colsample_bytree': max(min(colsample_bytree, 1), 0),
+        #           'min_child_weight': int(min_child_weight),
+        #           'max_delta_step': int(max_delta_step),
+        #           'cv_seed': 1001}
+        params = {
+            'objective': 'reg:linear',
+            'eval_metric': ['rmse', 'logloss'],
+            'booster': 'dart',
+            'nthread': 4,
+            'silent': 0,
+            'eta': 0.1,
+            'max_depth': int(max_depth),
+            'gamma': int(gamma),
+            'subsample': max(min(subsample, 1), 0),
+            'colsample_bytree': max(min(colsample_bytree, 1), 0),
+            'min_child_weight': int(min_child_weight),
+            'max_delta_step': int(max_delta_step),
+            'cv_seed': 1001}
         best_model = xgb.train(params=params,
                                dtrain=data_train,
                                num_boost_round=self.max_round,
@@ -194,18 +194,45 @@ if __name__ == '__main__':
     # Classify Parameter Optimization Test
     log.logger.info('Classify Parameter Optimization Test')
     import numpy as np
-    from sklearn.datasets import load_iris
+    from sklearn.datasets import load_iris, load_boston
     from sklearn.model_selection import train_test_split
     from src.stacking.models.m1_xgb import XGBooster, xgb_predict
-    from src.conf.configuration import classify_conf
+    from src.conf.configuration import classify_conf, regress_conf
 
-    iris = load_iris()
-    data = iris.data
-    target = iris.target
+    # iris = load_iris()
+    # data = iris.data
+    # target = iris.target
+    # X_train, X_test, y_train, y_test = train_test_split(data, target, test_size=0.1)
+    # log.logger.info('{},{},{},{}'.format(np.shape(X_train), np.shape(X_test), np.shape(y_train), np.shape(y_test)))
+    # classify_conf.xgb_config_c()
+    #
+    # opt_parameters = {'max_depth': (2, 12),
+    #                   'gamma': (0.001, 10.0),
+    #                   'min_child_weight': (0, 20),
+    #                   'max_delta_step': (0, 10),
+    #                   'subsample': (0.01, 0.99),
+    #                   'colsample_bytree': (0.01, 0.99)}
+    #
+    # gp_params = {"init_points": 2, "n_iter": 20, "acq": 'ei', "xi": 0.0, "alpha": 1e-4}
+    # opt_xgb = BayesOptimizationXGB(X_train, y_train, X_test, y_test, kfolds=5)
+    # params_op = opt_xgb.train_opt(opt_parameters, gp_params=None)
+    # log.logger.info('Best params: \n{}'.format(params_op))
+    # log.logger.info('BestScore: {}, BestIter: {}'.format(opt_xgb.BestScore, opt_xgb.BestIter))
+    #
+    # # update hyperparameters
+    # classify_conf.params.update(params_op)
+    # # train model
+    # xgbc = XGBooster(classify_conf)
+    # best_score, best_round, best_model = xgbc.fit(X_train, y_train)
+    # # eval
+    # xgb_predict(best_model, classify_conf, X_test, y_test)
+
+    boston = load_boston()
+    data = boston.data
+    target = boston.target
     X_train, X_test, y_train, y_test = train_test_split(data, target, test_size=0.1)
     log.logger.info('{},{},{},{}'.format(np.shape(X_train), np.shape(X_test), np.shape(y_train), np.shape(y_test)))
-    classify_conf.xgb_config_c()
-
+    conf = regress_conf.xgb_config_r()
     opt_parameters = {'max_depth': (2, 12),
                       'gamma': (0.001, 10.0),
                       'min_child_weight': (0, 20),
@@ -214,16 +241,15 @@ if __name__ == '__main__':
                       'colsample_bytree': (0.01, 0.99)}
 
     gp_params = {"init_points": 2, "n_iter": 20, "acq": 'ei', "xi": 0.0, "alpha": 1e-4}
-    opt_xgb = BayesOptimizationXGB(X_train, y_train, X_test, y_test, kfolds=5)
+    opt_xgb = BayesOptimizationXGB(X_train, y_train, X_test, y_test)
     params_op = opt_xgb.train_opt(opt_parameters, gp_params=None)
     log.logger.info('Best params: \n{}'.format(params_op))
     log.logger.info('BestScore: {}, BestIter: {}'.format(opt_xgb.BestScore, opt_xgb.BestIter))
 
     # update hyperparameters
-    classify_conf.params.update(params_op)
+    conf.params.update(params_op)
     # train model
-    xgbc = XGBooster(classify_conf)
+    xgbc = XGBooster(conf)
     best_score, best_round, best_model = xgbc.fit(X_train, y_train)
     # eval
-    xgb_predict(best_model, classify_conf, X_test, y_test)
-
+    xgb_predict(best_model, conf, X_test, y_test)
