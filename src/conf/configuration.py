@@ -21,15 +21,14 @@ class RegressionConfig(object):
 
     def xgb_config_r(self):
         # 回归
-        self.params = {
-            'booster': 'dart',
-            'learning_rate': 0.01,
-            'max_depth': 5,
-            'eta': 1,
-            'silent': 1,
-            'rate_drop': 0.1,
-            'objective': 'reg:linear',
-            'eval_metric': ['rmse', 'logloss']}
+        self.params = {'booster': 'dart',
+                       'objective': 'reg:linear',
+                       'eval_metric': ['rmse', 'logloss'],
+                       'learning_rate': 0.01,
+                       'max_depth': 5,
+                       'eta': 1,
+                       'silent': 1,
+                       }
         self.max_round = 800
         self.cv_folds = None
         self.early_stop_round = 100
