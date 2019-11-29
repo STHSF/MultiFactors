@@ -70,7 +70,7 @@ class BayesOptimizationXGB(BayesOptimizationBase):
                   'colsample_bytree': max(min(colsample_bytree, 1), 0),
                   'min_child_weight': int(min_child_weight),
                   'max_delta_step': int(max_delta_step),
-                  'seed': 30}
+                  'cv_seed': 30}
 
         cv_result = xgb.cv(params,
                            data_train,
@@ -129,7 +129,7 @@ class BayesOptimizationXGB(BayesOptimizationBase):
                   'colsample_bytree': max(min(colsample_bytree, 1), 0),
                   'min_child_weight': int(min_child_weight),
                   'max_delta_step': int(max_delta_step),
-                  'seed': 1001}
+                  'cv_seed': 1001}
         # params = {
         #     'objective': 'reg:linear',
         #     'eval_metric': ['rmse', 'logloss'],
@@ -143,7 +143,7 @@ class BayesOptimizationXGB(BayesOptimizationBase):
         #     'colsample_bytree': max(min(colsample_bytree, 1), 0),
         #     'min_child_weight': int(min_child_weight),
         #     'max_delta_step': int(max_delta_step),
-        #     'seed': 1001}
+        #     'cv_seed': 1001}
         best_model = xgb.train(params=params,
                                dtrain=data_train,
                                num_boost_round=self.max_round,
