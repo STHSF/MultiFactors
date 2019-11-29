@@ -61,11 +61,11 @@ class ClassificationConfig(object):
     def __init__(self):
         self.params = {}
         self.max_round = None
-        self.cv_folds = None
         self.early_stop_round = None
-        self.seed = None
-        self.save_model_path = None
         self.ts_cv_folds = None
+        self.cv_folds = None
+        self.cv_seed = None
+        self.save_model_path = None
 
     def lgb_config_c(self):
         self.params = {'task': 'train',
@@ -92,7 +92,7 @@ class ClassificationConfig(object):
         self.max_round = 10000
         self.cv_folds = None
         self.early_stop_round = 300
-        self.seed = 3
+        self.cv_seed = 3
         self.save_model_path = 'bst_model/lgb/lgb.txt'
 
     def xgb_config_c(self):
@@ -109,7 +109,7 @@ class ClassificationConfig(object):
         self.max_round = 10000
         self.cv_folds = None
         self.early_stop_round = 3000
-        self.seed = 3
+        self.cv_seed = 3
 
 
 regress_conf = RegressionConfig()
