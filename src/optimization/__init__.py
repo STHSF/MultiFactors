@@ -33,9 +33,3 @@
 #
 # xtq = XiaoTianQuan()
 # print(xtq.eat('jijiji'))
-
-
-a = {'colsample_bytree': 0.7270718895051846, 'gamma': 6.942242690087745, 'max_delta_step': 0.8699125900359417, 'max_depth': 5.339221068023104, 'min_child_weight': 8.510226254442712, 'subsample': 0.8733565776551393}
-
-a['colsample_bytree'] = int(a['colsample_bytree'])
-print(a)

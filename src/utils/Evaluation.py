@@ -15,6 +15,7 @@ class RegressionEvaluate(object):
 
     @staticmethod
     def mape(y_true, y_pred):
+        y_true, y_pred = np.array(y_true), np.array(y_pred)
         return np.mean(np.abs((y_pred - y_true) / y_true)) * 100
 
     @staticmethod
@@ -32,6 +33,12 @@ class RegressionEvaluate(object):
     @staticmethod
     def mae(y_true, y_pred):
         return metrics.mean_absolute_error(y_true, y_pred)
+
+    @staticmethod
+    def r_square_error(y_true, y_pred):
+        r_square_error_ = metrics.r2_score(y_true, y_pred)
+        _r_square_error = 1 - metrics.mean_squared_error(y_true, y_pred) / np.var(y_true)
+        return _r_square_error
 
 
 class ClassifyEvaluate(object):

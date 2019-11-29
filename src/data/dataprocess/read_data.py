@@ -18,7 +18,7 @@ engine_postgre = data_source.GetDataEngine("ALPHA_FACTOR")
 
 @pysnooper.snoop()
 def factor_read(sheet_name):
-    sql = "SELECT * FROM public.%s" % sheet_name
+    sql = "SELECT * FROM public.%s where trade_date='2019-10-11' and index_market.indexCode=905" % sheet_name
     resultdf = pd.read_sql(sql, engine_postgre)
     return resultdf
 
@@ -32,8 +32,8 @@ if __name__ == '__main__':
     #
     # print(len(zz500_df))
     # print(zz500_df[zz500_df['code'] == '000006.XSHG'])
-    # factor_df = factor_read('alpha191')
-    factor_df = pd.read_csv('../dataset/training_sample.csv')
+    factor_df = factor_read('index_market')
+    # factor_df = pd.read_csv('../dataset/training_sample.csv')
     print(factor_df.head())
 
 

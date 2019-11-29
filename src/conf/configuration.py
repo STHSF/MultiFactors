@@ -13,33 +13,32 @@ class RegressionConfig(object):
     def __init__(self):
         self.params = {}
         self.max_round = None
-        self.cv_folds = None
         self.early_stop_round = None
-        self.seed = None
+        self.cv_folds = None
+        self.cv_seed = None
         self.save_model_path = None
         self.ts_cv_folds = None
 
     def xgb_config_r(self):
         # 回归
-        self.params = {
-            'booster': 'dart',
-            'learning_rate': 0.01,
-            'max_depth': 5,
-            'eta': 1,
-            'silent': 1,
-            'rate_drop': 0.1,
-            'objective': 'reg:linear',
-            'eval_metric': ['rmse', 'logloss']}
-        self.max_round = 800
+        self.params = {'booster': 'gbtree',
+                       'objective': 'reg:linear',
+                       'eval_metric': ['rmse', 'logloss'],
+                       'learning_rate': 0.01,
+                       'max_depth': 5,
+                       'eta': 1,
+                       'silent': 1,
+                       }
+        self.max_round = 10000
+        self.early_stop_round = 1000
         self.cv_folds = None
-        self.early_stop_round = 100
-        self.seed = 3
+        self.cv_seed = 100
         self.save_model_path = '../bst_model/xgb/'
 
     def lgb_config_r(self):
         self.params = {
             'task': 'train',
-            'boosting_type': 'gbdt',  # 设置提升类型
+            'boosting': 'gbdt',  # 设置提升类型
             'objective': 'regression',  # 目标函数
             'metric': {'l2', 'auc'},  # 评估函数
             'num_leaves': 31,  # 叶子节点数
@@ -50,21 +49,22 @@ class RegressionConfig(object):
             'lambda_l1': 0.90,  # L1 正则化
             'lambda_l2': 0.95,  # L2 正则化
             'bagging_seed': 100,  # 随机种子,light中默认为100
-            'verbose': 1  # <0 显示致命的, =0 显示错误 (警告), >0 显示信息
+            'verbosity': -1  # <0 显示致命的, =0 显示错误 (警告), >0 显示信息
         }
         self.max_round = 500
-        self.cv_folds = None
         self.early_stop_round = 10
-        self.seed = 3
+        self.cv_folds = None
+        self.cv_seed = 3
 
 
 class ClassificationConfig(object):
     def __init__(self):
         self.params = {}
         self.max_round = None
-        self.cv_folds = None
         self.early_stop_round = None
-        self.seed = None
+        self.ts_cv_folds = None
+        self.cv_folds = None
+        self.cv_seed = None
         self.save_model_path = None
 
     def lgb_config_c(self):
@@ -83,6 +83,7 @@ class ClassificationConfig(object):
                        'bagging_freq': 5,
                        'lambda_l1': 0.9,
                        'lambda_l2': 0.95,  # L2正则化系数
+                       'verbosity': -1,
                        # 'device': 'gpu',  # 默认使用集显
                        # 'gpu_platform_id': 1,  # 确定是使用集成显卡还是独立显卡，0代表独显，1代表独显
                        # 'gpu_device_id': 0  # id为0的独显
@@ -90,9 +91,25 @@ class ClassificationConfig(object):
 
         self.max_round = 10000
         self.cv_folds = None
-        self.early_stop_round = 30
-        self.seed = 3
+        self.early_stop_round = 300
+        self.cv_seed = 3
         self.save_model_path = 'bst_model/lgb/lgb.txt'
+
+    def xgb_config_c(self):
+        self.params = {'objective': 'multi:softmax',
+                       'num_class': 3,
+                       'nthread': 4,
+                       'silent': 0,
+                       'eta': 0.1,
+                       "eval_metric": ["mlogloss", "merror"],
+                       'learning_rate': 0.01,
+                       'max_depth': 5,
+                       }
+
+        self.max_round = 10000
+        self.cv_folds = None
+        self.early_stop_round = 3000
+        self.cv_seed = 3
 
 
 regress_conf = RegressionConfig()

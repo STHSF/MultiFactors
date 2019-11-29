@@ -24,6 +24,7 @@ import pandas as pd
 from sklearn.externals import joblib
 from sklearn.model_selection import train_test_split, TimeSeriesSplit
 from sklearn.metrics import mean_squared_error, r2_score
+from src.utils.Evaluation import cls_eva, reg_eva
 import matplotlib.pyplot as plt
 pd.set_option('display.max_rows', None, 'display.max_columns', None, "display.max_colwidth", 1000, 'display.width', 1000)
 
@@ -37,7 +38,7 @@ class XGBooster(object):
         self.cv_folds = args.cv_folds
         self.ts_cv_folds = args.ts_cv_folds
         self.early_stop_round = args.early_stop_round
-        self.seed = args.seed
+        self.cv_seed = args.cv_seed
         self.save_model_path = args.save_model_path
 
     def fit(self, x_train, y_train, x_val=None, y_val=None):
@@ -94,14 +95,16 @@ class XGBooster(object):
 
         else:
             log.logger.info('NonCrossValidation。。。。')
-            if x_val is None and y_val is None:
-                # 注意这里的shift
-                x_train, x_valid, y_train, y_valid = train_test_sp(x_train, y_train, test_size=0.2, shift=0)
-            else:
-                x_valid, y_valid = x_val, y_val
+            # if x_val is None and y_val is None:
+            #     # 注意这里的shift
+            #     x_train, x_valid, y_train, y_valid = train_test_sp(x_train, y_train, test_size=0.2, shift=0)
+            # else:
+            #     x_valid, y_valid = x_val, y_val
+
             d_train = xgb.DMatrix(x_train, label=y_train)
-            d_valid = xgb.DMatrix(x_valid, label=y_valid)
-            watchlist = [(d_train, "train"), (d_valid, "valid")]
+            # d_valid = xgb.DMatrix(x_valid, label=y_valid)
+            watchlist = [(d_train, "train")]
+            # watchlist = [(d_train, "train"), (d_valid, "valid")]
             best_model = xgb.train(params=self.xgb_params,
                                    dtrain=d_train,
                                    num_boost_round=self.num_boost_round,
@@ -121,7 +124,7 @@ class XGBooster(object):
                            dtrain,
                            num_boost_round=self.num_boost_round,
                            nfold=self.cv_folds,
-                           seed=self.seed,
+                           seed=self.cv_seed,
                            verbose_eval=True,
                            early_stopping_rounds=self.early_stop_round,
                            show_stdv=False,
@@ -177,21 +180,36 @@ def ic_cal(y_pred: np.ndarray, y_test: np.ndarray) -> float:
     return np.corrcoef(y_pred, y_test)[0, 1]
 
 
-def xgb_predict(model, x_test, y_test=None, save_result_path=None):
+def xgb_predict(model, conf, x_test, y_test=None, save_result_path=None):
+
     d_test = xgb.DMatrix(x_test)
-    # 输出
-    y_pred = model.predict(d_test)
-    if y_test is None:
-        return y_pred
-    rmse = np.sqrt(mean_squared_error(y_test, y_pred))
-    print('rmse_of_pred: %s' % rmse)
-    r_square_ = r2_score(y_test, y_pred)
-    r_square = 1 - mean_squared_error(y_test, y_pred)/ np.var(y_test)
-    print('r_square_of_pred: %s' % r_square)
-    print('r_square_of_pred: %s' % r_square_)
-    print(y_pred), print(y_test)
-    # PLOT
-    plot_figure(y_pred, y_test, 'xgb_predict')
+
+    if conf.params['objective'] == 'multi:softmax':
+        y_pred = model.predict(d_test)
+        if y_test is None:
+            log.logger.info(y_test)
+        else:
+            log.logger.info(y_test)
+            log.logger.info(y_pred)
+            log.logger.info('The Accuracy:\t{}'.format(cls_eva.auc(y_test, y_pred)))
+    elif conf.params['objective'] == "regression":
+        y_pred = model.predict(d_test)
+        if y_test is None:
+            log.logger.info('y_pre: {}'.format(y_pred))
+        else:
+            log.logger.info('y_pre: {}'.format(y_pred))
+            log.logger.info('y_test: {}'.format(y_test))
+
+            rmse = reg_eva.rmse(y_test, y_pred)
+            print('rmse: %s' % rmse)
+            r2_sc = reg_eva.r_square_error(y_test, y_pred)
+            print('r_square_error: %s' % r2_sc)
+            print(y_pred), print(y_test)
+            # PLOT
+            plot_figure(y_pred, y_test, 'xgb_regression')
+    else:
+        log.logger.error('CAN NOT FIND OBJECTIVE PARAMS')
+        y_pred = None
 
     if save_result_path:
         df_reult = pd.DataFrame(x_test)
@@ -254,7 +272,7 @@ if __name__ == '__main__':
     x_train, x_test, y_train, y_test = train_test_sp(train_dataset_df[:30000], label_dataset_df[:30000])
     print('x_train_pre: \n%s' % x_train.head())
     # print('y_train_pre: %s' % y_train.head())
-    # print('x_test_pre: %s' % x_test.head())
+    print('x_test_pre: %s' % x_test.head())
     # print('y_test_pre: %s' % y_test.head())
 
     # 数据统计用
@@ -265,26 +283,28 @@ if __name__ == '__main__':
     x_train_mean = x_train.mean()
     x_train_std = x_train.std()
     x_train = (x_train - x_train_mean) / x_train_std
+    x_test = (x_test - x_train_mean) / x_train_std
     print(x_train.head())
+    print(x_test.head())
 
     # # 超参数
-    # regress_conf.xgb_config_r()
-    # log.logger.info("params before: {}".format(regress_conf.params))
-    # # 超参数寻优
-    # from src.optimization.bayes_optimization_xgb import *
-    # opt_parameters = {'max_depth': (2, 12),
-    #                   'gamma': (0.001, 10.0),
-    #                   'min_child_weight': (0, 20),
-    #                   'max_delta_step': (0, 10),
-    #                   'subsample': (0.01, 0.99),
-    #                   'colsample_bytree': (0.01, 0.99)
-    #                   }
-    # gp_params = {"init_points": 2, "n_iter": 2, "acq": 'ei', "xi": 0.0, "alpha": 1e-4}
-    # bayes_opt_xgb = BayesOptimizationXGB(x_train.values, y_train.values, x_test.values, y_test.values)
-    # params_op = bayes_opt_xgb.train_opt(opt_parameters, gp_params)
-    #
-    # regress_conf.params.update(params_op)
-    # log.logger.info("params after: {}".format(regress_conf.params))
-    # # 模型训练
-    # run_cv(x_train.values, x_test.values, y_train.values, y_test.values, regress_conf)
+    regress_conf.xgb_config_r()
+    log.logger.info("params before: {}".format(regress_conf.params))
+    # 超参数寻优
+    from src.optimization.bayes_optimization_xgb import *
+    opt_parameters = {'max_depth': (2, 12),
+                      'gamma': (0.001, 10.0),
+                      'min_child_weight': (0, 20),
+                      'max_delta_step': (0, 10),
+                      'subsample': (0.01, 0.99),
+                      'colsample_bytree': (0.01, 0.99)
+                      }
+    gp_params = {"init_points": 2, "n_iter": 2, "acq": 'ei', "xi": 0.0, "alpha": 1e-4}
+    bayes_opt_xgb = BayesOptimizationXGB(x_train.values, y_train.values, x_test.values, y_test.values)
+    params_op = bayes_opt_xgb.train_opt(opt_parameters, gp_params)
+
+    regress_conf.params.update(params_op)
+    log.logger.info("params after: {}".format(regress_conf.params))
+    # 模型训练
+    run_cv(x_train.values, x_test.values, y_train.values, y_test.values, regress_conf)
 

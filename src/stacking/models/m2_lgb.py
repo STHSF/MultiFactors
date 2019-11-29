@@ -14,6 +14,7 @@ sys.path.append('../../../')
 import time
 import joblib
 import lightgbm as lgb
+from sklearn.model_selection import train_test_split
 from src.conf.configuration import classify_conf, regress_conf
 from src.utils import log_util
 from src.utils.Evaluation import cls_eva, reg_eva
@@ -37,21 +38,24 @@ class LightGBM(object):
         best_score = {}
         if self.cv_folds is None:
             log.logger.info('NonCrossValidation。。。。')
-            if x_valid is None and y_valid is None:
-                x_train, x_valid, y_train, y_valid = train_test_split(x_train, y_train, test_size=0.2)
-
-            else:
-                x_valid, y_valid = x_valid, y_valid
+            # if x_valid is None and y_valid is None:
+            #     x_train, x_valid, y_train, y_valid = train_test_split(x_train, y_train, test_size=0.2)
+            #
+            # else:
+            #     x_valid, y_valid = x_valid, y_valid
             d_train = lgb.Dataset(x_train, label=y_train)
-            d_valid = lgb.Dataset(x_valid, label=y_valid)
-            watchlist = [d_train, d_valid]
+            # d_valid = lgb.Dataset(x_valid, label=y_valid)
+            watchlist = [d_train]
             best_model = lgb.train(self.params,
                                    d_train,
                                    num_boost_round=self.max_round,
                                    valid_sets=watchlist,
-                                   early_stopping_rounds=self.early_stop_round)
+                                   early_stopping_rounds=self.early_stop_round,
+                                   verbose_eval=False,
+                                   )
             best_round = best_model.best_iteration
             best_score['best_score'] = best_model.best_score
+            log.logger.info('best_score: \n{}'.format(best_model.best_score))
 
         else:
             log.logger.info('CrossValidation ........')
@@ -114,7 +118,7 @@ class LightGBM(object):
                            num_boost_round=self.max_round,
                            nfold=self.cv_folds,
                            seed=self.seed,
-                           verbose_eval=True,
+                           verbose_eval=False,
                            early_stopping_rounds=self.early_stop_round,
                            show_stdv=False)
         return cv_result
@@ -147,7 +151,6 @@ def run_feat_search(X_train, X_test, y_train, feature_names):
 
 def lgb_predict(bst_model, x_test, y_test, conf, save_result_path=None):
     # x_test = x_test.flatten()
-
     if conf.params['objective'] == "multiclass":
         y_pred = bst_model.predict(x_test).argmax(axis=1)
         log.logger.info(y_pred)
@@ -191,6 +194,7 @@ def run_cv(x_train, x_test, y_test, y_train, conf):
 if __name__ == '__main__':
     import pandas as pd
     import numpy as np
+    from src.optimization.bayes_optimization_lgb import BayesOptimizationLGBM
     from sklearn.datasets import load_iris
     from sklearn.model_selection import train_test_split
 
@@ -202,6 +206,23 @@ if __name__ == '__main__':
     log.logger.info('type of x_train: {}'.format(type(X_train)))
     log.logger.info('shape of x_train: {}'.format(np.shape(X_train)))
     classify_conf.lgb_config_c()
+    log.logger.info('Model Params pre:\n{}'.format(classify_conf.params))
+
+    # Hyper Parameters Optimization
+    opt_parameters = {'max_depth': (4, 10),
+                      'num_leaves': (5, 130),
+                      'min_data_in_leaf': (10, 150),
+                      'feature_fraction': (0.7, 1.0),
+                      'bagging_fraction': (0.7, 1.0),
+                      'lambda_l1': (0, 1),
+                      'lambda_l2': (0, 1)
+                      }
+
+    gp_params = {"init_points": 2, "n_iter": 20, "acq": 'ei', "xi": 0.0}
+    opt_lgb = BayesOptimizationLGBM(X_train, y_train, X_test, y_test)
+    params_op = opt_lgb.train_opt(opt_parameters, gp_params)
+
+    classify_conf.params.update(params_op)
     log.logger.info('Model Params:\n{}'.format(classify_conf.params))
 
     # # NonCrossValidation Test
@@ -212,5 +233,4 @@ if __name__ == '__main__':
     # # CrossValidation Test
     # classify_conf.cv_folds = 5
     # run_cv(X_train, X_test, y_test, y_train, classify_conf)
-
     # REGRESSION TEST
