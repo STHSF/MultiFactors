@@ -32,7 +32,7 @@ class RegressionConfig(object):
         self.max_round = 10000
         self.cv_folds = None
         self.early_stop_round = 1000
-        self.seed = 3
+        self.seed = 100
         self.save_model_path = '../bst_model/xgb/'
 
     def lgb_config_r(self):
