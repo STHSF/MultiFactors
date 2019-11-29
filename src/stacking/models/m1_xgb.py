@@ -113,7 +113,7 @@ class XGBooster(object):
             #                        evals=watchlist,
             #                        early_stopping_rounds=self.early_stop_round)
             best_round = best_model.best_iteration
-            best_score['best_score'] = best_model.best_score
+            # best_score['best_score'] = best_model.best_score
         # print('spend time :' + str((time.time() - xgb_start)) + '(s)')
         return best_score, best_round, best_model
 
