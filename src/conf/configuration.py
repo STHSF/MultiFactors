@@ -29,9 +29,9 @@ class RegressionConfig(object):
                        'eta': 1,
                        'silent': 1,
                        }
-        self.max_round = 800
+        self.max_round = 10000
         self.cv_folds = None
-        self.early_stop_round = 100
+        self.early_stop_round = 1000
         self.seed = 3
         self.save_model_path = '../bst_model/xgb/'
 
