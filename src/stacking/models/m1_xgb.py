@@ -102,7 +102,7 @@ class XGBooster(object):
             else:
                 x_valid, y_valid = x_val, y_val
             d_train = xgb.DMatrix(x_train, label=y_train)
-            d_valid = xgb.DMatrix(x_valid)
+            d_valid = xgb.DMatrix(x_valid, label=y_valid)
             watchlist = [(d_train, "train"), (d_valid, "valid")]
             best_model = xgb.train(params=self.xgb_params,
                                    dtrain=d_train,
