@@ -38,14 +38,14 @@ class LightGBM(object):
         best_score = {}
         if self.cv_folds is None:
             log.logger.info('NonCrossValidation。。。。')
-            if x_valid is None and y_valid is None:
-                x_train, x_valid, y_train, y_valid = train_test_split(x_train, y_train, test_size=0.2)
-
-            else:
-                x_valid, y_valid = x_valid, y_valid
+            # if x_valid is None and y_valid is None:
+            #     x_train, x_valid, y_train, y_valid = train_test_split(x_train, y_train, test_size=0.2)
+            #
+            # else:
+            #     x_valid, y_valid = x_valid, y_valid
             d_train = lgb.Dataset(x_train, label=y_train)
-            d_valid = lgb.Dataset(x_valid, label=y_valid)
-            watchlist = [d_train, d_valid]
+            # d_valid = lgb.Dataset(x_valid, label=y_valid)
+            watchlist = [d_train]
             best_model = lgb.train(self.params,
                                    d_train,
                                    num_boost_round=self.max_round,
