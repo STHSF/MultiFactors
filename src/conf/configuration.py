@@ -22,7 +22,7 @@ class RegressionConfig(object):
     def xgb_config_r(self):
         # 回归
         self.params = {'booster': 'gbtree',
-                       'objective': 'reg:squarederror',
+                       'objective': 'reg:linear',
                        'eval_metric': ['rmse', 'logloss'],
                        'learning_rate': 0.01,
                        'max_depth': 5,
