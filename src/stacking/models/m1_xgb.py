@@ -95,14 +95,14 @@ class XGBooster(object):
 
         else:
             log.logger.info('NonCrossValidation。。。。')
+
             if x_val is None and y_val is None:
                 # 注意这里的shift
                 x_train, x_valid, y_train, y_valid = train_test_sp(x_train, y_train, test_size=0.2, shift=0)
             else:
                 x_valid, y_valid = x_val, y_val
             d_train = xgb.DMatrix(x_train, label=y_train)
-            d_valid = xgb.DMatrix(x_valid, label=y_valid)
-            # watchlist = [(d_train, "train")]
+            d_valid = xgb.DMatrix(x_valid)
             watchlist = [(d_train, "train"), (d_valid, "valid")]
             best_model = xgb.train(params=self.xgb_params,
                                    dtrain=d_train,
