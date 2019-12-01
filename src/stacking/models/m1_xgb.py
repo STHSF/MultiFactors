@@ -18,6 +18,7 @@ import argparse
 import numpy as np
 from math import *
 import xgboost as xgb
+import seaborn as sns
 from src.utils import log_util
 from src.conf.configuration import regress_conf
 import pandas as pd
@@ -41,7 +42,7 @@ class XGBooster(object):
         self.cv_seed = args.cv_seed
         self.save_model_path = args.save_model_path
 
-    def fit(self, x_train, y_train, x_val=None, y_val=None):
+    def fit(self, x_train, y_train, x_valid=None, y_valid=None):
         # xgb_start = time.time()
         best_model = None
         best_round = None
@@ -95,20 +96,21 @@ class XGBooster(object):
 
         else:
             log.logger.info('NonCrossValidation。。。。')
-            # if x_val is None and y_val is None:
-            #     # 注意这里的shift
-            #     x_train, x_valid, y_train, y_valid = train_test_sp(x_train, y_train, test_size=0.2, shift=0)
-            # else:
-            #     x_valid, y_valid = x_val, y_val
+            if x_valid is None and y_valid is None:
+                # 注意这里的shift
+                # x_train, x_valid, y_train, y_valid = train_test_sp(x_train, y_train, test_size=0.2, shift=0)
+                d_train = xgb.DMatrix(x_train, label=y_train)
+                watchlist = [(d_train, "train")]
+            else:
+                d_train = xgb.DMatrix(x_train, label=y_train)
+                d_valid = xgb.DMatrix(x_valid, label=y_valid)
+                watchlist = [(d_train, "train"), (d_valid, "valid")]
 
-            d_train = xgb.DMatrix(x_train, label=y_train)
-            # d_valid = xgb.DMatrix(x_valid, label=y_valid)
-            watchlist = [(d_train, "train")]
-            # watchlist = [(d_train, "train"), (d_valid, "valid")]
             best_model = xgb.train(params=self.xgb_params,
                                    dtrain=d_train,
                                    num_boost_round=self.num_boost_round,
                                    evals=watchlist,
+                                   verbose_eval=5,
                                    early_stopping_rounds=self.early_stop_round)
             best_round = best_model.best_iteration
             best_score['best_score'] = best_model.best_score
@@ -132,10 +134,22 @@ class XGBooster(object):
         return cv_result
 
     @staticmethod
-    def plot_feature_importance(best_model):
-        feat_imp = pd.Series(best_model.get_fscore()).sort_values(ascending=False)
-        feat_imp.plot(title='Feature Importances')
+    def plot_feature_importance(best_model, top_n=20):
+        feature_importance_df = pd.DataFrame()
+        feature_importance_df["Feature"] = best_model.get_fscore().keys()
+        feature_importance_df["importance"] = best_model.get_fscore().values()
+        # # plot feature importance of top_n
+        best_features = feature_importance_df[["Feature", "importance"]].sort_values(by="importance", ascending=True)
+        best_features['importance'] = best_features['importance'] / best_features['importance'].sum()
+        # best_features = feature_importance_df[["Feature", "importance"]].groupby("Feature").mean().sort_values(by="importance", ascending=True)[:top_n].reset_index()
+        plt.figure(figsize=(16, 10))
+        best_features[:top_n].plot(kind='barh', x='Feature', y='importance', legend=False, figsize=(16, 10))
+        plt.title('XGBoost Feature Importance')
+        plt.xlabel('relative Features')
         plt.ylabel('Feature Importance Score')
+        # save picture
+        # plt.gcf().savefig('feature_importance_xgb.png')
+        plt.show()
 
     def get_params(self, deep=True):
         return self.xgb_params
@@ -183,7 +197,6 @@ def ic_cal(y_pred: np.ndarray, y_test: np.ndarray) -> float:
 def xgb_predict(model, conf, x_test, y_test=None, save_result_path=None):
 
     d_test = xgb.DMatrix(x_test)
-
     if conf.params['objective'] == 'multi:softmax':
         y_pred = model.predict(d_test)
         if y_test is None:

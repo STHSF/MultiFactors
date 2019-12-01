@@ -194,6 +194,10 @@ if __name__ == '__main__':
     # Classify Parameter Optimization Test
     log.logger.info('Classify Parameter Optimization Test')
     import numpy as np
+    import pandas as pd
+    import matplotlib.pyplot as plt
+    import operator
+
     from sklearn.datasets import load_iris, load_boston
     from sklearn.model_selection import train_test_split
     from src.stacking.models.m1_xgb import XGBooster, xgb_predict
@@ -206,26 +210,27 @@ if __name__ == '__main__':
     log.logger.info('{},{},{},{}'.format(np.shape(X_train), np.shape(X_test), np.shape(y_train), np.shape(y_test)))
     classify_conf.xgb_config_c()
 
-    opt_parameters = {'max_depth': (2, 12),
-                      'gamma': (0.001, 10.0),
-                      'min_child_weight': (0, 20),
-                      'max_delta_step': (0, 10),
-                      'subsample': (0.01, 0.99),
-                      'colsample_bytree': (0.01, 0.99)}
-
-    gp_params = {"init_points": 2, "n_iter": 20, "acq": 'ei', "xi": 0.0, "alpha": 1e-4}
-    opt_xgb = BayesOptimizationXGB(X_train, y_train, X_test, y_test, kfolds=5)
-    params_op = opt_xgb.train_opt(opt_parameters, gp_params=None)
-    log.logger.info('Best params: \n{}'.format(params_op))
-    log.logger.info('BestScore: {}, BestIter: {}'.format(opt_xgb.BestScore, opt_xgb.BestIter))
-
-    # update hyperparameters
-    classify_conf.params.update(params_op)
+    # opt_parameters = {'max_depth': (2, 12),
+    #                   'gamma': (0.001, 10.0),
+    #                   'min_child_weight': (0, 20),
+    #                   'max_delta_step': (0, 10),
+    #                   'subsample': (0.01, 0.99),
+    #                   'colsample_bytree': (0.01, 0.99)}
+    #
+    # gp_params = {"init_points": 2, "n_iter": 20, "acq": 'ei', "xi": 0.0, "alpha": 1e-4}
+    # opt_xgb = BayesOptimizationXGB(X_train, y_train, X_test, y_test, kfolds=5)
+    # params_op = opt_xgb.train_opt(opt_parameters, gp_params=None)
+    # log.logger.info('Best params: \n{}'.format(params_op))
+    # log.logger.info('BestScore: {}, BestIter: {}'.format(opt_xgb.BestScore, opt_xgb.BestIter))
+    #
+    # # update hyperparameters
+    # classify_conf.params.update(params_op)
     # train model
     xgbc = XGBooster(classify_conf)
     best_score, best_round, best_model = xgbc.fit(X_train, y_train)
     # eval
     xgb_predict(best_model, classify_conf, X_test, y_test)
+    xgbc.plot_feature_importance(best_model)
 
     # boston = load_boston()
     # data = boston.data

@@ -15,6 +15,7 @@ import time
 import joblib
 import lightgbm as lgb
 from sklearn.model_selection import train_test_split
+import matplotlib.pyplot as plt
 from src.conf.configuration import classify_conf, regress_conf
 from src.utils import log_util
 from src.utils.Evaluation import cls_eva, reg_eva
@@ -38,14 +39,16 @@ class LightGBM(object):
         best_score = {}
         if self.cv_folds is None:
             log.logger.info('NonCrossValidation。。。。')
-            # if x_valid is None and y_valid is None:
-            #     x_train, x_valid, y_train, y_valid = train_test_split(x_train, y_train, test_size=0.2)
-            #
-            # else:
-            #     x_valid, y_valid = x_valid, y_valid
-            d_train = lgb.Dataset(x_train, label=y_train)
-            # d_valid = lgb.Dataset(x_valid, label=y_valid)
-            watchlist = [d_train]
+
+            x_train, x_valid, y_train, y_valid = train_test_split(x_train, y_train, test_size=0.2)
+            if x_valid is None and y_valid is None:
+                d_train = lgb.Dataset(x_train, label=y_train)
+                watchlist = [d_train]
+            else:
+                d_train = lgb.Dataset(x_train, label=y_train)
+                d_valid = lgb.Dataset(x_valid, label=y_valid)
+                watchlist = [d_train, d_valid]
+
             best_model = lgb.train(self.params,
                                    d_train,
                                    num_boost_round=self.max_round,
@@ -122,6 +125,26 @@ class LightGBM(object):
                            early_stopping_rounds=self.early_stop_round,
                            show_stdv=False)
         return cv_result
+
+    @staticmethod
+    def plot_feature_importance(best_model):
+        feature_importance_df = pd.DataFrame()
+        # feature_importance_df["Feature"] = best_model.get_fscore().keys()
+        feature_importance_df["importance"] = best_model.feature_importance()
+        # # plot feature importance of top_n
+        print(feature_importance_df)
+        # top_n = 2
+        # best_features = feature_importance_df[["Feature", "importance"]].sort_values(by="importance", ascending=True)
+        # best_features['importance'] = best_features['importance'] / best_features['importance'].sum()
+        # # best_features = feature_importance_df[["Feature", "importance"]].groupby("Feature").mean().sort_values(by="importance", ascending=True)[:top_n].reset_index()
+        # plt.figure(figsize=(16, 10))
+        # best_features[:top_n].plot(kind='barh', x='Feature', y='importance', legend=False, figsize=(16, 10))
+        # plt.title('XGBoost Feature Importance')
+        # plt.xlabel('relative Features')
+        # plt.ylabel('Feature Importance Score')
+        # # save picture
+        # # plt.gcf().savefig('feature_importance_xgb.png')
+        # plt.show()
 
     def set_params(self, **params):
         self.params.update(params)
