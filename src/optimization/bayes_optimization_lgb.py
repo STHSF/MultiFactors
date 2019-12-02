@@ -226,7 +226,6 @@ if __name__ == '__main__':
     # lgbm = LightGBM(classify_conf)
     # best_model, best_score, best_round = lgbm.fit(X_train, y_train)
     # lgb_predict(best_model, X_test, y_test, classify_conf)
-    #
     # lgbm.plot_feature_importance(best_model)
     # # #===========================classify Test end==========================================
 
@@ -237,24 +236,25 @@ if __name__ == '__main__':
     X_train, X_test, y_train, y_test = train_test_split(data, target, test_size=0.1)
     log.logger.info('{},{},{},{}'.format(np.shape(X_train), np.shape(X_test), np.shape(y_train), np.shape(y_test)))
     regress_conf.lgb_config_r()
-    # opt_parameters = {'max_depth': (2, 12),
-    #                   'gamma': (0.001, 10.0),
-    #                   'min_child_weight': (0, 20),
-    #                   'max_delta_step': (0, 10),
-    #                   'subsample': (0.01, 0.99),
-    #                   'colsample_bytree': (0.01, 0.99)}
-    #
-    # gp_params = {"init_points": 2, "n_iter": 20, "acq": 'ei', "xi": 0.0, "alpha": 1e-4}
-    # opt_xgb = BayesOptimizationXGB(X_train, y_train, X_test, y_test)
-    # params_op = opt_xgb.train_opt(opt_parameters, gp_params=None)
-    # log.logger.info('Best params: \n{}'.format(params_op))
-    # log.logger.info('BestScore: {}, BestIter: {}'.format(opt_xgb.BestScore, opt_xgb.BestIter))
-    # update hyperparameters
-    # regress_conf.params.update(params_op)
+
+    opt_parameters = {'max_depth': (2, 12),
+                      'gamma': (0.001, 10.0),
+                      'min_child_weight': (0, 20),
+                      'max_delta_step': (0, 10),
+                      'subsample': (0.01, 0.99),
+                      'colsample_bytree': (0.01, 0.99)}
+
+    gp_params = {"init_points": 2, "n_iter": 20, "acq": 'ei', "xi": 0.0, "alpha": 1e-4}
+    opt_xgb = BayesOptimizationLGBM(X_train, y_train, X_test, y_test)
+    params_op = opt_xgb.train_opt(opt_parameters, gp_params=None)
+    log.logger.info('Best params: \n{}'.format(params_op))
+    log.logger.info('BestScore: {}, BestIter: {}'.format(opt_xgb.BestScore, opt_xgb.BestIter))
+    # # Update HyperParameters
+    regress_conf.params.update(params_op)
 
     # train model
     lgb_m = LightGBM(regress_conf)
-    best_score, best_round, best_model = lgb_m.fit(X_train, y_train)
+    best_model, best_score, best_round = lgb_m.fit(X_train, y_train)
     # eval
     lgb_predict(best_model, regress_conf, X_test, y_test)
     # #===========================REGRESSION TEST END==========================================

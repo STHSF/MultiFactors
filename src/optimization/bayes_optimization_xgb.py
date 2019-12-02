@@ -229,7 +229,7 @@ if __name__ == '__main__':
     # train model
     # xgbc = XGBooster(classify_conf)
     # best_score, best_round, best_model = xgbc.fit(X_train, y_train)
-    # # eval
+    # # predict
     # xgb_predict(best_model, classify_conf, X_test, y_test)
     # xgbc.plot_feature_importance(best_model)
     # ===========================classify Test end==========================================

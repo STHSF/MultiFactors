@@ -40,7 +40,7 @@ class RegressionConfig(object):
             'task': 'train',
             'boosting': 'gbdt',  # 设置提升类型
             'objective': 'regression',  # 目标函数
-            'metric': {'l2', 'auc'},  # 评估函数
+            'metric': {'l2', 'mean_squared_error'},  # 评估函数
             'num_leaves': 31,  # 叶子节点数
             'learning_rate': 0.05,  # 学习速率
             'feature_fraction': 0.9,  # 建树的特征选择比例 # 样本列采样
