@@ -135,6 +135,15 @@ class LightGBM(object):
         feature_importance_df["importance"] = best_model.feature_importance()
         # # plot feature importance of top_n
         print(feature_importance_df)
+
+        print(80 * '*')
+        print(31 * '*' + 'Feature Importance' + 31 * '*')
+        print(80 * '.')
+        print("\n".join((".%50s => %9.5f" % x) for x in sorted(zip(best_model.feature_name(), best_model.feature_importance("gain")),
+                                                               key=lambda x: x[1],
+                                                               reverse=True)))
+        print(80 * '.')
+
         # top_n = 2
         # best_features = feature_importance_df[["Feature", "importance"]].sort_values(by="importance", ascending=True)
         # best_features['importance'] = best_features['importance'] / best_features['importance'].sum()
@@ -261,6 +270,7 @@ if __name__ == '__main__':
         lgbm = LightGBM(classify_conf)
         best_model, best_score, best_round = lgbm.fit(X_train, y_train)
         lgb_predict(best_model, classify_conf, X_test, y_test)
+        lgbm.plot_feature_importance(best_model)
 
         # # CrossValidation Test
         # classify_conf.cv_folds = 5
@@ -281,6 +291,7 @@ if __name__ == '__main__':
         best_model, best_score, best_round = lgb_m.fit(X_train, y_train)
         # eval
         lgb_predict(best_model, regress_conf, X_test, y_test)
+        lgb_m.plot_feature_importance(best_model)
         # #===========================REGRESSION TEST END==========================================
 
     # classify_test()
