@@ -174,7 +174,7 @@ def run_feat_search(X_train, X_test, y_train, feature_names):
     pass
 
 
-def lgb_predict(bst_model, x_test, y_test, conf, save_result_path=None):
+def lgb_predict(bst_model, conf, x_test, y_test, save_result_path=None):
     # x_test = x_test.flatten()
     if conf.params['objective'] == "multiclass":
         y_pred = bst_model.predict(x_test).argmax(axis=1)
@@ -213,7 +213,7 @@ def run_cv(x_train, x_test, y_test, y_train, conf):
     now = time.strftime("%m%d-%H%M%S")
     result_path = 'result/result_lgb_{}-{:.4f}.csv'.format(now, best_round)
     # check_path(result_path)
-    lgb_predict(lgb_model, x_test, y_test, conf, save_result_path=None)
+    lgb_predict(lgb_model, conf, x_test, y_test, save_result_path=None)
 
 
 if __name__ == '__main__':
