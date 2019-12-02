@@ -218,42 +218,41 @@ if __name__ == '__main__':
     import pandas as pd
     import numpy as np
     from src.optimization.bayes_optimization_lgb import BayesOptimizationLGBM
-    from sklearn.datasets import load_iris
+    from sklearn.datasets import load_iris, load_boston
     from sklearn.model_selection import train_test_split
 
-    # CLASSIFY TEST
-    iris = load_iris()
-    data = iris.data
-    target = iris.target
-    X_train, X_test, y_train, y_test = train_test_split(data, target, test_size=0.2)
-    log.logger.info('type of x_train: {}'.format(type(X_train)))
-    log.logger.info('shape of x_train: {}'.format(np.shape(X_train)))
-    classify_conf.lgb_config_c()
-    log.logger.info('Model Params pre:\n{}'.format(classify_conf.params))
+    # # # #===========================classify Test start==========================================
+    # # CLASSIFY TEST
+    # iris = load_iris()
+    # data = iris.data
+    # target = iris.target
+    # X_train, X_test, y_train, y_test = train_test_split(data, target, test_size=0.2)
+    # log.logger.info('type of x_train: {}'.format(type(X_train)))
+    # log.logger.info('shape of x_train: {}'.format(np.shape(X_train)))
+    # classify_conf.lgb_config_c()
+    # log.logger.info('Model Params pre:\n{}'.format(classify_conf.params))
+    #
+    # # # NonCrossValidation Test
+    # lgbm = LightGBM(classify_conf)
+    # best_model, best_score, best_round = lgbm.fit(X_train, y_train)
+    # lgb_predict(best_model, X_test, y_test, classify_conf)
+    #
+    # # # CrossValidation Test
+    # # classify_conf.cv_folds = 5
+    # # run_cv(X_train, X_test, y_test, y_train, classify_conf)
+    # # # #===========================classify Test end==========================================
 
-    # Hyper Parameters Optimization
-    opt_parameters = {'max_depth': (4, 10),
-                      'num_leaves': (5, 130),
-                      'min_data_in_leaf': (10, 150),
-                      'feature_fraction': (0.7, 1.0),
-                      'bagging_fraction': (0.7, 1.0),
-                      'lambda_l1': (0, 1),
-                      'lambda_l2': (0, 1)
-                      }
+    # #===========================REGRESSION TEST START==========================================
+    boston = load_boston()
+    data = boston.data
+    target = boston.target
+    X_train, X_test, y_train, y_test = train_test_split(data, target, test_size=0.1)
+    log.logger.info('{},{},{},{}'.format(np.shape(X_train), np.shape(X_test), np.shape(y_train), np.shape(y_test)))
+    regress_conf.lgb_config_r()
 
-    gp_params = {"init_points": 2, "n_iter": 20, "acq": 'ei', "xi": 0.0}
-    opt_lgb = BayesOptimizationLGBM(X_train, y_train, X_test, y_test)
-    params_op = opt_lgb.train_opt(opt_parameters, gp_params)
-
-    classify_conf.params.update(params_op)
-    log.logger.info('Model Params:\n{}'.format(classify_conf.params))
-
-    # # NonCrossValidation Test
-    lgbm = LightGBM(classify_conf)
-    best_model, best_score, best_round = lgbm.fit(X_train, y_train)
-    lgb_predict(best_model, X_test, y_test, classify_conf)
-
-    # # CrossValidation Test
-    # classify_conf.cv_folds = 5
-    # run_cv(X_train, X_test, y_test, y_train, classify_conf)
-    # REGRESSION TEST
+    # train model
+    lgb_m = LightGBM(regress_conf)
+    best_score, best_round, best_model = lgb_m.fit(X_train, y_train)
+    # eval
+    lgb_predict(best_model, regress_conf, X_test, y_test)
+    # #===========================REGRESSION TEST END==========================================

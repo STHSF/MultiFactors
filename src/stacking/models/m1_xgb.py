@@ -202,19 +202,18 @@ def xgb_predict(model, conf, x_test, y_test=None, result_save_path=None):
             log.logger.info(y_test)
             log.logger.info(y_pred)
             log.logger.info('The Accuracy:\t{}'.format(cls_eva.auc(y_test, y_pred)))
-    elif conf.params['objective'] == "regression":
+    elif conf.params['objective'] == "reg:linear":
         y_pred = model.predict(d_test)
         if y_test is None:
-            log.logger.info('y_pre: {}'.format(y_pred))
+            log.logger.info('y_pre: \n{}'.format(y_pred))
         else:
-            log.logger.info('y_pre: {}'.format(y_pred))
-            log.logger.info('y_test: {}'.format(y_test))
+            log.logger.info('y_pre: \n{}'.format(y_pred))
+            log.logger.info('y_test: \n{}'.format(y_test))
 
             rmse = reg_eva.rmse(y_test, y_pred)
-            print('rmse: %s' % rmse)
+            log.logger.info('rmse: {}'.format(rmse))
             r2_sc = reg_eva.r_square_error(y_test, y_pred)
-            print('r_square_error: %s' % r2_sc)
-            print(y_pred), print(y_test)
+            log.logger.info('r_square_error: {}'.format(r2_sc))
             # PLOT
             plot_figure(y_pred, y_test, 'xgb_regression')
     else:

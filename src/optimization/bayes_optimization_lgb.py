@@ -189,40 +189,72 @@ if __name__ == '__main__':
     # Classify Parameter Optimization Test
     log.logger.info('Classify Parameter Optimization Test')
     import numpy as np
-    from sklearn.datasets import load_iris
+    from sklearn.datasets import load_iris, load_boston
     from src.stacking.models.m2_lgb import *
     from sklearn.model_selection import train_test_split
     from src.conf.configuration import classify_conf, regress_conf
 
-    iris = load_iris()
-    data = iris.data
-    target = iris.target
-    X_train, X_test, y_train, y_test = train_test_split(data, target, test_size=0.1)
-    log.logger.info('{},{},{},{}'.format(np.shape(X_train), np.shape(X_test), np.shape(y_train), np.shape(y_test)))
-    classify_conf.lgb_config_c()
-    log.logger.info('Model Params pre:\n{}'.format(classify_conf.params))
-
+    # # #===========================classify Test start==========================================
+    # iris = load_iris()
+    # data = iris.data
+    # target = iris.target
+    # X_train, X_test, y_train, y_test = train_test_split(data, target, test_size=0.1)
+    # log.logger.info('{},{},{},{}'.format(np.shape(X_train), np.shape(X_test), np.shape(y_train), np.shape(y_test)))
+    # classify_conf.lgb_config_c()
+    # log.logger.info('Model Params pre:\n{}'.format(classify_conf.params))
+    # # Hyper Parameters Optimization
+    # # 超参
     # opt_parameters = {'max_depth': (4, 10),
-    #                   'num_leaves': (10, 130),
+    #                   'num_leaves': (5, 130),
     #                   'min_data_in_leaf': (10, 150),
     #                   'feature_fraction': (0.1, 1.0),
     #                   'bagging_fraction': (0.1, 1.0),
     #                   'lambda_l1': (0, 10),
     #                   'lambda_l2': (0, 10)
     #                   }
-    #
+    # # 贝叶斯优化参数设置
     # gp_params = {"init_points": 10, "n_iter": 50, "acq": 'ei', "xi": 0.0, "alpha": 1e-4}
+    # # 贝叶斯优化
     # opt_lgb = BayesOptimizationLGBM(X_train, y_train, X_test, y_test)
     # params_op = opt_lgb.train_opt(opt_parameters, gp_params)
     # log.logger.info('Best params: \n{}'.format(params_op))
     # log.logger.info('BestScore: {}, BestIter: {}'.format(opt_lgb.BestScore, opt_lgb.BestIter))
     # classify_conf.params.update(params_op)
     # log.logger.info('Model Params:\n{}'.format(classify_conf.params))
-
+    #
     # # NonCrossValidation Test
-    lgbm = LightGBM(classify_conf)
-    best_model, best_score, best_round = lgbm.fit(X_train, y_train)
-    lgb_predict(best_model, X_test, y_test, classify_conf)
+    # lgbm = LightGBM(classify_conf)
+    # best_model, best_score, best_round = lgbm.fit(X_train, y_train)
+    # lgb_predict(best_model, X_test, y_test, classify_conf)
+    #
+    # lgbm.plot_feature_importance(best_model)
+    # # #===========================classify Test end==========================================
 
-    lgbm.plot_feature_importance(best_model)
+    # #===========================REGRESSION TEST START==========================================
+    boston = load_boston()
+    data = boston.data
+    target = boston.target
+    X_train, X_test, y_train, y_test = train_test_split(data, target, test_size=0.1)
+    log.logger.info('{},{},{},{}'.format(np.shape(X_train), np.shape(X_test), np.shape(y_train), np.shape(y_test)))
+    regress_conf.lgb_config_r()
+    # opt_parameters = {'max_depth': (2, 12),
+    #                   'gamma': (0.001, 10.0),
+    #                   'min_child_weight': (0, 20),
+    #                   'max_delta_step': (0, 10),
+    #                   'subsample': (0.01, 0.99),
+    #                   'colsample_bytree': (0.01, 0.99)}
+    #
+    # gp_params = {"init_points": 2, "n_iter": 20, "acq": 'ei', "xi": 0.0, "alpha": 1e-4}
+    # opt_xgb = BayesOptimizationXGB(X_train, y_train, X_test, y_test)
+    # params_op = opt_xgb.train_opt(opt_parameters, gp_params=None)
+    # log.logger.info('Best params: \n{}'.format(params_op))
+    # log.logger.info('BestScore: {}, BestIter: {}'.format(opt_xgb.BestScore, opt_xgb.BestIter))
+    # update hyperparameters
+    # regress_conf.params.update(params_op)
 
+    # train model
+    lgb_m = LightGBM(regress_conf)
+    best_score, best_round, best_model = lgb_m.fit(X_train, y_train)
+    # eval
+    lgb_predict(best_model, regress_conf, X_test, y_test)
+    # #===========================REGRESSION TEST END==========================================
