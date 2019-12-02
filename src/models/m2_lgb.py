@@ -42,7 +42,7 @@ class LightGBM(object):
         if self.cv_folds is None:
             log.logger.info('NonCrossValidation。。。。')
 
-            x_train, x_valid, y_train, y_valid = train_test_split(x_train, y_train, test_size=0.2)
+            # x_train, x_valid, y_train, y_valid = train_test_split(x_train, y_train, test_size=0.2)
             if x_valid is None and y_valid is None:
                 d_train = lgb.Dataset(x_train, label=y_train)
                 watchlist = [d_train]
