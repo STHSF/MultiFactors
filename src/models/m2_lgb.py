@@ -130,7 +130,6 @@ class LightGBM(object):
 
     @staticmethod
     def plot_feature_importance(best_model):
-
         print(80 * '*')
         print(31 * '*' + 'Feature Importance' + 31 * '*')
         print(80 * '.')
@@ -140,22 +139,19 @@ class LightGBM(object):
         print(80 * '.')
 
         feature_importance_df = pd.DataFrame(zip(best_model.feature_name(), best_model.feature_importance("gain")), columns=['Feature', 'importance'])
-        # feature_importance_df["Feature"] = best_model.get_fscore().keys()
-        # feature_importance_df["importance"] = best_model.feature_importance()
         # # plot feature importance of top_n
-        print(feature_importance_df)
-        # top_n = 2
-        # best_features = feature_importance_df[["Feature", "importance"]].sort_values(by="importance", ascending=True)
-        # best_features['importance'] = best_features['importance'] / best_features['importance'].sum()
-        # # best_features = feature_importance_df[["Feature", "importance"]].groupby("Feature").mean().sort_values(by="importance", ascending=True)[:top_n].reset_index()
-        # plt.figure(figsize=(16, 10))
-        # best_features[:top_n].plot(kind='barh', x='Feature', y='importance', legend=False, figsize=(16, 10))
-        # plt.title('XGBoost Feature Importance')
-        # plt.xlabel('relative Features')
-        # plt.ylabel('Feature Importance Score')
-        # # save picture
-        # # plt.gcf().savefig('feature_importance_xgb.png')
-        # plt.show()
+        top_n = 2
+        best_features = feature_importance_df[["Feature", "importance"]].sort_values(by="importance", ascending=True)
+        best_features['importance'] = best_features['importance'] / best_features['importance'].sum()
+        # best_features = feature_importance_df[["Feature", "importance"]].groupby("Feature").mean().sort_values(by="importance", ascending=True)[:top_n].reset_index()
+        plt.figure(figsize=(16, 10))
+        best_features[:top_n].plot(kind='barh', x='Feature', y='importance', legend=False, figsize=(16, 10))
+        plt.title('XGBoost Feature Importance')
+        plt.xlabel('relative Features')
+        plt.ylabel('Feature Importance Score')
+        # save picture
+        # plt.gcf().savefig('feature_importance_xgb.png')
+        plt.show()
 
     def set_params(self, **params):
         self.params.update(params)
