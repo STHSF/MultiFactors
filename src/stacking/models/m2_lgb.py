@@ -174,6 +174,16 @@ def run_feat_search(X_train, X_test, y_train, feature_names):
     pass
 
 
+def plot_figure(y_pred, y_test, fig_name):
+    fig1 = plt.figure(num=fig_name, figsize=(10, 3), dpi=75, facecolor='#FFFFFF', edgecolor='#0000FF')
+    plt.plot(y_pred)
+    plt.plot(y_test)
+    plt.title(u"REGRESSION")
+    plt.legend((u'Predict', u'Test'), loc='best')  # sets our legend for our graph.
+    plt.show()
+    plt.close()
+
+
 def lgb_predict(bst_model, conf, x_test, y_test, save_result_path=None):
     # x_test = x_test.flatten()
     if conf.params['objective'] == "multiclass":
@@ -186,7 +196,18 @@ def lgb_predict(bst_model, conf, x_test, y_test, save_result_path=None):
 
     elif conf.params['objective'] == "regression":
         y_pred = bst_model.predict(x_test)
-        log.logger.info('y_pre: {}'.format(y_pred))
+        if y_test is None:
+            log.logger.info('y_pre: {}'.format(y_pred))
+        else:
+            log.logger.info('y_pre: \n{}'.format(y_pred))
+            log.logger.info('y_test: \n{}'.format(y_test))
+
+            rmse = reg_eva.rmse(y_test, y_pred)
+            log.logger.info('rmse: {}'.format(rmse))
+            r2_sc = reg_eva.r_square_error(y_test, y_pred)
+            log.logger.info('r_square_error: {}'.format(r2_sc))
+            # PLOT
+            plot_figure(y_pred, y_test, 'xgb_regression')
     else:
         y_pred = None
 
@@ -225,36 +246,36 @@ if __name__ == '__main__':
 
     # # # #===========================classify Test start==========================================
     # # CLASSIFY TEST
-    iris = load_iris()
-    data = iris.data
-    target = iris.target
-    X_train, X_test, y_train, y_test = train_test_split(data, target, test_size=0.2)
-    log.logger.info('type of x_train: {}'.format(type(X_train)))
-    log.logger.info('shape of x_train: {}'.format(np.shape(X_train)))
-    classify_conf.lgb_config_c()
-    log.logger.info('Model Params pre:\n{}'.format(classify_conf.params))
-
-    # # NonCrossValidation Test
-    lgbm = LightGBM(classify_conf)
-    best_model, best_score, best_round = lgbm.fit(X_train, y_train)
-    lgb_predict(best_model, classify_conf, X_test, y_test)
+    # iris = load_iris()
+    # data = iris.data
+    # target = iris.target
+    # X_train, X_test, y_train, y_test = train_test_split(data, target, test_size=0.2)
+    # log.logger.info('type of x_train: {}'.format(type(X_train)))
+    # log.logger.info('shape of x_train: {}'.format(np.shape(X_train)))
+    # classify_conf.lgb_config_c()
+    # log.logger.info('Model Params pre:\n{}'.format(classify_conf.params))
     #
+    # # # NonCrossValidation Test
+    # lgbm = LightGBM(classify_conf)
+    # best_model, best_score, best_round = lgbm.fit(X_train, y_train)
+    # lgb_predict(best_model, classify_conf, X_test, y_test)
+
     # # # CrossValidation Test
     # # classify_conf.cv_folds = 5
     # # run_cv(X_train, X_test, y_test, y_train, classify_conf)
     # # # #===========================classify Test end==========================================
 
     # #===========================REGRESSION TEST START==========================================
-    # boston = load_boston()
-    # data = boston.data
-    # target = boston.target
-    # X_train, X_test, y_train, y_test = train_test_split(data, target, test_size=0.1)
-    # log.logger.info('{},{},{},{}'.format(np.shape(X_train), np.shape(X_test), np.shape(y_train), np.shape(y_test)))
-    # regress_conf.lgb_config_r()
-    #
-    # # train model
-    # lgb_m = LightGBM(regress_conf)
-    # best_score, best_round, best_model = lgb_m.fit(X_train, y_train)
-    # # eval
-    # lgb_predict(best_model, regress_conf, X_test, y_test)
+    boston = load_boston()
+    data = boston.data
+    target = boston.target
+    X_train, X_test, y_train, y_test = train_test_split(data, target, test_size=0.1)
+    log.logger.info('{},{},{},{}'.format(np.shape(X_train), np.shape(X_test), np.shape(y_train), np.shape(y_test)))
+    regress_conf.lgb_config_r()
+
+    # train model
+    lgb_m = LightGBM(regress_conf)
+    best_score, best_round, best_model = lgb_m.fit(X_train, y_train)
+    # eval
+    lgb_predict(best_model, regress_conf, X_test, y_test)
     # #===========================REGRESSION TEST END==========================================
