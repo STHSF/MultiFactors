@@ -30,7 +30,7 @@ class LightGBM(object):
         self.max_round = args.max_round
         self.cv_folds = args.cv_folds
         self.early_stop_round = args.early_stop_round
-        self.seed = args.seed
+        self.cv_seed = args.cv_seed
         self.save_model_path = args.save_model_path
 
     def fit(self, x_train, y_train, x_valid=None, y_valid=None):
@@ -120,7 +120,7 @@ class LightGBM(object):
                            d_train,
                            num_boost_round=self.max_round,
                            nfold=self.cv_folds,
-                           seed=self.seed,
+                           seed=self.cv_seed,
                            verbose_eval=False,
                            early_stopping_rounds=self.early_stop_round,
                            show_stdv=False)
