@@ -130,11 +130,6 @@ class LightGBM(object):
 
     @staticmethod
     def plot_feature_importance(best_model):
-        feature_importance_df = pd.DataFrame()
-        # feature_importance_df["Feature"] = best_model.get_fscore().keys()
-        feature_importance_df["importance"] = best_model.feature_importance()
-        # # plot feature importance of top_n
-        print(feature_importance_df)
 
         print(80 * '*')
         print(31 * '*' + 'Feature Importance' + 31 * '*')
@@ -144,6 +139,11 @@ class LightGBM(object):
                                                                reverse=True)))
         print(80 * '.')
 
+        feature_importance_df = pd.DataFrame(zip(best_model.feature_name(), best_model.feature_importance("gain")), columns=['Feature', 'importance'])
+        # feature_importance_df["Feature"] = best_model.get_fscore().keys()
+        # feature_importance_df["importance"] = best_model.feature_importance()
+        # # plot feature importance of top_n
+        print(feature_importance_df)
         # top_n = 2
         # best_features = feature_importance_df[["Feature", "importance"]].sort_values(by="importance", ascending=True)
         # best_features['importance'] = best_features['importance'] / best_features['importance'].sum()

@@ -7,6 +7,7 @@
 @file: m3_svm.py
 @time: 2019/11/20 8:35 下午
 """
+from src.models.libsvm import *
 
 y, x = svm_read_problem('./libsvm/heart_scale')
 
