@@ -222,10 +222,13 @@ def xgb_predict(model, conf, x_test, y_test=None, result_save_path=None):
         y_pred = None
 
     if result_save_path:
-        df_reult = pd.DataFrame(x_test)
-        df_reult['y_test'] = y_test
-        df_reult['result'] = y_pred
-        df_reult.to_csv(result_save_path, index=False)
+        if not isinstance(x_test, pd.DataFrame):
+            df_result = pd.DataFrame(x_test)
+        else:
+            df_result = x_test
+        df_result['y_test'] = y_test
+        df_result['result'] = y_pred
+        df_result.to_csv(result_save_path, index=False)
 
 
 def run_cv(x_train, x_test, y_train, y_test, regress_conf):

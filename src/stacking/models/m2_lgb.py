@@ -209,6 +209,7 @@ def lgb_predict(bst_model, conf, x_test, y_test, save_result_path=None):
             # PLOT
             plot_figure(y_pred, y_test, 'xgb_regression')
     else:
+        log.logger.error('CAN NOT FIND OBJECTIVE PARAMS')
         y_pred = None
 
     if save_result_path:
