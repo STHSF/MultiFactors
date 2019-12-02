@@ -10,8 +10,9 @@
 
 import os
 import sys
-sys.path.append(os.path.join(os.path.dirname(__file__), '../'))
-
+sys.path.append('../')
+sys.path.append('../../')
+sys.path.append('../../../')
 import time
 import numpy as np
 from math import *
