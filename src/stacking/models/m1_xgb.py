@@ -8,17 +8,14 @@
 @time: 2019-03-04 09:36
 """
 
+import os
 import sys
-sys.path.append('../')
-sys.path.append('../../')
-sys.path.append('../../../')
+sys.path.append(os.path.join(os.path.dirname(__file__), '../'))
 
 import time
-import argparse
 import numpy as np
 from math import *
 import xgboost as xgb
-import seaborn as sns
 from src.utils import log_util
 from src.conf.configuration import regress_conf
 import pandas as pd
@@ -194,7 +191,7 @@ def ic_cal(y_pred: np.ndarray, y_test: np.ndarray) -> float:
     return np.corrcoef(y_pred, y_test)[0, 1]
 
 
-def xgb_predict(model, conf, x_test, y_test=None, save_result_path=None):
+def xgb_predict(model, conf, x_test, y_test=None, result_save_path=None):
 
     d_test = xgb.DMatrix(x_test)
     if conf.params['objective'] == 'multi:softmax':
@@ -224,11 +221,11 @@ def xgb_predict(model, conf, x_test, y_test=None, save_result_path=None):
         log.logger.error('CAN NOT FIND OBJECTIVE PARAMS')
         y_pred = None
 
-    if save_result_path:
+    if result_save_path:
         df_reult = pd.DataFrame(x_test)
         df_reult['y_test'] = y_test
         df_reult['result'] = y_pred
-        df_reult.to_csv(save_result_path, index=False)
+        df_reult.to_csv(result_save_path, index=False)
 
 
 def run_cv(x_train, x_test, y_train, y_test, regress_conf):
@@ -245,8 +242,8 @@ def run_cv(x_train, x_test, y_train, y_test, regress_conf):
 
     # now = time.strftime('%Y-%m-%d %H:%M')
     result_saved_path = '../result/result_{}-{:.4f}.csv'.format(now, best_round)
-    # xgb_predict(best_model, x_test, y_test, save_result_path=result_saved_path)
-    xgb_predict(best_model, x_test, y_test, save_result_path=None)
+    # xgb_predict(best_model, x_test, y_test, result_save_path=result_saved_path)
+    xgb_predict(best_model, x_test, y_test, result_save_path=None)
 
 
 def train_test_sp(train_dataset_df, label_dataset_df, test_size=0.02, shift=100, random=None):

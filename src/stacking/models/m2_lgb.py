@@ -7,10 +7,10 @@
 @file: m2_lgb.py
 @time: 2019-03-04 11:03
 """
+import os
 import sys
-sys.path.append('../')
-sys.path.append('../../')
-sys.path.append('../../../')
+
+sys.path.append(os.path.join(os.path.dirname(__file__), '../'))
 import time
 import joblib
 import lightgbm as lgb
