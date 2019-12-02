@@ -211,9 +211,9 @@ if __name__ == '__main__':
         data = iris.data
         target = iris.target
         X_train, X_test, y_train, y_test = train_test_split(data, target, test_size=0.1)
-        log.logger.info('{},{},{},{}'.format(np.shape(X_train), np.shape(X_test), np.shape(y_train), np.shape(y_test)))
+        log.logger.info('Detail of IRIS: {},{},{},{}'.format(np.shape(X_train), np.shape(X_test), np.shape(y_train), np.shape(y_test)))
         classify_conf.lgb_config_c()
-        log.logger.info('Model Params pre:\n{}'.format(classify_conf.params))
+        log.logger.info('Model Params before Optimization:\n{}'.format(classify_conf.params))
         # Hyper Parameters Optimization
         # 超参
         opt_parameters = {'max_depth': (4, 10),
@@ -232,7 +232,7 @@ if __name__ == '__main__':
         log.logger.info('Best params: \n{}'.format(params_op))
         log.logger.info('BestScore: {}, BestIter: {}'.format(opt_lgb.BestScore, opt_lgb.BestIter))
         classify_conf.params.update(params_op)
-        log.logger.info('Model Params:\n{}'.format(classify_conf.params))
+        log.logger.info('Model Params after Optimization:\n{}'.format(classify_conf.params))
 
         # NonCrossValidation Test
         lgbm = LightGBM(classify_conf)
@@ -247,8 +247,9 @@ if __name__ == '__main__':
         data = boston.data
         target = boston.target
         X_train, X_test, y_train, y_test = train_test_split(data, target, test_size=0.1)
-        log.logger.info('{},{},{},{}'.format(np.shape(X_train), np.shape(X_test), np.shape(y_train), np.shape(y_test)))
+        log.logger.info('Detail of Boston Data: {},{},{},{}'.format(np.shape(X_train), np.shape(X_test), np.shape(y_train), np.shape(y_test)))
         regress_conf.lgb_config_r()
+        log.logger.info('Model Params before Optimization:\n{}'.format(regress_conf.params))
 
         opt_parameters = {'max_depth': (4, 10),
                           'num_leaves': (5, 130),
@@ -273,3 +274,6 @@ if __name__ == '__main__':
         # eval
         lgb_predict(best_model, regress_conf, X_test, y_test)
         # #===========================REGRESSION TEST END==========================================
+
+        # classify_test()
+        regression_test()
