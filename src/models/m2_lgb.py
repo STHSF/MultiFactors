@@ -245,38 +245,43 @@ if __name__ == '__main__':
     from sklearn.datasets import load_iris, load_boston
     from sklearn.model_selection import train_test_split
 
-    # # # #===========================classify Test start==========================================
-    # # CLASSIFY TEST
-    # iris = load_iris()
-    # data = iris.data
-    # target = iris.target
-    # X_train, X_test, y_train, y_test = train_test_split(data, target, test_size=0.2)
-    # log.logger.info('type of x_train: {}'.format(type(X_train)))
-    # log.logger.info('shape of x_train: {}'.format(np.shape(X_train)))
-    # classify_conf.lgb_config_c()
-    # log.logger.info('Model Params pre:\n{}'.format(classify_conf.params))
-    #
-    # # # NonCrossValidation Test
-    # lgbm = LightGBM(classify_conf)
-    # best_model, best_score, best_round = lgbm.fit(X_train, y_train)
-    # lgb_predict(best_model, classify_conf, X_test, y_test)
+    def classify_test():
+        # # #===========================classify Test start==========================================
+        # CLASSIFY TEST
+        iris = load_iris()
+        data = iris.data
+        target = iris.target
+        X_train, X_test, y_train, y_test = train_test_split(data, target, test_size=0.2)
+        log.logger.info('type of x_train: {}'.format(type(X_train)))
+        log.logger.info('shape of x_train: {}'.format(np.shape(X_train)))
+        classify_conf.lgb_config_c()
+        log.logger.info('Model Params pre:\n{}'.format(classify_conf.params))
 
-    # # # CrossValidation Test
-    # # classify_conf.cv_folds = 5
-    # # run_cv(X_train, X_test, y_test, y_train, classify_conf)
-    # # # #===========================classify Test end==========================================
+        # # NonCrossValidation Test
+        lgbm = LightGBM(classify_conf)
+        best_model, best_score, best_round = lgbm.fit(X_train, y_train)
+        lgb_predict(best_model, classify_conf, X_test, y_test)
 
-    # #===========================REGRESSION TEST START==========================================
-    boston = load_boston()
-    data = boston.data
-    target = boston.target
-    X_train, X_test, y_train, y_test = train_test_split(data, target, test_size=0.1)
-    log.logger.info('{},{},{},{}'.format(np.shape(X_train), np.shape(X_test), np.shape(y_train), np.shape(y_test)))
-    regress_conf.lgb_config_r()
+        # # CrossValidation Test
+        # classify_conf.cv_folds = 5
+        # run_cv(X_train, X_test, y_test, y_train, classify_conf)
+        # # #===========================classify Test end==========================================
 
-    # train model
-    lgb_m = LightGBM(regress_conf)
-    best_model, best_score, best_round = lgb_m.fit(X_train, y_train)
-    # eval
-    lgb_predict(best_model, regress_conf, X_test, y_test)
-    # #===========================REGRESSION TEST END==========================================
+    def regression_test():
+        # #===========================REGRESSION TEST START==========================================
+        boston = load_boston()
+        data = boston.data
+        target = boston.target
+        X_train, X_test, y_train, y_test = train_test_split(data, target, test_size=0.1)
+        log.logger.info('{},{},{},{}'.format(np.shape(X_train), np.shape(X_test), np.shape(y_train), np.shape(y_test)))
+        regress_conf.lgb_config_r()
+
+        # train model
+        lgb_m = LightGBM(regress_conf)
+        best_model, best_score, best_round = lgb_m.fit(X_train, y_train)
+        # eval
+        lgb_predict(best_model, regress_conf, X_test, y_test)
+        # #===========================REGRESSION TEST END==========================================
+
+    # classify_test()
+    regression_test()

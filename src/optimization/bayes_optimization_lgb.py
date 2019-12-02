@@ -11,8 +11,6 @@ import sys
 sys.path.append('../')
 sys.path.append('../../')
 sys.path.append('../../../')
-import pdb
-import warnings
 import pandas as pd
 import lightgbm as lgb
 from src.utils import log_util
@@ -201,10 +199,10 @@ if __name__ == '__main__':
     # Classify Parameter Optimization Test
     log.logger.info('Classify Parameter Optimization Test')
     import numpy as np
-    from sklearn.datasets import load_iris, load_boston
-    from src.stacking.models.m2_lgb import *
+    from sklearn.datasets import load_boston
     from sklearn.model_selection import train_test_split
-    from src.conf.configuration import classify_conf, regress_conf
+    from src.conf.configuration import regress_conf
+    from src.models.m2_lgb import LightGBM, lgb_predict
 
     # # #===========================classify Test start==========================================
     # iris = load_iris()

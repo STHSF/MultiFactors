@@ -5,13 +5,12 @@ import sys
 sys.path.append('../')
 sys.path.append('../../')
 sys.path.append('../../../')
-import gc, time, sqlite3
+import gc, time
 import pandas as pd
 import numpy as np
-from src.stacking.models.m1_xgb import *
-from datetime import datetime, timedelta
+from datetime import timedelta
 from src.conf.configuration import regress_conf
-from src.stacking import factor_store, feature_list
+from src.stacking import factor_store
 from PyFin.api import *
 from alphamind.api import *
 from src.conf.models import *

@@ -8,11 +8,9 @@
 @time: 2019/11/26 4:23 下午
 """
 import sys
-
 sys.path.append('../')
 sys.path.append('../../')
 sys.path.append('../../../')
-import warnings
 import xgboost as xgb
 from src.utils import log_util
 from src.optimization.bayes_optimization_base import BayesOptimizationBase
@@ -197,10 +195,10 @@ if __name__ == '__main__':
     # Classify Parameter Optimization Test
     log.logger.info('Classify Parameter Optimization Test')
     import numpy as np
-
+    import matplotlib.pyplot as plt
     from sklearn.datasets import load_iris, load_boston
     from sklearn.model_selection import train_test_split
-    from src.stacking.models.m1_xgb import XGBooster, xgb_predict
+    from src.models.m1_xgb import XGBooster, xgb_predict
     from src.conf.configuration import classify_conf, regress_conf
 
     def classify_test():
