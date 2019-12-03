@@ -107,9 +107,9 @@ class LightGBM(object):
     def predict(self, bst_model, x_test, save_result_path=None):
         x_test = lgb.Dataset(x_test)
         if self.params['objective'] == "multiclass":
-            pre_data = bst_model.predit(x_test).argmax(axis=1)
+            pre_data = bst_model.predict(x_test).argmax(axis=1)
         else:
-            pre_data = bst_model.predit(x_test)
+            pre_data = bst_model.predict(x_test)
 
         if save_result_path:
             df_reult = pd.DataFrame()
