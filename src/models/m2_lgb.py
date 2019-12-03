@@ -105,7 +105,6 @@ class LightGBM(object):
         return best_model, best_score, best_round
 
     def predict(self, bst_model, x_test, save_result_path=None):
-        x_test = lgb.Dataset(x_test)
         if self.params['objective'] == "multiclass":
             pre_data = bst_model.predict(x_test).argmax(axis=1)
         else:
