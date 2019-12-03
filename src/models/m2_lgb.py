@@ -105,6 +105,7 @@ class LightGBM(object):
         return best_model, best_score, best_round
 
     def predict(self, bst_model, x_test, save_result_path=None):
+        x_test = lgb.Dataset(x_test)
         if self.params['objective'] == "multiclass":
             pre_data = bst_model.predit(x_test).argmax(axis=1)
         else:
@@ -286,6 +287,7 @@ if __name__ == '__main__':
         # eval
         lgb_predict(best_model, regress_conf, X_test, y_test)
         lgb_m.plot_feature_importance(best_model)
+        print(lgb_m.predict(best_model, X_test))
         # #===========================REGRESSION TEST END==========================================
 
     # classify_test()
