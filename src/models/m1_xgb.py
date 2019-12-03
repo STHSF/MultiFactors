@@ -133,6 +133,16 @@ class XGBooster(object):
 
     @staticmethod
     def plot_feature_importance(best_model, top_n=20):
+        print(80 * '*')
+        print(31 * '*' + 'Feature Importance' + 31 * '*')
+        print(80 * '.')
+        print("\n".join((".%50s => %9.5f" % x) for x in
+                        sorted(zip(best_model.get_fscore().keys(), best_model.get_fscore().values()),
+                               key=lambda x: x[1],
+                               reverse=True)))
+        print(80 * '.')
+
+        # plot
         feature_importance_df = pd.DataFrame()
         feature_importance_df["Feature"] = best_model.get_fscore().keys()
         feature_importance_df["importance"] = best_model.get_fscore().values()
@@ -275,49 +285,92 @@ def train_test_sp(train_dataset_df, label_dataset_df, test_size=0.02, shift=100,
 now = time.strftime('%Y-%m-%d %H:%M')
 
 if __name__ == '__main__':
-    # 输入数据为dataframe格式
-    train_sample_df = pd.read_csv('../../data/dataset/training_sample.csv')
-    print(train_sample_df.head())
-    train_dataset_df = train_sample_df[['alpha_1', 'alpha_2', 'alpha_3', 'alpha_4', 'alpha_5',
-                                        'alpha_6', 'alpha_7', 'alpha_8', 'alpha_9', 'alpha_10']]
-    label_dataset_df = train_sample_df[['dx_2']]
+    # # 输入数据为dataframe格式
+    # train_sample_df = pd.read_csv('../../data/dataset/training_sample.csv')
+    # print(train_sample_df.head())
+    # train_dataset_df = train_sample_df[['alpha_1', 'alpha_2', 'alpha_3', 'alpha_4', 'alpha_5',
+    #                                     'alpha_6', 'alpha_7', 'alpha_8', 'alpha_9', 'alpha_10']]
+    # label_dataset_df = train_sample_df[['dx_2']]
+    #
+    # x_train, x_test, y_train, y_test = train_test_sp(train_dataset_df[:30000], label_dataset_df[:30000])
+    # print('x_train_pre: \n%s' % x_train.head())
+    # # print('y_train_pre: %s' % y_train.head())
+    # print('x_test_pre: %s' % x_test.head())
+    # # print('y_test_pre: %s' % y_test.head())
+    #
+    # # 数据统计用
+    # # x_test.to_csv('../result/x_test_{}.csv'.format(now), index=0)
+    # # y_test.to_csv('../result/y_test_{}.csv'.format(now), index=0)
+    #
+    # # 样本预处理(标准化等)
+    # x_train_mean = x_train.mean()
+    # x_train_std = x_train.std()
+    # x_train = (x_train - x_train_mean) / x_train_std
+    # x_test = (x_test - x_train_mean) / x_train_std
+    # print(x_train.head())
+    # print(x_test.head())
+    #
+    # # # 超参数
+    # regress_conf.xgb_config_r()
+    # log.logger.info("params before: {}".format(regress_conf.params))
+    # # 超参数寻优
+    # from src.optimization.bayes_optimization_xgb import *
+    # opt_parameters = {'max_depth': (2, 12),
+    #                   'gamma': (0.001, 10.0),
+    #                   'min_child_weight': (0, 20),
+    #                   'max_delta_step': (0, 10),
+    #                   'subsample': (0.01, 0.99),
+    #                   'colsample_bytree': (0.01, 0.99)
+    #                   }
+    # gp_params = {"init_points": 2, "n_iter": 2, "acq": 'ei', "xi": 0.0, "alpha": 1e-4}
+    # bayes_opt_xgb = BayesOptimizationXGB(x_train.values, y_train.values, x_test.values, y_test.values)
+    # params_op = bayes_opt_xgb.train_opt(opt_parameters, gp_params)
+    #
+    # regress_conf.params.update(params_op)
+    # log.logger.info("params after: {}".format(regress_conf.params))
+    # # 模型训练
+    # run_cv(x_train.values, x_test.values, y_train.values, y_test.values, regress_conf)
 
-    x_train, x_test, y_train, y_test = train_test_sp(train_dataset_df[:30000], label_dataset_df[:30000])
-    print('x_train_pre: \n%s' % x_train.head())
-    # print('y_train_pre: %s' % y_train.head())
-    print('x_test_pre: %s' % x_test.head())
-    # print('y_test_pre: %s' % y_test.head())
+    import numpy as np
+    import matplotlib.pyplot as plt
+    from sklearn.datasets import load_iris, load_boston
+    from sklearn.model_selection import train_test_split
+    from src.conf.configuration import classify_conf, regress_conf
 
-    # 数据统计用
-    # x_test.to_csv('../result/x_test_{}.csv'.format(now), index=0)
-    # y_test.to_csv('../result/y_test_{}.csv'.format(now), index=0)
+    def classify_test():
+        # ===========================classify Test start==========================================
+        iris = load_iris()
+        data = iris.data
+        target = iris.target
+        X_train, X_test, y_train, y_test = train_test_split(data, target, test_size=0.1)
+        log.logger.info('{},{},{},{}'.format(np.shape(X_train), np.shape(X_test), np.shape(y_train), np.shape(y_test)))
+        classify_conf.xgb_config_c()
 
-    # 样本预处理(标准化等)
-    x_train_mean = x_train.mean()
-    x_train_std = x_train.std()
-    x_train = (x_train - x_train_mean) / x_train_std
-    x_test = (x_test - x_train_mean) / x_train_std
-    print(x_train.head())
-    print(x_test.head())
+        # # train model
+        xgbc = XGBooster(classify_conf)
+        best_score, best_round, best_model = xgbc.fit(X_train, y_train)
+        # # predict
+        xgb_predict(best_model, classify_conf, X_test, y_test)
+        xgbc.plot_feature_importance(best_model)
+        # ===========================classify Test end==========================================
 
-    # # 超参数
-    regress_conf.xgb_config_r()
-    log.logger.info("params before: {}".format(regress_conf.params))
-    # 超参数寻优
-    from src.optimization.bayes_optimization_xgb import *
-    opt_parameters = {'max_depth': (2, 12),
-                      'gamma': (0.001, 10.0),
-                      'min_child_weight': (0, 20),
-                      'max_delta_step': (0, 10),
-                      'subsample': (0.01, 0.99),
-                      'colsample_bytree': (0.01, 0.99)
-                      }
-    gp_params = {"init_points": 2, "n_iter": 2, "acq": 'ei', "xi": 0.0, "alpha": 1e-4}
-    bayes_opt_xgb = BayesOptimizationXGB(x_train.values, y_train.values, x_test.values, y_test.values)
-    params_op = bayes_opt_xgb.train_opt(opt_parameters, gp_params)
+    def regression_test():
+        # ===========================REGRESSION TEST START==========================================
+        boston = load_boston()
+        data = boston.data
+        target = boston.target
+        X_train, X_test, y_train, y_test = train_test_split(data, target, test_size=0.1)
+        log.logger.info('{},{},{},{}'.format(np.shape(X_train), np.shape(X_test), np.shape(y_train), np.shape(y_test)))
+        regress_conf.xgb_config_r()
 
-    regress_conf.params.update(params_op)
-    log.logger.info("params after: {}".format(regress_conf.params))
-    # 模型训练
-    run_cv(x_train.values, x_test.values, y_train.values, y_test.values, regress_conf)
+        # train model
+        xgbc = XGBooster(regress_conf)
+        best_score, best_round, best_model = xgbc.fit(X_train, y_train)
+        # eval
+        xgb_predict(best_model, regress_conf, X_test, y_test)
+        xgbc.plot_feature_importance(best_model)
+        # ===========================REGRESSION TEST END==========================================
+
+    regression_test()
+    # classify_test()
 
