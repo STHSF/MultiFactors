@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 
 """
-@version: ??
+@version: 1.0
 @author: li
-@file: __init__.py.py
-@time: 2019-05-08 15:01
+@file: test.py
+@time: 2019/12/3 5:04 下午
 """

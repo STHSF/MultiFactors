@@ -18,7 +18,7 @@ from bayes_opt import BayesianOptimization
 
 class BayesOptimizationBase(object):
     """
-    BayesOptimizationTool
+    Automated search of network hyperparameters Base on BayesOptimization
     """
     def __init__(self):
         self.function = self.black_box_function

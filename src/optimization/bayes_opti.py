@@ -98,16 +98,15 @@ def train(X_train, y_train, X_test, y_test, function, parameters):
     best_solution = bayesian_optimization(dataset, function, parameters)
     params = best_solution["params"]
 
+    model = xgb.XGBClassifier(eta=int(max(params["eta"], 0)),
+                              gamma=int(max(params["gamma"], 0)),
+                              max_depth=int(max(params["max_depth"], 0)),
+                              cv_seed=42,
+                              nthread=-1,
+                              scale_pos_weight=len(y_train[y_train == 0]) / len(y_train[y_train == 1])
+                              )
 
-    # model = xgb.XGBClassifier(eta=int(max(params["eta"], 0)),
-    #                           gamma=int(max(params["gamma"], 0)),
-    #                           max_depth=int(max(params["max_depth"], 0)),
-    #                           cv_seed=42,
-    #                           nthread=-1,
-    #                           scale_pos_weight=len(y_train[y_train == 0]) / len(y_train[y_train == 1])
-    #                           )
-    #
-    # model.fit(X_train, y_train)
+    model.fit(X_train, y_train)
 
     return model
 
