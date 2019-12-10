@@ -29,6 +29,12 @@ class BasicModule(nn.Module):
         ])
         return optimizer
 
+    def save_model(self, the_model, path='./models/model.model'):
+        torch.save(the_model, path)
+
+    def load_model(self, the_model, path='./models/model.model'):
+        torch.load(the_model, path)
+
 
 kernal_sizes = [1, 2, 3, 4, 5]
 
