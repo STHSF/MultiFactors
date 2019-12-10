@@ -50,6 +50,8 @@ model = BiRNN(4642, 1024, 3)
 loss_function = torch.nn.MSELoss()
 optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 
+print(model)
+
 
 
 

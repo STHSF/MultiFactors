@@ -10,12 +10,11 @@
 
 max_len = 10
 
-max_word_len = 10
+max_word_len = 10  # seq_length
 
 word_embedding_len = 10
 
 char_vocab_len = 10
-
 
 char_hidden_size = 10
 

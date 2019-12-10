@@ -16,7 +16,6 @@ import numpy as np
 
 class BasicModule(nn.Module):
     # 封装了nn.Module， 主要是提供了save和load两个方法
-
     def __init__(self):
         super(BasicModule, self).__init__()
         self.model_name = str(type(self))  # 模型的默认名字
