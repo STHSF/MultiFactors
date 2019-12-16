@@ -137,3 +137,4 @@ src/data/dataprepare/zz500_all.pkl
 /src/log/
 *./log
 /src/optimization/bayes_opti.py
+!/src/stacking/notebooks/cross_section/real_tune_record.db
