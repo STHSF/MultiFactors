@@ -45,12 +45,17 @@ class BiRNN(nn.Module):
         h_conc_linear = self.output(out)
         return h_conc_linear
 
+input = torch.randn(32, 5)
 
 model = BiRNN(4642, 1024, 3)
 loss_function = torch.nn.MSELoss()
 optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 
 print(model)
+
+
+for param in model.parameters():
+    print(type(param.data), param.size())
 
 
 
