@@ -17,13 +17,13 @@ import time
 import numpy as np
 from math import *
 import xgboost as xgb
-from src.utils import log_util
-from src.conf.configuration import regress_conf
+from utils import log_util
+from conf.configuration import regress_conf
 import pandas as pd
 from sklearn.externals import joblib
 from sklearn.model_selection import train_test_split, TimeSeriesSplit
 from sklearn.metrics import mean_squared_error, r2_score
-from src.utils.Evaluation import cls_eva, reg_eva
+from utils.Evaluation import cls_eva, reg_eva
 import matplotlib.pyplot as plt
 pd.set_option('display.max_rows', None, 'display.max_columns', None, "display.max_colwidth", 1000, 'display.width', 1000)
 

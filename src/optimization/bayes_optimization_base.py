@@ -12,7 +12,7 @@ sys.path.append('../')
 sys.path.append('../../')
 sys.path.append('../../../')
 import warnings
-from src.utils import log_util
+from utils import log_util
 from bayes_opt import BayesianOptimization
 
 
