@@ -12,13 +12,13 @@ sys.path.append('../')
 sys.path.append('../../')
 sys.path.append('../../../')
 import warnings
-from src.utils import log_util
+from utils import log_util
 from bayes_opt import BayesianOptimization
 
 
 class BayesOptimizationBase(object):
     """
-    BayesOptimizationTool
+    Automated search of network hyperparameters Base on BayesOptimization
     """
     def __init__(self):
         self.function = self.black_box_function

@@ -5,16 +5,15 @@ import sys
 sys.path.append('../')
 sys.path.append('../../')
 sys.path.append('../../../')
-import gc, time, sqlite3
+import gc, time
 import pandas as pd
 import numpy as np
-from src.stacking.models.m2_lgb import *
-from datetime import datetime, timedelta
-from src.conf.configuration import regress_conf
-from src.stacking import factor_store, feature_list
+from datetime import timedelta
+from conf.configuration import regress_conf
+from stacking import factor_store
 from PyFin.api import *
 from alphamind.api import *
-from src.conf.models import *
+from conf.models import *
 from alphamind.execution.naiveexecutor import NaiveExecutor
 
 data_source = 'postgresql+psycopg2://alpha:alpha@180.166.26.82:8889/alpha'

@@ -32,7 +32,7 @@ class RegressionConfig(object):
         self.max_round = 10000
         self.early_stop_round = 1000
         self.cv_folds = None
-        self.cv_seed = 100
+        self.cv_seed = 2019
         self.save_model_path = '../bst_model/xgb/'
 
     def lgb_config_r(self):
@@ -40,7 +40,7 @@ class RegressionConfig(object):
             'task': 'train',
             'boosting': 'gbdt',  # 设置提升类型
             'objective': 'regression',  # 目标函数
-            'metric': {'l2', 'auc'},  # 评估函数
+            'metric': {'l2', 'mean_squared_error'},  # 评估函数
             'num_leaves': 31,  # 叶子节点数
             'learning_rate': 0.05,  # 学习速率
             'feature_fraction': 0.9,  # 建树的特征选择比例 # 样本列采样
@@ -54,7 +54,7 @@ class RegressionConfig(object):
         self.max_round = 500
         self.early_stop_round = 10
         self.cv_folds = None
-        self.cv_seed = 3
+        self.cv_seed = 2019
 
 
 class ClassificationConfig(object):
@@ -92,24 +92,31 @@ class ClassificationConfig(object):
         self.max_round = 10000
         self.cv_folds = None
         self.early_stop_round = 300
-        self.cv_seed = 3
+        self.cv_seed = 2019
         self.save_model_path = 'bst_model/lgb/lgb.txt'
 
     def xgb_config_c(self):
-        self.params = {'objective': 'multi:softmax',
-                       'num_class': 3,
-                       'nthread': 4,
-                       'silent': 0,
-                       'eta': 0.1,
-                       "eval_metric": ["mlogloss", "merror"],
+        self.params = {'objective': 'multi:softmax',  # 目标函数
+                       'num_class': 3,  # 当是objective为'multi:softmax'时需要指定类别数量，eg:'num_class':33
+                       'nthread': 4,  # 运行的线程数，-1所有线程
+                       'eta': 0.03,
+                       'gamma': 0.1,  # 用于控制是否后剪枝的参数,越大越保守，一般0.1、0.2这样子
+                       "eval_metric": ["mlogloss", "merror"],  # 评价函数，如果该参数没有指定，缺省值是通过目标函数来做匹配，
                        'learning_rate': 0.01,
-                       'max_depth': 5,
+                       'max_depth': 5,  #  树的深度，对结果影响较大，越深越容易过拟合
+                       'alpha': 0,  # L1正则，树的深度过大时，可以适大该参数
+                       'lambda': 0,  # L2正则
+                       'subsample': 0.7,  # 随机采样的比率，通俗理解就是选多少样本做为训练集，选择小于1的比例可以减少方差，即防止过拟合
+                       'colsample_bytree': 0.5,  # 这里是选择多少列作为训练集，具体的理解就是选择多少特征
+                       'min_child_weight': 3,  # 决定最小叶子节点样本权重和。当它的值较大时，可以避免模型学习到局部的特殊样本。但如果这个值过高，会导致欠拟合
+                       'silent': 0,
+                       'seed': 2019,  # 这个随机指定一个常数，防止每次结果不一致
                        }
 
         self.max_round = 10000
         self.cv_folds = None
         self.early_stop_round = 3000
-        self.cv_seed = 3
+        self.cv_seed = 2019
 
 
 regress_conf = RegressionConfig()

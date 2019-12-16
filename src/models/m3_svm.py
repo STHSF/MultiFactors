@@ -7,8 +7,11 @@
 @file: m3_svm.py
 @time: 2019/11/20 8:35 下午
 """
+import sys
+sys.path.append('../')
+sys.path.append('../../')
 
-from src.stacking.models.libsvm.python.svmutil import *
+from src.models.libsvm.python.svm import *
 
 y, x = svm_read_problem('./libsvm/heart_scale')
 

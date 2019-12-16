@@ -7,14 +7,17 @@
 @file: m2_lgb.py
 @time: 2019-03-04 11:03
 """
+import os
 import sys
 sys.path.append('../')
 sys.path.append('../../')
 sys.path.append('../../../')
+sys.path.append('../../../../')
 import time
 import joblib
 import lightgbm as lgb
 from sklearn.model_selection import train_test_split
+import matplotlib.pyplot as plt
 from src.conf.configuration import classify_conf, regress_conf
 from src.utils import log_util
 from src.utils.Evaluation import cls_eva, reg_eva
@@ -29,7 +32,7 @@ class LightGBM(object):
         self.max_round = args.max_round
         self.cv_folds = args.cv_folds
         self.early_stop_round = args.early_stop_round
-        self.seed = args.seed
+        self.cv_seed = args.cv_seed
         self.save_model_path = args.save_model_path
 
     def fit(self, x_train, y_train, x_valid=None, y_valid=None):
@@ -38,14 +41,16 @@ class LightGBM(object):
         best_score = {}
         if self.cv_folds is None:
             log.logger.info('NonCrossValidation。。。。')
-            # if x_valid is None and y_valid is None:
-            #     x_train, x_valid, y_train, y_valid = train_test_split(x_train, y_train, test_size=0.2)
-            #
-            # else:
-            #     x_valid, y_valid = x_valid, y_valid
-            d_train = lgb.Dataset(x_train, label=y_train)
-            # d_valid = lgb.Dataset(x_valid, label=y_valid)
-            watchlist = [d_train]
+
+            # x_train, x_valid, y_train, y_valid = train_test_split(x_train, y_train, test_size=0.2)
+            if x_valid is None and y_valid is None:
+                d_train = lgb.Dataset(x_train, label=y_train)
+                watchlist = [d_train]
+            else:
+                d_train = lgb.Dataset(x_train, label=y_train)
+                d_valid = lgb.Dataset(x_valid, label=y_valid)
+                watchlist = [d_train, d_valid]
+
             best_model = lgb.train(self.params,
                                    d_train,
                                    num_boost_round=self.max_round,
@@ -101,9 +106,9 @@ class LightGBM(object):
 
     def predict(self, bst_model, x_test, save_result_path=None):
         if self.params['objective'] == "multiclass":
-            pre_data = bst_model.predit(x_test).argmax(axis=1)
+            pre_data = bst_model.predict(x_test).argmax(axis=1)
         else:
-            pre_data = bst_model.predit(x_test)
+            pre_data = bst_model.predict(x_test)
 
         if save_result_path:
             df_reult = pd.DataFrame()
@@ -117,11 +122,35 @@ class LightGBM(object):
                            d_train,
                            num_boost_round=self.max_round,
                            nfold=self.cv_folds,
-                           seed=self.seed,
+                           seed=self.cv_seed,
                            verbose_eval=False,
                            early_stopping_rounds=self.early_stop_round,
                            show_stdv=False)
         return cv_result
+
+    @staticmethod
+    def plot_feature_importance(best_model, top_n=20):
+        print(80 * '*')
+        print(31 * '*' + 'Feature Importance' + 31 * '*')
+        print(80 * '.')
+        print("\n".join((".%50s => %9.5f" % x) for x in sorted(zip(best_model.feature_name(), best_model.feature_importance("gain")),
+                                                               key=lambda x: x[1],
+                                                               reverse=True)))
+        print(80 * '.')
+
+        feature_importance_df = pd.DataFrame(zip(best_model.feature_name(), best_model.feature_importance("gain")), columns=['Feature', 'importance'])
+        best_features = feature_importance_df[["Feature", "importance"]].sort_values(by="importance", ascending=True)
+        best_features['importance'] = best_features['importance'] / best_features['importance'].sum()
+        # best_features = feature_importance_df[["Feature", "importance"]].groupby("Feature").mean().sort_values(by="importance", ascending=True)[:top_n].reset_index()
+        plt.figure(figsize=(16, 10))
+        # # plot feature importance of top_n
+        best_features[:top_n].plot(kind='barh', x='Feature', y='importance', legend=False, figsize=(16, 10))
+        plt.title('XGBoost Feature Importance')
+        plt.xlabel('relative Features')
+        plt.ylabel('Feature Importance Score')
+        # save picture
+        # plt.gcf().savefig('feature_importance_xgb.png')
+        plt.show()
 
     def set_params(self, **params):
         self.params.update(params)
@@ -149,7 +178,17 @@ def run_feat_search(X_train, X_test, y_train, feature_names):
     pass
 
 
-def lgb_predict(bst_model, x_test, y_test, conf, save_result_path=None):
+def plot_figure(y_pred, y_test, fig_name):
+    fig1 = plt.figure(num=fig_name, figsize=(10, 3), dpi=75, facecolor='#FFFFFF', edgecolor='#0000FF')
+    plt.plot(y_pred)
+    plt.plot(y_test)
+    plt.title(u"REGRESSION")
+    plt.legend((u'Predict', u'Test'), loc='best')  # sets our legend for our graph.
+    plt.show()
+    plt.close()
+
+
+def lgb_predict(bst_model, conf, x_test, y_test, save_result_path=None):
     # x_test = x_test.flatten()
     if conf.params['objective'] == "multiclass":
         y_pred = bst_model.predict(x_test).argmax(axis=1)
@@ -161,8 +200,20 @@ def lgb_predict(bst_model, x_test, y_test, conf, save_result_path=None):
 
     elif conf.params['objective'] == "regression":
         y_pred = bst_model.predict(x_test)
-        log.logger.info('y_pre: {}'.format(y_pred))
+        if y_test is None:
+            log.logger.info('y_pre: {}'.format(y_pred))
+        else:
+            log.logger.info('y_pre: \n{}'.format(y_pred))
+            log.logger.info('y_test: \n{}'.format(y_test))
+
+            rmse = reg_eva.rmse(y_test, y_pred)
+            log.logger.info('rmse: {}'.format(rmse))
+            r2_sc = reg_eva.r_square_error(y_test, y_pred)
+            log.logger.info('r_square_error: {}'.format(r2_sc))
+            # PLOT
+            plot_figure(y_pred, y_test, 'xgb_regression')
     else:
+        log.logger.error('CAN NOT FIND OBJECTIVE PARAMS')
         y_pred = None
 
     if save_result_path:
@@ -188,49 +239,55 @@ def run_cv(x_train, x_test, y_test, y_train, conf):
     now = time.strftime("%m%d-%H%M%S")
     result_path = 'result/result_lgb_{}-{:.4f}.csv'.format(now, best_round)
     # check_path(result_path)
-    lgb_predict(lgb_model, x_test, y_test, conf, save_result_path=None)
+    lgb_predict(lgb_model, conf, x_test, y_test, save_result_path=None)
 
 
 if __name__ == '__main__':
     import pandas as pd
     import numpy as np
-    from src.optimization.bayes_optimization_lgb import BayesOptimizationLGBM
-    from sklearn.datasets import load_iris
+    from sklearn.datasets import load_iris, load_boston
     from sklearn.model_selection import train_test_split
 
-    # CLASSIFY TEST
-    iris = load_iris()
-    data = iris.data
-    target = iris.target
-    X_train, X_test, y_train, y_test = train_test_split(data, target, test_size=0.2)
-    log.logger.info('type of x_train: {}'.format(type(X_train)))
-    log.logger.info('shape of x_train: {}'.format(np.shape(X_train)))
-    classify_conf.lgb_config_c()
-    log.logger.info('Model Params pre:\n{}'.format(classify_conf.params))
+    def classify_test():
+        # # #===========================classify Test start==========================================
+        # CLASSIFY TEST
+        iris = load_iris()
+        data = iris.data
+        target = iris.target
+        X_train, X_test, y_train, y_test = train_test_split(data, target, test_size=0.2)
+        log.logger.info('type of x_train: {}'.format(type(X_train)))
+        log.logger.info('shape of x_train: {}'.format(np.shape(X_train)))
+        classify_conf.lgb_config_c()
+        log.logger.info('Model Params pre:\n{}'.format(classify_conf.params))
 
-    # Hyper Parameters Optimization
-    opt_parameters = {'max_depth': (4, 10),
-                      'num_leaves': (5, 130),
-                      'min_data_in_leaf': (10, 150),
-                      'feature_fraction': (0.7, 1.0),
-                      'bagging_fraction': (0.7, 1.0),
-                      'lambda_l1': (0, 1),
-                      'lambda_l2': (0, 1)
-                      }
+        # # NonCrossValidation Test
+        lgbm = LightGBM(classify_conf)
+        best_model, best_score, best_round = lgbm.fit(X_train, y_train)
+        lgb_predict(best_model, classify_conf, X_test, y_test)
+        lgbm.plot_feature_importance(best_model)
 
-    gp_params = {"init_points": 2, "n_iter": 20, "acq": 'ei', "xi": 0.0}
-    opt_lgb = BayesOptimizationLGBM(X_train, y_train, X_test, y_test)
-    params_op = opt_lgb.train_opt(opt_parameters, gp_params)
+        # # CrossValidation Test
+        # classify_conf.cv_folds = 5
+        # run_cv(X_train, X_test, y_test, y_train, classify_conf)
+        # # #===========================classify Test end==========================================
 
-    classify_conf.params.update(params_op)
-    log.logger.info('Model Params:\n{}'.format(classify_conf.params))
+    def regression_test():
+        # #===========================REGRESSION TEST START==========================================
+        boston = load_boston()
+        data = boston.data
+        target = boston.target
+        X_train, X_test, y_train, y_test = train_test_split(data, target, test_size=0.1)
+        log.logger.info('{},{},{},{}'.format(np.shape(X_train), np.shape(X_test), np.shape(y_train), np.shape(y_test)))
+        regress_conf.lgb_config_r()
 
-    # # NonCrossValidation Test
-    lgbm = LightGBM(classify_conf)
-    best_model, best_score, best_round = lgbm.fit(X_train, y_train)
-    lgb_predict(best_model, X_test, y_test, classify_conf)
+        # train model
+        lgb_m = LightGBM(regress_conf)
+        best_model, best_score, best_round = lgb_m.fit(X_train, y_train)
+        # eval
+        lgb_predict(best_model, regress_conf, X_test, y_test)
+        lgb_m.plot_feature_importance(best_model)
+        print(lgb_m.predict(best_model, X_test))
+        # #===========================REGRESSION TEST END==========================================
 
-    # # CrossValidation Test
-    # classify_conf.cv_folds = 5
-    # run_cv(X_train, X_test, y_test, y_train, classify_conf)
-    # REGRESSION TEST
+    # classify_test()
+    regression_test()

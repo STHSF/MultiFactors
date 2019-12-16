@@ -12,7 +12,7 @@ sys.path.append('../')
 sys.path.append('../../')
 sys.path.append('../../../')
 import logging
-from src.utils import file_util
+from utils import file_util
 from logging import handlers
 
 

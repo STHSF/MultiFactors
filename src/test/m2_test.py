@@ -9,7 +9,6 @@
 """
 
 import unittest
-from src.stacking.models import m2_lgb
 
 
 class M2TestCase(unittest.TestCase):
