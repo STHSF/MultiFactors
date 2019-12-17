@@ -161,7 +161,7 @@ class BayesOptimizationLGBM(BayesOptimizationBase):
         best_round = best_model.best_iteration
         # 不同的metric可能有不同的best_score类型，使用时需要注意。
         log.logger.info('best_score: \n{}'.format(best_model.best_score))
-        best_score = best_model.best_score['training']['l2']
+        best_score = best_model.best_score['training']['multi_logloss']
         log.logger.info('parameters: \n{}'.format(self.params))
         log.logger.info(' Stopped after %d iterations with train-score = %f ' % (best_round, best_score))
         if best_score < self.BestScore:
