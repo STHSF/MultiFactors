@@ -18,7 +18,7 @@ import numpy as np
 from math import *
 import xgboost as xgb
 from utils import log_util
-from conf.configuration import regress_conf
+from src.conf.configuration import lgb_conf
 import pandas as pd
 from sklearn.externals import joblib
 from sklearn.model_selection import train_test_split, TimeSeriesSplit
@@ -311,8 +311,8 @@ if __name__ == '__main__':
     # print(x_test.head())
     #
     # # # 超参数
-    # regress_conf.xgb_config_r()
-    # log.logger.info("params before: {}".format(regress_conf.params))
+    # lgb_conf.xgb_config_r()
+    # log.logger.info("params before: {}".format(lgb_conf.params))
     # # 超参数寻优
     # from src.optimization.bayes_optimization_xgb import *
     # opt_parameters = {'max_depth': (2, 12),
@@ -326,16 +326,16 @@ if __name__ == '__main__':
     # bayes_opt_xgb = BayesOptimizationXGB(x_train.values, y_train.values, x_test.values, y_test.values)
     # params_op = bayes_opt_xgb.train_opt(opt_parameters, gp_params)
     #
-    # regress_conf.params.update(params_op)
-    # log.logger.info("params after: {}".format(regress_conf.params))
+    # lgb_conf.params.update(params_op)
+    # log.logger.info("params after: {}".format(lgb_conf.params))
     # # 模型训练
-    # run_cv(x_train.values, x_test.values, y_train.values, y_test.values, regress_conf)
+    # run_cv(x_train.values, x_test.values, y_train.values, y_test.values, lgb_conf)
 
     import numpy as np
     import matplotlib.pyplot as plt
     from sklearn.datasets import load_iris, load_boston
     from sklearn.model_selection import train_test_split
-    from src.conf.configuration import classify_conf, regress_conf
+    from src.conf.configuration import lgb_conf, lgb_conf
 
     def classify_test():
         # ===========================classify Test start==========================================
@@ -344,13 +344,13 @@ if __name__ == '__main__':
         target = iris.target
         X_train, X_test, y_train, y_test = train_test_split(data, target, test_size=0.1)
         log.logger.info('{},{},{},{}'.format(np.shape(X_train), np.shape(X_test), np.shape(y_train), np.shape(y_test)))
-        classify_conf.xgb_config_c()
+        lgb_conf.xgb_config_c()
 
         # # train model
-        xgbc = XGBooster(classify_conf)
+        xgbc = XGBooster(lgb_conf)
         best_score, best_round, best_model = xgbc.fit(X_train, y_train)
         # # predict
-        xgb_predict(best_model, classify_conf, X_test, y_test)
+        xgb_predict(best_model, lgb_conf, X_test, y_test)
         xgbc.plot_feature_importance(best_model)
         # ===========================classify Test end==========================================
 
@@ -361,16 +361,16 @@ if __name__ == '__main__':
         target = boston.target
         X_train, X_test, y_train, y_test = train_test_split(data, target, test_size=0.1)
         log.logger.info('{},{},{},{}'.format(np.shape(X_train), np.shape(X_test), np.shape(y_train), np.shape(y_test)))
-        regress_conf.xgb_config_r()
+        lgb_conf.xgb_config_r()
 
         # train model
-        xgbc = XGBooster(regress_conf)
+        xgbc = XGBooster(lgb_conf)
         best_score, best_round, best_model = xgbc.fit(X_train, y_train)
         # eval
-        xgb_predict(best_model, regress_conf, X_test, y_test)
+        xgb_predict(best_model, lgb_conf, X_test, y_test)
         xgbc.plot_feature_importance(best_model)
         # ===========================REGRESSION TEST END==========================================
 
-    regression_test()
-    # classify_test()
+    # regression_test()
+    classify_test()
 

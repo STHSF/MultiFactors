@@ -199,7 +199,7 @@ if __name__ == '__main__':
     from sklearn.datasets import load_iris, load_boston
     from sklearn.model_selection import train_test_split
     from src.models.m1_xgb import XGBooster, xgb_predict
-    from src.conf.configuration import classify_conf, regress_conf
+    from src.conf.configuration import lgb_conf, lgb_conf
 
     def classify_test():
         # ===========================classify Test start==========================================
@@ -208,7 +208,7 @@ if __name__ == '__main__':
         target = iris.target
         X_train, X_test, y_train, y_test = train_test_split(data, target, test_size=0.1)
         log.logger.info('{},{},{},{}'.format(np.shape(X_train), np.shape(X_test), np.shape(y_train), np.shape(y_test)))
-        classify_conf.xgb_config_c()
+        lgb_conf.xgb_config_c()
 
         opt_parameters = {'max_depth': (2, 12),
                           'gamma': (0.001, 10.0),
@@ -224,12 +224,12 @@ if __name__ == '__main__':
         log.logger.info('BestScore: {}, BestIter: {}'.format(opt_xgb.BestScore, opt_xgb.BestIter))
 
         # # update hyperparameters
-        classify_conf.params.update(params_op)
+        lgb_conf.params.update(params_op)
         # # train model
-        xgbc = XGBooster(classify_conf)
+        xgbc = XGBooster(lgb_conf)
         best_score, best_round, best_model = xgbc.fit(X_train, y_train)
         # # predict
-        xgb_predict(best_model, classify_conf, X_test, y_test)
+        xgb_predict(best_model, lgb_conf, X_test, y_test)
         xgbc.plot_feature_importance(best_model)
         # ===========================classify Test end==========================================
 
@@ -240,29 +240,29 @@ if __name__ == '__main__':
         target = boston.target
         X_train, X_test, y_train, y_test = train_test_split(data, target, test_size=0.1)
         log.logger.info('{},{},{},{}'.format(np.shape(X_train), np.shape(X_test), np.shape(y_train), np.shape(y_test)))
-        regress_conf.xgb_config_r()
+        lgb_conf.xgb_config_r()
         opt_parameters = {'max_depth': (2, 12),
                           'gamma': (0.001, 10.0),
                           'min_child_weight': (0, 20),
                           'max_delta_step': (0, 10),
                           'subsample': (0.01, 0.99),
                           'colsample_bytree': (0.01, 0.99)}
-
+        # 贝叶斯优化
         gp_params = {"init_points": 2, "n_iter": 20, "acq": 'ei', "xi": 0.0, "alpha": 1e-4}
         opt_xgb = BayesOptimizationXGB('regression', X_train, y_train, X_test, y_test)
         params_op = opt_xgb.train_opt(opt_parameters, gp_params=None)
         log.logger.info('Best params: \n{}'.format(params_op))
         log.logger.info('BestScore: {}, BestIter: {}'.format(opt_xgb.BestScore, opt_xgb.BestIter))
-        # #update hyperparameters
-        regress_conf.params.update(params_op)
+        # update hyperparameters
+        lgb_conf.params.update(params_op)
 
         # train model
-        xgbc = XGBooster(regress_conf)
+        xgbc = XGBooster(lgb_conf)
         best_score, best_round, best_model = xgbc.fit(X_train, y_train)
         # eval
-        xgb_predict(best_model, regress_conf, X_test, y_test)
+        xgb_predict(best_model, lgb_conf, X_test, y_test)
         xgbc.plot_feature_importance(best_model)
         # ===========================REGRESSION TEST END==========================================
 
-    # regression_test()
-    classify_test()
+    regression_test()
+    # classify_test()

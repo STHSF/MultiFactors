@@ -9,7 +9,7 @@ import gc, time
 import pandas as pd
 import numpy as np
 from datetime import timedelta
-from src.conf.configuration import regress_conf
+from src.conf.configuration import lgb_conf
 from src.stacking import factor_store
 from PyFin.api import *
 from alphamind.api import *
@@ -163,13 +163,13 @@ def create_scenario():
         alpha_logger.info('X_train.shape={0}, X_test.shape = {1}'.format(np.shape(x_train), np.shape(y_train)))
 
         # xgb_configuration
-        regress_conf.xgb_config_r()
-        regress_conf.cv_folds = None
-        regress_conf.early_stop_round = 10
-        regress_conf.max_round = 800
+        lgb_conf.xgb_config_r()
+        lgb_conf.cv_folds = None
+        lgb_conf.early_stop_round = 10
+        lgb_conf.max_round = 800
         tic = time.time()
         # training
-        xgb_model = XGBooster(regress_conf)
+        xgb_model = XGBooster(lgb_conf)
         if GPU_device:
             xgb_model.set_params(tree_method='gpu_hist', max_depth=5)
         else:
