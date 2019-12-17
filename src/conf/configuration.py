@@ -229,5 +229,5 @@ class LGBConfig:
         self.cv_seed = 2019
 
 
-lgb_conf = XGBConfig()
+xgb_conf = XGBConfig()
 lgb_conf = LGBConfig()
