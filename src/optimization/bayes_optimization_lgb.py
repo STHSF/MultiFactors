@@ -69,7 +69,7 @@ class BayesOptimizationLGBM(BayesOptimizationBase):
 
     def lgb_cv(self, max_depth, num_leaves, min_data_in_leaf, feature_fraction, bagging_fraction, lambda_l1, lambda_l2):
         """
-        XGBoost model with NonCrossValidation
+        LightGBM model with NonCrossValidation
         :param max_depth:
         :param lambda_l2:
         :param lambda_l1:
@@ -118,7 +118,7 @@ class BayesOptimizationLGBM(BayesOptimizationBase):
 
     def lgb_no(self, max_depth, num_leaves, min_data_in_leaf, feature_fraction, bagging_fraction, lambda_l1, lambda_l2):
         """
-        XGBoost model with NonCrossValidation
+        LightGBM model with NonCrossValidation
         :param lambda_l2:
         :param lambda_l1:
         :param bagging_fraction:
@@ -161,7 +161,7 @@ class BayesOptimizationLGBM(BayesOptimizationBase):
         best_round = best_model.best_iteration
         # 不同的metric可能有不同的best_score类型，使用时需要注意。
         log.logger.info('best_score: \n{}'.format(best_model.best_score))
-        best_score = best_model.best_score['training']['l2']
+        best_score = best_model.best_score['training']['multi_logloss']
         log.logger.info('parameters: \n{}'.format(self.params))
         log.logger.info(' Stopped after %d iterations with train-score = %f ' % (best_round, best_score))
         if best_score < self.BestScore:
@@ -197,12 +197,12 @@ class BayesOptimizationLGBM(BayesOptimizationBase):
 
 
 if __name__ == '__main__':
-    # Classify Parameter Optimization Test
-    log.logger.info('Classify Parameter Optimization Test')
+    # Parameter Optimization Test
+    log.logger.info('Parameter Optimization Test')
     import numpy as np
     from sklearn.datasets import load_boston, load_iris
     from sklearn.model_selection import train_test_split
-    from src.conf.configuration import regress_conf, classify_conf
+    from src.conf.configuration import lgb_conf, lgb_conf
     from src.models.m2_lgb import LightGBM, lgb_predict
 
     def classify_test():
@@ -212,8 +212,8 @@ if __name__ == '__main__':
         target = iris.target
         X_train, X_test, y_train, y_test = train_test_split(data, target, test_size=0.1)
         log.logger.info('Detail of IRIS: {},{},{},{}'.format(np.shape(X_train), np.shape(X_test), np.shape(y_train), np.shape(y_test)))
-        classify_conf.lgb_config_c()
-        log.logger.info('Model Params before Optimization:\n{}'.format(classify_conf.params))
+        lgb_conf.lgb_config_c()
+        log.logger.info('Model Params before Optimization:\n{}'.format(lgb_conf.params))
         # Hyper Parameters Optimization
         # 超参
         opt_parameters = {'max_depth': (4, 10),
@@ -231,13 +231,13 @@ if __name__ == '__main__':
         params_op = opt_lgb.train_opt(opt_parameters, gp_params)
         log.logger.info('Best params: \n{}'.format(params_op))
         log.logger.info('BestScore: {}, BestIter: {}'.format(opt_lgb.BestScore, opt_lgb.BestIter))
-        classify_conf.params.update(params_op)
-        log.logger.info('Model Params after Optimization:\n{}'.format(classify_conf.params))
+        lgb_conf.params.update(params_op)
+        log.logger.info('Model Params after Optimization:\n{}'.format(lgb_conf.params))
 
         # NonCrossValidation Test
-        lgbm = LightGBM(classify_conf)
+        lgbm = LightGBM(lgb_conf)
         best_model, best_score, best_round = lgbm.fit(X_train, y_train)
-        lgb_predict(best_model, X_test, y_test, classify_conf)
+        lgb_predict(best_model, X_test, y_test, lgb_conf)
         lgbm.plot_feature_importance(best_model)
         # #===========================classify Test end==========================================
 
@@ -248,8 +248,8 @@ if __name__ == '__main__':
         target = boston.target
         X_train, X_test, y_train, y_test = train_test_split(data, target, test_size=0.1)
         log.logger.info('Detail of Boston Data: {},{},{},{}'.format(np.shape(X_train), np.shape(X_test), np.shape(y_train), np.shape(y_test)))
-        regress_conf.lgb_config_r()
-        log.logger.info('Model Params before Optimization:\n{}'.format(regress_conf.params))
+        lgb_conf.lgb_config_r()
+        log.logger.info('Model Params before Optimization:\n{}'.format(lgb_conf.params))
 
         opt_parameters = {'max_depth': (4, 10),
                           'num_leaves': (5, 130),
@@ -261,19 +261,19 @@ if __name__ == '__main__':
                           }
 
         gp_params = {"init_points": 2, "n_iter": 20, "acq": 'ei', "xi": 0.0, "alpha": 1e-4}
-        opt_xgb = BayesOptimizationLGBM('regression', X_train, y_train, X_test, y_test)
-        params_op = opt_xgb.train_opt(opt_parameters, gp_params=None)
+        opt_lgb = BayesOptimizationLGBM('regression', X_train, y_train, X_test, y_test)
+        params_op = opt_lgb.train_opt(opt_parameters, gp_params=None)
         log.logger.info('Best params: \n{}'.format(params_op))
-        log.logger.info('BestScore: {}, BestIter: {}'.format(opt_xgb.BestScore, opt_xgb.BestIter))
+        log.logger.info('BestScore: {}, BestIter: {}'.format(opt_lgb.BestScore, opt_lgb.BestIter))
         # # Update HyperParameters
-        regress_conf.params.update(params_op)
+        lgb_conf.params.update(params_op)
 
         # train model
-        lgb_m = LightGBM(regress_conf)
+        lgb_m = LightGBM(lgb_conf)
         best_model, best_score, best_round = lgb_m.fit(X_train, y_train)
         # eval
-        lgb_predict(best_model, regress_conf, X_test, y_test)
+        lgb_predict(best_model, lgb_conf, X_test, y_test)
         # #===========================REGRESSION TEST END==========================================
 
-        # classify_test()
-        regression_test()
+    # classify_test()
+    regression_test()

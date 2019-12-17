@@ -18,7 +18,7 @@ import joblib
 import lightgbm as lgb
 from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
-from src.conf.configuration import classify_conf, regress_conf
+from src.conf.configuration import lgb_conf, lgb_conf
 from src.utils import log_util
 from src.utils.Evaluation import cls_eva, reg_eva
 
@@ -257,18 +257,18 @@ if __name__ == '__main__':
         X_train, X_test, y_train, y_test = train_test_split(data, target, test_size=0.2)
         log.logger.info('type of x_train: {}'.format(type(X_train)))
         log.logger.info('shape of x_train: {}'.format(np.shape(X_train)))
-        classify_conf.lgb_config_c()
-        log.logger.info('Model Params pre:\n{}'.format(classify_conf.params))
+        lgb_conf.lgb_config_c()
+        log.logger.info('Model Params pre:\n{}'.format(lgb_conf.params))
 
         # # NonCrossValidation Test
-        lgbm = LightGBM(classify_conf)
+        lgbm = LightGBM(lgb_conf)
         best_model, best_score, best_round = lgbm.fit(X_train, y_train)
-        lgb_predict(best_model, classify_conf, X_test, y_test)
+        lgb_predict(best_model, lgb_conf, X_test, y_test)
         lgbm.plot_feature_importance(best_model)
 
         # # CrossValidation Test
-        # classify_conf.cv_folds = 5
-        # run_cv(X_train, X_test, y_test, y_train, classify_conf)
+        # lgb_conf.cv_folds = 5
+        # run_cv(X_train, X_test, y_test, y_train, lgb_conf)
         # # #===========================classify Test end==========================================
 
     def regression_test():
@@ -278,13 +278,13 @@ if __name__ == '__main__':
         target = boston.target
         X_train, X_test, y_train, y_test = train_test_split(data, target, test_size=0.1)
         log.logger.info('{},{},{},{}'.format(np.shape(X_train), np.shape(X_test), np.shape(y_train), np.shape(y_test)))
-        regress_conf.lgb_config_r()
+        lgb_conf.lgb_config_r()
 
         # train model
-        lgb_m = LightGBM(regress_conf)
+        lgb_m = LightGBM(lgb_conf)
         best_model, best_score, best_round = lgb_m.fit(X_train, y_train)
         # eval
-        lgb_predict(best_model, regress_conf, X_test, y_test)
+        lgb_predict(best_model, lgb_conf, X_test, y_test)
         lgb_m.plot_feature_importance(best_model)
         print(lgb_m.predict(best_model, X_test))
         # #===========================REGRESSION TEST END==========================================

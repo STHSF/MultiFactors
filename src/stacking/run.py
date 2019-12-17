@@ -21,7 +21,7 @@ import numpy as np
 from alphamind.execution.naiveexecutor import NaiveExecutor
 from datetime import timedelta
 from m1_xgb import *
-from src.conf.configuration import regress_conf
+from src.conf.configuration import lgb_conf
 import xgboost as xgb
 import gc
 from flask import Flask, request
@@ -204,10 +204,10 @@ def backtest():
         max_round = 10
 
     # xgb_configuration
-    regress_conf.xgb_config_r()
-    regress_conf.cv_folds = None
-    regress_conf.early_stop_round = 10
-    regress_conf.max_round = int(max_round)
+    lgb_conf.xgb_config_r()
+    lgb_conf.cv_folds = None
+    lgb_conf.early_stop_round = 10
+    lgb_conf.max_round = int(max_round)
 
     ref_dates = makeSchedule(start_date, end_date, freq, 'china.sse')
     universe = Universe('zz500')
@@ -736,7 +736,7 @@ def backtest():
 
     train_data = pd.merge(factor_data, return_data, on=['trade_date', 'code']).dropna()
     print('>>>>>>>>>>>> Data Load Success >>>>>>>>>>>>')
-    ret_df, tune_record = create_scenario(train_data, features, label, ref_dates, freq, regress_conf, weight_gap,
+    ret_df, tune_record = create_scenario(train_data, features, label, ref_dates, freq, lgb_conf, weight_gap,
                                           return_data, risk_total, benchmark_total, industry_total,
                                           bounds, constraint_risk, total_risk_names, GPUs)
 
