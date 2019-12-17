@@ -336,6 +336,12 @@ if __name__ == '__main__':
     from sklearn.datasets import load_iris, load_boston
     from sklearn.model_selection import train_test_split
     from src.conf.configuration import xgb_conf
+    import argparse
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--type", dest="test_type", default="classification", type=str, help="输入回归or分类")
+    args = parser.parse_args()
+    _type = args.test_type
 
     def classify_test():
         # ===========================classify Test start==========================================
@@ -371,6 +377,10 @@ if __name__ == '__main__':
         xgbc.plot_feature_importance(best_model)
         # ===========================REGRESSION TEST END==========================================
 
-    regression_test()
-    # classify_test()
+    if _type == 'regression':
+        classify_test()
+    elif _type == 'classification':
+        regression_test()
+    else:
+        print('chose test type')
 

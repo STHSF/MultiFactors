@@ -247,6 +247,13 @@ if __name__ == '__main__':
     import numpy as np
     from sklearn.datasets import load_iris, load_boston
     from sklearn.model_selection import train_test_split
+    import argparse
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--type", dest="test_type", default="classification", type=str, help="输入回归or分类")
+    args = parser.parse_args()
+    _type = args.test_type
+
 
     def classify_test():
         # # #===========================classify Test start==========================================
@@ -289,5 +296,10 @@ if __name__ == '__main__':
         print(lgb_m.predict(best_model, X_test))
         # #===========================REGRESSION TEST END==========================================
 
-    # classify_test()
-    regression_test()
+    if _type == 'regression':
+        classify_test()
+    elif _type == 'classification':
+        regression_test()
+    else:
+        print('chose test type')
+
