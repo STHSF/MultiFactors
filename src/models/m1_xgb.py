@@ -335,7 +335,7 @@ if __name__ == '__main__':
     import matplotlib.pyplot as plt
     from sklearn.datasets import load_iris, load_boston
     from sklearn.model_selection import train_test_split
-    from src.conf.configuration import xgb_conf
+    from conf.configuration import xgb_conf
     import argparse
 
     parser = argparse.ArgumentParser()
