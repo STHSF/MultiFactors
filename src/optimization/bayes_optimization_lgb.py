@@ -275,5 +275,5 @@ if __name__ == '__main__':
         lgb_predict(best_model, lgb_conf, X_test, y_test)
         # #===========================REGRESSION TEST END==========================================
 
-    # classify_test()
+    classify_test()
     regression_test()
