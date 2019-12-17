@@ -4,7 +4,7 @@
 """
 @version: 1.0
 @author: li
-@file: bayes_opti.py
+@file: bayes_optimization.py
 @time: 2019/11/26 4:23 下午
 """
 
