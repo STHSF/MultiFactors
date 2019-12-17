@@ -297,9 +297,7 @@ if __name__ == '__main__':
         # #===========================REGRESSION TEST END==========================================
 
     if _type == 'regression':
-        classify_test()
-    elif _type == 'classification':
         regression_test()
-    else:
-        print('chose test type')
+    elif _type == 'classification':
+        classify_test()
 
