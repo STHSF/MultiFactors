@@ -18,7 +18,6 @@ import numpy as np
 from math import *
 import xgboost as xgb
 from utils import log_util
-from src.conf.configuration import lgb_conf
 import pandas as pd
 from sklearn.externals import joblib
 from sklearn.model_selection import train_test_split, TimeSeriesSplit
