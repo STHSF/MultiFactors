@@ -70,7 +70,7 @@ class XGBooster(object):
 
             for n_fold, (tr_idx, val_idx) in enumerate(tscv.split(x_train)):
                 print(f'the {n_fold} training start ...')
-                # tr_x, tr_y, val_x, val_y = x_train.iloc[tr_idx], y_train[tr_idx], x_train.iloc[val_idx], y_train[val_idx]
+                tr_x, tr_y, val_x, val_y = x_train.iloc[tr_idx], y_train[tr_idx], x_train.iloc[val_idx], y_train[val_idx]
                 d_train = xgb.DMatrix(tr_x, label=tr_y)
                 d_valid = xgb.DMatrix(val_x, label=val_y)
                 watchlist = [(d_train, "train"), (d_valid, "valid")]

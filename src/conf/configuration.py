@@ -60,9 +60,9 @@ class XGBConfig:
                        'seed': 2019,  # 这个随机指定一个常数，防止每次结果不一致
                        }
 
-        self.max_round = 10000
+        self.max_round = 1000
         self.cv_folds = None
-        self.early_stop_round = 3000
+        self.early_stop_round = 100
         self.cv_seed = 2019
 
 

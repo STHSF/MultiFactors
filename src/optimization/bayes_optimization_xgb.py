@@ -64,7 +64,7 @@ class BayesOptimizationXGB(BayesOptimizationBase):
 
     def xgb_cv(self, max_depth, gamma, min_child_weight, max_delta_step, subsample, colsample_bytree):
         """
-        XGBoost model with NonCrossValidation
+        XGBoost model with CrossValidation
         :param max_depth:
         :param gamma:
         :param min_child_weight:
