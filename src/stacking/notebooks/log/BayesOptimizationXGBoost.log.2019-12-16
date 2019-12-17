@@ -1,0 +1,40 @@
+2019-12-16 08:45:21,040 - ../../../optimization/bayes_optimization_xgb.py[line:139] - INFO: parameters: 
+{'task': 'train', 'objective': 'reg:linear', 'booster': 'dart', 'eval_metric': ['rmse', 'logloss'], 'nthread': 4, 'silent': 0, 'eta': 0.1, 'max_depth': 4, 'gamma': 9, 'subsample': 0.9025361912473812, 'colsample_bytree': 0.6329617401717869, 'min_child_weight': 11, 'max_delta_step': 8, 'cv_seed': 2019}
+2019-12-16 08:45:28,253 - ../../../optimization/bayes_optimization_xgb.py[line:155] - INFO: params: 
+{'task': 'train', 'objective': 'reg:linear', 'booster': 'dart', 'eval_metric': ['rmse', 'logloss'], 'nthread': 4, 'silent': 0, 'eta': 0.1, 'max_depth': 4, 'gamma': 9, 'subsample': 0.9025361912473812, 'colsample_bytree': 0.6329617401717869, 'min_child_weight': 11, 'max_delta_step': 8, 'cv_seed': 2019}
+2019-12-16 08:45:28,253 - ../../../optimization/bayes_optimization_xgb.py[line:157] - INFO:  Stopped after 54 iterations with train-score = -0.064629 train-gini = -1.129258
+2019-12-16 08:45:28,254 - ../../../optimization/bayes_optimization_xgb.py[line:139] - INFO: parameters: 
+{'task': 'train', 'objective': 'reg:linear', 'booster': 'dart', 'eval_metric': ['rmse', 'logloss'], 'nthread': 4, 'silent': 0, 'eta': 0.1, 'max_depth': 3, 'gamma': 5, 'subsample': 0.4711967360736852, 'colsample_bytree': 0.45487712148771486, 'min_child_weight': 1, 'max_delta_step': 4, 'cv_seed': 2019}
+2019-12-16 08:45:32,026 - ../../../optimization/bayes_optimization_xgb.py[line:155] - INFO: params: 
+{'task': 'train', 'objective': 'reg:linear', 'booster': 'dart', 'eval_metric': ['rmse', 'logloss'], 'nthread': 4, 'silent': 0, 'eta': 0.1, 'max_depth': 3, 'gamma': 5, 'subsample': 0.4711967360736852, 'colsample_bytree': 0.45487712148771486, 'min_child_weight': 1, 'max_delta_step': 4, 'cv_seed': 2019}
+2019-12-16 08:45:32,027 - ../../../optimization/bayes_optimization_xgb.py[line:157] - INFO:  Stopped after 54 iterations with train-score = -0.064629 train-gini = -1.129258
+2019-12-16 08:45:37,903 - ../../../optimization/bayes_optimization_xgb.py[line:139] - INFO: parameters: 
+{'task': 'train', 'objective': 'reg:linear', 'booster': 'dart', 'eval_metric': ['rmse', 'logloss'], 'nthread': 4, 'silent': 0, 'eta': 0.1, 'max_depth': 11, 'gamma': 0, 'subsample': 0.15371527766972728, 'colsample_bytree': 0.7727485564341627, 'min_child_weight': 19, 'max_delta_step': 0, 'cv_seed': 2019}
+2019-12-16 08:53:11,766 - ../../../optimization/bayes_optimization_xgb.py[line:155] - INFO: params: 
+{'task': 'train', 'objective': 'reg:linear', 'booster': 'dart', 'eval_metric': ['rmse', 'logloss'], 'nthread': 4, 'silent': 0, 'eta': 0.1, 'max_depth': 11, 'gamma': 0, 'subsample': 0.15371527766972728, 'colsample_bytree': 0.7727485564341627, 'min_child_weight': 19, 'max_delta_step': 0, 'cv_seed': 2019}
+2019-12-16 08:53:11,766 - ../../../optimization/bayes_optimization_xgb.py[line:157] - INFO:  Stopped after 2246 iterations with train-score = -0.453680 train-gini = -1.907360
+2019-12-16 08:53:19,005 - ../../../optimization/bayes_optimization_xgb.py[line:139] - INFO: parameters: 
+{'task': 'train', 'objective': 'reg:linear', 'booster': 'dart', 'eval_metric': ['rmse', 'logloss'], 'nthread': 4, 'silent': 0, 'eta': 0.1, 'max_depth': 2, 'gamma': 0, 'subsample': 0.01, 'colsample_bytree': 0.01, 'min_child_weight': 20, 'max_delta_step': 0, 'cv_seed': 2019}
+2019-12-16 08:53:22,069 - ../../../optimization/bayes_optimization_xgb.py[line:155] - INFO: params: 
+{'task': 'train', 'objective': 'reg:linear', 'booster': 'dart', 'eval_metric': ['rmse', 'logloss'], 'nthread': 4, 'silent': 0, 'eta': 0.1, 'max_depth': 2, 'gamma': 0, 'subsample': 0.01, 'colsample_bytree': 0.01, 'min_child_weight': 20, 'max_delta_step': 0, 'cv_seed': 2019}
+2019-12-16 08:53:22,070 - ../../../optimization/bayes_optimization_xgb.py[line:157] - INFO:  Stopped after 264 iterations with train-score = -0.082946 train-gini = -1.165892
+2019-12-16 09:01:13,698 - ../../../optimization/bayes_optimization_xgb.py[line:139] - INFO: parameters: 
+{'task': 'train', 'objective': 'reg:linear', 'booster': 'dart', 'eval_metric': ['rmse', 'logloss'], 'nthread': 4, 'silent': 0, 'eta': 0.1, 'max_depth': 6, 'gamma': 5, 'subsample': 0.8725421851029234, 'colsample_bytree': 0.09226090676464732, 'min_child_weight': 2, 'max_delta_step': 4, 'cv_seed': 2019}
+2019-12-16 09:01:16,496 - ../../../optimization/bayes_optimization_xgb.py[line:155] - INFO: params: 
+{'task': 'train', 'objective': 'reg:linear', 'booster': 'dart', 'eval_metric': ['rmse', 'logloss'], 'nthread': 4, 'silent': 0, 'eta': 0.1, 'max_depth': 6, 'gamma': 5, 'subsample': 0.8725421851029234, 'colsample_bytree': 0.09226090676464732, 'min_child_weight': 2, 'max_delta_step': 4, 'cv_seed': 2019}
+2019-12-16 09:01:16,496 - ../../../optimization/bayes_optimization_xgb.py[line:157] - INFO:  Stopped after 53 iterations with train-score = -0.064629 train-gini = -1.129258
+2019-12-16 09:01:16,499 - ../../../optimization/bayes_optimization_xgb.py[line:139] - INFO: parameters: 
+{'task': 'train', 'objective': 'reg:linear', 'booster': 'dart', 'eval_metric': ['rmse', 'logloss'], 'nthread': 4, 'silent': 0, 'eta': 0.1, 'max_depth': 9, 'gamma': 7, 'subsample': 0.5051313295217048, 'colsample_bytree': 0.06031695974557917, 'min_child_weight': 0, 'max_delta_step': 0, 'cv_seed': 2019}
+2019-12-16 09:01:19,173 - ../../../optimization/bayes_optimization_xgb.py[line:155] - INFO: params: 
+{'task': 'train', 'objective': 'reg:linear', 'booster': 'dart', 'eval_metric': ['rmse', 'logloss'], 'nthread': 4, 'silent': 0, 'eta': 0.1, 'max_depth': 9, 'gamma': 7, 'subsample': 0.5051313295217048, 'colsample_bytree': 0.06031695974557917, 'min_child_weight': 0, 'max_delta_step': 0, 'cv_seed': 2019}
+2019-12-16 09:01:19,174 - ../../../optimization/bayes_optimization_xgb.py[line:157] - INFO:  Stopped after 54 iterations with train-score = -0.064629 train-gini = -1.129258
+2019-12-16 09:01:24,955 - ../../../optimization/bayes_optimization_xgb.py[line:139] - INFO: parameters: 
+{'task': 'train', 'objective': 'reg:linear', 'booster': 'dart', 'eval_metric': ['rmse', 'logloss'], 'nthread': 4, 'silent': 0, 'eta': 0.1, 'max_depth': 2, 'gamma': 0, 'subsample': 0.6197703212055979, 'colsample_bytree': 0.7335721373104397, 'min_child_weight': 19, 'max_delta_step': 9, 'cv_seed': 2019}
+2019-12-16 09:27:41,340 - ../../../optimization/bayes_optimization_xgb.py[line:155] - INFO: params: 
+{'task': 'train', 'objective': 'reg:linear', 'booster': 'dart', 'eval_metric': ['rmse', 'logloss'], 'nthread': 4, 'silent': 0, 'eta': 0.1, 'max_depth': 2, 'gamma': 0, 'subsample': 0.6197703212055979, 'colsample_bytree': 0.7335721373104397, 'min_child_weight': 19, 'max_delta_step': 9, 'cv_seed': 2019}
+2019-12-16 09:27:41,341 - ../../../optimization/bayes_optimization_xgb.py[line:157] - INFO:  Stopped after 9195 iterations with train-score = -0.453809 train-gini = -1.907618
+2019-12-16 09:27:50,821 - ../../../optimization/bayes_optimization_xgb.py[line:139] - INFO: parameters: 
+{'task': 'train', 'objective': 'reg:linear', 'booster': 'dart', 'eval_metric': ['rmse', 'logloss'], 'nthread': 4, 'silent': 0, 'eta': 0.1, 'max_depth': 12, 'gamma': 0, 'subsample': 0.01, 'colsample_bytree': 0.99, 'min_child_weight': 20, 'max_delta_step': 0, 'cv_seed': 2019}
+2019-12-16 09:27:54,409 - ../../../optimization/bayes_optimization_xgb.py[line:155] - INFO: params: 
+{'task': 'train', 'objective': 'reg:linear', 'booster': 'dart', 'eval_metric': ['rmse', 'logloss'], 'nthread': 4, 'silent': 0, 'eta': 0.1, 'max_depth': 12, 'gamma': 0, 'subsample': 0.01, 'colsample_bytree': 0.99, 'min_child_weight': 20, 'max_delta_step': 0, 'cv_seed': 2019}
+2019-12-16 09:27:54,409 - ../../../optimization/bayes_optimization_xgb.py[line:157] - INFO:  Stopped after 250 iterations with train-score = -0.083353 train-gini = -1.166706
