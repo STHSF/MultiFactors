@@ -15,15 +15,15 @@ sys.path.append('../../')
 sys.path.append('../../../')
 import time
 import numpy as np
+import pandas as pd
 from math import *
 import xgboost as xgb
+import matplotlib.pyplot as plt
+
 from utils import log_util
-import pandas as pd
 from sklearn.externals import joblib
 from sklearn.model_selection import train_test_split, TimeSeriesSplit
-from sklearn.metrics import mean_squared_error, r2_score
 from utils.Evaluation import cls_eva, reg_eva
-import matplotlib.pyplot as plt
 pd.set_option('display.max_rows', None, 'display.max_columns', None, "display.max_colwidth", 1000, 'display.width', 1000)
 
 log = log_util.Logger('m1_xgboost', level='info')
