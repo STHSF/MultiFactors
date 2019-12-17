@@ -254,7 +254,6 @@ if __name__ == '__main__':
     args = parser.parse_args()
     _type = args.test_type
 
-
     def classify_test():
         # # #===========================classify Test start==========================================
         # CLASSIFY TEST
