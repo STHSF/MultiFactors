@@ -197,8 +197,8 @@ class BayesOptimizationLGBM(BayesOptimizationBase):
 
 
 if __name__ == '__main__':
-    # Classify Parameter Optimization Test
-    log.logger.info('Classify Parameter Optimization Test')
+    # Parameter Optimization Test
+    log.logger.info('Parameter Optimization Test')
     import numpy as np
     from sklearn.datasets import load_boston, load_iris
     from sklearn.model_selection import train_test_split
@@ -275,5 +275,5 @@ if __name__ == '__main__':
         lgb_predict(best_model, lgb_conf, X_test, y_test)
         # #===========================REGRESSION TEST END==========================================
 
-        # classify_test()
-        regression_test()
+    # classify_test()
+    regression_test()
