@@ -18,7 +18,7 @@ import joblib
 import lightgbm as lgb
 from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
-from src.conf.configuration import lgb_conf, lgb_conf
+from src.conf.configuration import lgb_conf
 from src.utils import log_util
 from src.utils.Evaluation import cls_eva, reg_eva
 
