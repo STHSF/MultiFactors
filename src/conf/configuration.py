@@ -98,9 +98,9 @@ class LGBConfig:
                        # 'gpu_device_id': 0  # id为0的独显
                        }
 
-        self.max_round = 10000
+        self.max_round = 1000
         self.cv_folds = None
-        self.early_stop_round = 300
+        self.early_stop_round = 100
         self.cv_seed = 2019
         self.save_model_path = 'bst_model/lgb/lgb.txt'
 
@@ -120,8 +120,8 @@ class LGBConfig:
             'bagging_seed': 100,  # 随机种子,light中默认为100
             'verbosity': -1  # <0 显示致命的, =0 显示错误 (警告), >0 显示信息
         }
-        self.max_round = 500
-        self.early_stop_round = 10
+        self.max_round = 1000
+        self.early_stop_round = 100
         self.cv_folds = None
         self.cv_seed = 2019
 
