@@ -203,8 +203,8 @@ if __name__ == '__main__':
     import argparse
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--type', dest='type', type=str, required=True,
-                        choices=['classification', 'regression'], help="测试类型", default="regression")
+    parser.add_argument('--type', dest='type', default="classification", type=str, required=True,
+                        choices=['classification', 'regression'], help="测试类型")
     args = parser.parse_args()
     _type = args.type
 
