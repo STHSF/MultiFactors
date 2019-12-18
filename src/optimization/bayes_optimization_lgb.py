@@ -207,7 +207,8 @@ if __name__ == '__main__':
     import argparse
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--type', 'type', type=str, required=True, help="测试类型", default="regression")
+    parser.add_argument('--type', dest='type', type=str, required=True,
+                        choices=['classification', 'regression'], help="测试类型", default="regression")
     args = parser.parse_args()
     _type = args.type
 
@@ -217,7 +218,8 @@ if __name__ == '__main__':
         data = iris.data
         target = iris.target
         X_train, X_test, y_train, y_test = train_test_split(data, target, test_size=0.1)
-        log.logger.info('Detail of IRIS: {},{},{},{}'.format(np.shape(X_train), np.shape(X_test), np.shape(y_train), np.shape(y_test)))
+        log.logger.info('Detail of IRIS: {},{},{},{}'.format(np.shape(X_train), np.shape(X_test),
+                                                             np.shape(y_train), np.shape(y_test)))
         lgb_conf.lgb_config_c()
         log.logger.info('Model Params before Optimization:\n{}'.format(lgb_conf.params))
         # Hyper Parameters Optimization
@@ -253,7 +255,8 @@ if __name__ == '__main__':
         data = boston.data
         target = boston.target
         X_train, X_test, y_train, y_test = train_test_split(data, target, test_size=0.1)
-        log.logger.info('Detail of Boston Data: {},{},{},{}'.format(np.shape(X_train), np.shape(X_test), np.shape(y_train), np.shape(y_test)))
+        log.logger.info('Detail of Boston Data: {},{},{},{}'.format(np.shape(X_train), np.shape(X_test),
+                                                                    np.shape(y_train), np.shape(y_test)))
         lgb_conf.lgb_config_r()
         log.logger.info('Model Params before Optimization:\n{}'.format(lgb_conf.params))
 
@@ -281,7 +284,7 @@ if __name__ == '__main__':
         lgb_predict(best_model, lgb_conf, X_test, y_test)
         # #===========================REGRESSION TEST END==========================================
 
-    if _type == 'classify':
+    if _type == 'classification':
         classify_test()
     if _type == 'regression':
         regression_test()

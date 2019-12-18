@@ -203,7 +203,8 @@ if __name__ == '__main__':
     import argparse
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('-types', '--type', type=str, required=True,choices=['classify', 'regression'], help="测试类型", default="regression")
+    parser.add_argument('--type', dest='type', type=str, required=True,
+                        choices=['classification', 'regression'], help="测试类型", default="regression")
     args = parser.parse_args()
     _type = args.type
 
@@ -270,7 +271,7 @@ if __name__ == '__main__':
         xgbc.plot_feature_importance(best_model)
         # ===========================REGRESSION TEST END==========================================
 
-    if _type == 'classify':
+    if _type == 'classification':
         classify_test()
     if _type == 'regression':
         regression_test()

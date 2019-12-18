@@ -250,9 +250,9 @@ if __name__ == '__main__':
     import argparse
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--type", dest="test_type", default="classification", type=str, help="输入回归or分类")
+    parser.add_argument("--type", dest="type", default="classification", choices=['classification', 'regression'], type=str, help="输入回归or分类")
     args = parser.parse_args()
-    _type = args.test_type
+    _type = args.type
 
     def classify_test():
         # # #===========================classify Test start==========================================
@@ -297,6 +297,6 @@ if __name__ == '__main__':
 
     if _type == 'regression':
         regression_test()
-    elif _type == 'classification':
+    if _type == 'classification':
         classify_test()
 
