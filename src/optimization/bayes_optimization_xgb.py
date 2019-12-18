@@ -43,8 +43,8 @@ class BayesOptimizationXGB(BayesOptimizationBase):
         self.X_test = X_test
         self.y_test = y_test
         self.folds = kfolds
-        self.max_round = 10000
-        self.early_stop_round = 300
+        self.max_round = 1000
+        self.early_stop_round = 100
 
         self.params = {}
         if self.opt_type == 'multi':

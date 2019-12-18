@@ -45,7 +45,7 @@ class BayesOptimizationLGBM(BayesOptimizationBase):
         self.X_valid = X_valid
         self.y_valid = y_valid
         self.folds = kfolds
-        self.max_round = 2000
+        self.max_round = 1000
         self.early_stop_round = 100
 
         self.params = {}
