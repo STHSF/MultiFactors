@@ -202,8 +202,14 @@ if __name__ == '__main__':
     import numpy as np
     from sklearn.datasets import load_boston, load_iris
     from sklearn.model_selection import train_test_split
-    from src.conf.configuration import lgb_conf, lgb_conf
+    from src.conf.configuration import lgb_conf
     from src.models.m2_lgb import LightGBM, lgb_predict
+    import argparse
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--type', 'type', type=str, required=True, help="测试类型", default="regression")
+    args = parser.parse_args()
+    _type = args.type
 
     def classify_test():
         # #===========================classify Test start==========================================
@@ -275,5 +281,7 @@ if __name__ == '__main__':
         lgb_predict(best_model, lgb_conf, X_test, y_test)
         # #===========================REGRESSION TEST END==========================================
 
-    classify_test()
-    regression_test()
+    if _type == 'classify':
+        classify_test()
+    if _type == 'regression':
+        regression_test()
