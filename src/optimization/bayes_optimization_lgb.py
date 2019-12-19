@@ -160,8 +160,7 @@ class BayesOptimizationLGBM(BayesOptimizationBase):
 
         best_round = best_model.best_iteration
         # 不同的metric可能有不同的best_score类型，使用时需要注意。
-        print(self.params['metric'])
-        score = self.params['metric'][0]
+        score = list(self.params['metric'])[0]
         log.logger.info('best_score: \n{}'.format(best_model.best_score))
         best_score = best_model.best_score['training'][score]
         log.logger.info('parameters: \n{}'.format(self.params))
