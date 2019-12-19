@@ -50,10 +50,10 @@ class SQLEngine(object):
         :param trade_date:
         :return:
         """
-        if type(trade_date) == str:
-            trade_date = datetime.strptime(trade_date, '%Y-%m-%d')
-        else:
-            trade_date = trade_date
+        # if type(trade_date) == str:
+        #     trade_date = datetime.strptime(trade_date, '%Y-%m-%d')
+        # else:
+        #     trade_date = trade_date
         self.session.execute('''delete from `{0}` where trade_date=\'{1}\''''.format(table_name, trade_date))
         try:
             self.session.commit()
