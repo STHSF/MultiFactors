@@ -15,6 +15,7 @@ sys.path.append('../../../')
 sys.path.append('../../../../')
 import time
 import joblib
+import pandas as pd
 import lightgbm as lgb
 from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
@@ -138,7 +139,8 @@ class LightGBM(object):
                                                                reverse=True)))
         print(80 * '.')
 
-        feature_importance_df = pd.DataFrame(zip(best_model.feature_name(), best_model.feature_importance("gain")), columns=['Feature', 'importance'])
+        feature_importance_df = pd.DataFrame(zip(best_model.feature_name(), best_model.feature_importance("gain")),
+                                             columns=['Feature', 'importance'])
         best_features = feature_importance_df[["Feature", "importance"]].sort_values(by="importance", ascending=True)
         best_features['importance'] = best_features['importance'] / best_features['importance'].sum()
         # best_features = feature_importance_df[["Feature", "importance"]].groupby("Feature").mean().sort_values(by="importance", ascending=True)[:top_n].reset_index()
