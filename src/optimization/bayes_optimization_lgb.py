@@ -245,7 +245,11 @@ if __name__ == '__main__':
         # NonCrossValidation Test
         lgbm = LightGBM(lgb_conf)
         best_model, best_score, best_round = lgbm.fit(X_train, y_train)
+
+        # eval
         lgb_predict(best_model, X_test, y_test, lgb_conf)
+
+        # feature important
         lgbm.plot_feature_importance(best_model)
         # #===========================classify Test end==========================================
 
@@ -280,8 +284,12 @@ if __name__ == '__main__':
         # train model
         lgb_m = LightGBM(lgb_conf)
         best_model, best_score, best_round = lgb_m.fit(X_train, y_train)
+
         # eval
         lgb_predict(best_model, lgb_conf, X_test, y_test)
+
+        # feature important
+        lgb_m.plot_feature_importance(best_model)
         # #===========================REGRESSION TEST END==========================================
 
     if _type == 'classification':
