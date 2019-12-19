@@ -71,7 +71,7 @@ class SQLEngine(object):
         :param df_data:
         :return:
         """
-        df_data.to_sql(table_name, self.engine, index=False, if_exists='replace', chunksize=100)
+        df_data.to_sql(table_name, self.engine, index=False, if_exists='append', chunksize=100)
 
 
 if __name__ == '__main__':
