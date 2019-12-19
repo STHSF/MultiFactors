@@ -17,7 +17,6 @@ Base = declarative_base()
 
 class Record(Base):
     __tablename__ = 'pos_record'
-    # id = Column(String(20), primary_key=True)  # 标识为主键
     trade_date = Column(String(20), primary_key=True)
     weight = Column(Float(20))
     industry = Column(String(20))

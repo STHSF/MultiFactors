@@ -54,7 +54,8 @@ class SQLEngine(object):
             trade_date = datetime.strptime(trade_date, '%Y-%m-%d').date()
         else:
             trade_date = trade_date
-        self.session.execute('''delete from `{0}` where trade_date=\'{1}\''''.format(table_name, trade_date))
+        self.session.query(Record).filter(Record.trade_date == trade_date).delete()
+        # self.session.execute('''delete from `{0}` where trade_date=\'{1}\''''.format(table_name, trade_date))
         try:
             self.session.commit()
         except Exception as e:
