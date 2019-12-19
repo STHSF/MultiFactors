@@ -10,7 +10,7 @@
 import pandas as pd
 import sqlalchemy as sa
 import sqlalchemy.orm as orm
-from src.data.engines.model import Record
+from data.engines.model import Record
 from datetime import datetime
 
 
