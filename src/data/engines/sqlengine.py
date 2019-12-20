@@ -36,7 +36,10 @@ class SQLEngine(object):
         df_list = []
         for chunk in pd.read_sql(table_name, self.engine, chunksize=chunk_size):
             df_list.append(chunk)
-        df_data = pd.concat(df_list, ignore_index=True)
+        if len(df_list) <= 0:
+            df_data = pd.DataFrame()
+        else:
+            df_data = pd.concat(df_list, ignore_index=True)
         return df_data
 
     def fetch_data(self, db_sql):
