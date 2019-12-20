@@ -7,6 +7,11 @@
 @file: sqlengine.py
 @time: 2019-06-14 10:40
 """
+import sys
+sys.path.append('../')
+sys.path.append('../../')
+sys.path.append('../../../')
+
 import pandas as pd
 import sqlalchemy as sa
 import sqlalchemy.orm as orm
@@ -28,8 +33,13 @@ class SQLEngine(object):
         db_session = orm.sessionmaker(bind=self.engine)
         return db_session()
 
-    def fetch_record_meta(self):
-        query = self.session.query(Record)
+    def fetch_record_meta(self, trade_date):
+        if type(trade_date) == str:
+            trade_date = datetime.strptime(trade_date, '%Y-%m-%d').date()
+        else:
+            trade_date = trade_date
+
+        query = self.session.query(Record).filter(Record.trade_date == trade_date)
         return pd.read_sql(query.statement, query.session.bind)
 
     def fetch_record(self, table_name, chunk_size=10000):
@@ -58,6 +68,7 @@ class SQLEngine(object):
         else:
             trade_date = trade_date
         self.session.query(Record).filter(Record.trade_date == trade_date).delete()
+        # self.session.query(table_name).filter(table_name.trade_date == trade_date).delete()
         # self.session.execute('''delete from `{0}` where trade_date=\'{1}\''''.format(table_name, trade_date))
         try:
             self.session.commit()
@@ -79,13 +90,16 @@ class SQLEngine(object):
 
 
 if __name__ == '__main__':
-    engine = SQLEngine('sqlite:////Users/li/PycharmProjects/MultiFactors/src/stacking/notebooks/real_tune_record.db')
-    date = datetime.strptime('2019-10-08', '%Y-%m-%d')
-    engine.del_historical_data('pos_record', str(date))
-    data = engine.fetch_record('pos_record')
-    print(data)
+    engine = SQLEngine('sqlite:////Users/li/PycharmProjects/MultiFactors/src/stacking/notebooks/cross_section/real_tune_record.db')
+    date = datetime.strptime('2019-10-15', '%Y-%m-%d')
+    print(date)
 
-    data2 = engine.fetch_record_meta()
+    # engine.del_historical_data('pos_record', date)
+
+    # data = engine.fetch_record('pos_record')
+    # print(data)
+
+    data2 = engine.fetch_record_meta(date)
     print(data2)
 
     # data = engine.fetch_data('''select * from pos_record where trade_date=\'{}\''''.format(date))
