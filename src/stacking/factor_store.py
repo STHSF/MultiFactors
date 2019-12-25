@@ -10,7 +10,7 @@
 from PyFin.api import *
 from alphamind.api import *
 
-# uqer因子 CSQuantiles
+# uqer因子 经过CSQuantiles处理
 basic_factor_store = {
     'AccountsPayablesTDays': CSQuantiles(LAST('AccountsPayablesTDays'), groups='sw1'),
     'AccountsPayablesTRate': CSQuantiles(LAST('AccountsPayablesTRate'), groups='sw1'),
