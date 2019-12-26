@@ -4,7 +4,7 @@
 """
 @version: 1.0
 @author: li
-@file: text_cnn.py
+@file: d2_text_cnn.py
 @time: 2019/12/5 2:27 下午
 """
 

@@ -18,10 +18,13 @@ embedding = True
 class BiRNN(nn.Module):
     def __init__(self, input_dim, hidden, output_dim):
         super(BiRNN, self).__init__()
+        self.rnn = 'gru'
         self.input_dim = input_dim
         self.output_dim = output_dim
-        self.encoder = nn.LSTM(self.input_dim, hidden, bidirectional=True, batch_first=True)
-        # self.encoder = nn.GRU(self.input_dim, hidden, bidirectional=True, batch_first=True)
+        if self.rnn == 'lstm':
+            self.encoder = nn.LSTM(self.input_dim, hidden, bidirectional=True, batch_first=True)
+        else:
+            self.encoder = nn.GRU(self.input_dim, hidden, bidirectional=True, batch_first=True)
         self.linear1 = nn.Linear(hidden*2, int(hidden/2))
         self.linear2 = nn.Linear(int(hidden/2), int(hidden/2))
         self.dropout = nn.Dropout(0.5)
@@ -45,7 +48,6 @@ class BiRNN(nn.Module):
         h_conc_linear = self.output(out)
         return h_conc_linear
 
-input = torch.randn(32, 5)
 
 model = BiRNN(4642, 1024, 3)
 loss_function = torch.nn.MSELoss()
