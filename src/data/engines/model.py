@@ -21,5 +21,5 @@ class Record(Base):
     weight = Column(Float(20))
     industry = Column(String(20))
     er = Column(Float(20))
-    code = Column(Integer)
+    code = Column(String(20))
 
