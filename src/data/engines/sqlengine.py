@@ -44,7 +44,10 @@ class SQLEngine(object):
         else:
             trade_date = trade_date
 
-        query = self.session.query(module).filter(module.trade_date == trade_date)
+        if trade_date:
+            query = self.session.query(module).filter(module.trade_date == trade_date)
+        else:
+            query = self.session.query(module)
         return pd.read_sql(query.statement, query.session.bind)
 
     def fetch_record(self, table_name, chunk_size=10000):
