@@ -5,6 +5,7 @@ from sqlalchemy.ext.declarative import declarative_base
 Base = declarative_base()
 metadata = Base.metadata
 
+
 class VisionSWIndustry(Base):
     __tablename__ = 'sw_industry'
     id = Column(String(128), primary_key=True, nullable=False)
@@ -25,7 +26,8 @@ class VisionIndex(Base):
     symbol = Column(String(32))
     sname = Column(String(128))
     weighing = Column(Float(53))
-    
+
+
 class Market5MinBar(Base):
     __tablename__ = 'market_bar_5mins'
     trade_date = Column(TIMESTAMP, primary_key=True, nullable=False)
@@ -40,7 +42,8 @@ class Market5MinBar(Base):
     vwap = Column(Float(53))
     twap = Column(Float(53))
     accumadjfactor = Column(Float(53))
-    
+
+
 class Experimental(Base):
     __tablename__ = 'experimental'
     trade_date = Column(DateTime, primary_key=True, nullable=False)
@@ -54,6 +57,7 @@ class Experimental(Base):
     CFinc1 = Column(Float(53))
     Revenue = Column(Float(53))
     DRevenue = Column(Float(53))
+
 
 class Market(Base):
     __tablename__ = 'market'
@@ -84,7 +88,8 @@ class Market(Base):
     PB = Column(Float(53))
     isOpen = Column(Integer)
     vwap = Column(Float(53))
-    
+
+
 class RiskExposure(Base):
     __tablename__ = 'risk_exposure'
     trade_date =  Column(DateTime, primary_key=True, nullable=False)
@@ -130,6 +135,7 @@ class RiskExposure(Base):
     COUNTRY = Column(Float(53))
     updateTime = Column(DateTime)
 
+
 class RiskReturn(Base):
     __tablename__ = 'risk_return'
     trade_date =  Column(DateTime, primary_key=True, nullable=False)
@@ -174,6 +180,7 @@ class RiskReturn(Base):
     COUNTRY = Column(Float(53))
     updateTime = Column(DateTime)
 
+
 class Min5DailyHighFrequency(Base):
     __tablename__ = '5min_daily_high_frequency'
     trade_date = Column(DateTime, primary_key=True, nullable=False)
@@ -191,6 +198,7 @@ class Min5DailyHighFrequency(Base):
     volume_ratio_1400 = Column(Float(53))
     volume_ratio_1430 = Column(Float(53))
     volume_ratio_1500 = Column(Float(53))
+
 
 class Alpha191(Base):
     __tablename__ = 'alpha191'
