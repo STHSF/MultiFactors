@@ -33,7 +33,7 @@ class SQLEngine(object):
         db_session = orm.sessionmaker(bind=self.engine)
         return db_session()
 
-    def fetch_record_meta(self, module, trade_date):
+    def fetch_record_meta(self, module, trade_date=None):
         """
         :param module:
         :param trade_date:
