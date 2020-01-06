@@ -141,3 +141,9 @@ src/data/dataprepare/zz500_all.pkl
 /src/stacking/notebooks/cross_section/log/
 !/src/stacking/notebooks/cross_section/RealOperation/*
 !src/stacking/notebooks/cross_section/RealOperation/s1/*
+!src/stacking/notebooks/cross_section/RealOperation/s2/*
+!src/stacking/notebooks/cross_section/RealOperation/s3/*
+!src/stacking/notebooks/cross_section/RealOperation/s5/*
+!src/stacking/notebooks/cross_section/RealOperation/s_1/*
+!src/stacking/notebooks/cross_section/RealOperation/st/*
+!src/stacking/notebooks/cross_section/RealOperation/800st/*
