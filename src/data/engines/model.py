@@ -16,7 +16,7 @@ Base = declarative_base()
 
 
 class Record(Base):
-    __tablename__ = 'pos_record'
+    __tablename__ = 'pos_record2'
     trade_date = Column(Date(), primary_key=True)
     adjust_date = Column(Date())
     weight = Column(Float(20))
@@ -26,7 +26,7 @@ class Record(Base):
 
 
 class Record2(Base):
-    __tablename__ = 'pos_record2'
+    __tablename__ = 'pos_record'
     trade_date = Column(Date(), primary_key=True)
     weight = Column(Float(20))
     industry = Column(String(20))
