@@ -4,6 +4,6 @@
 """
 @version: 1.0
 @author: li
-@file: test.py
+@file: predict.py
 @time: 2019/12/3 5:04 下午
 """

@@ -41,7 +41,7 @@ class Graph(object):
     def BiLSTM(x):
         fw_cell = tf.nn.rnn_cell.BasicLSTMCell(args.lstm_hidden)
         bw_cell = tf.nn.rnn_cell.BasicLSTMCell(args.lstm_hidden)
-        outputs, outputs_state = tf.nn.bidirectional_dynamic_rnn(fw_cell, bw_cell, x, dtype=tf.float32)
+        outputs, outputs_state = tf.contrib.bidirectional_dynamic_rnn(fw_cell, bw_cell, x, dtype=tf.float32)
         # outputs, outputs_state = tf.nn.static_bidirectional_rnn(fw_cell, bw_cell, x, dtype=tf.float32)
         return outputs
 

@@ -24,3 +24,13 @@ class Record(Base):
     er = Column(Float(20))
     code = Column(String(20))
 
+
+class Record2(Base):
+    __tablename__ = 'pos_record'
+    trade_date = Column(String(20), primary_key=True)
+    weight = Column(Float(20))
+    industry = Column(String(20))
+    er = Column(Float(20))
+    code = Column(String(20))
+
+
