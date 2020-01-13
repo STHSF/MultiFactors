@@ -18,6 +18,7 @@ Base = declarative_base()
 class Record(Base):
     __tablename__ = 'pos_record'
     trade_date = Column(String(20), primary_key=True)
+    adjust_date = Column(String(20))
     weight = Column(Float(20))
     industry = Column(String(20))
     er = Column(Float(20))
