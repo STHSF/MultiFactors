@@ -15,7 +15,7 @@ sys.path.append('../../../')
 import pandas as pd
 import sqlalchemy as sa
 import sqlalchemy.orm as orm
-from data.engines.model import Record
+from data.engines.model import Record2
 from datetime import datetime
 
 
@@ -72,7 +72,7 @@ class SQLEngine(object):
         :return:
         """
         if type(trade_date) == str:
-            trade_date = datetime.strptime(trade_date, '%Y-%m-%d').date()
+            trade_date = datetime.strptime(trade_date, '%Y-%m-%d')
         else:
             trade_date = trade_date
         # self.session.query(Record).filter(Record.trade_date == trade_date).delete()
@@ -98,16 +98,17 @@ class SQLEngine(object):
 
 
 if __name__ == '__main__':
-    engine = SQLEngine('sqlite:////Users/li/PycharmProjects/MultiFactors/src/stacking/notebooks/cross_section/real_tune_record.db')
-    date = datetime.strptime('2019-10-15', '%Y-%m-%d')
-    print(date)
+    engine = SQLEngine('sqlite:////Users/li/PycharmProjects/MultiFactors/src/stacking/notebooks/cross_section/RealOperation/st/real_tune_record_without_alpha_1.db')
+    date = datetime.strptime('2020-01-09', '%Y-%m-%d').date()
+    data2 = engine.fetch_record_meta(Record2, trade_date=None)
+    print(data2)
+    # print(data2[data2['trade_date'] == date])
 
-    # engine.del_historical_data('pos_record', date)
-
+    engine.del_historical_data(Record2, '2020-01-09')
     # data = engine.fetch_record('pos_record')
-    # print(data)
+    data2 = engine.fetch_record_meta(Record2, trade_date=None)
 
-    data2 = engine.fetch_record_meta(Record, date)
+    # print(data[data['trade_date'] == date])
     print(data2)
 
     # data = engine.fetch_data('''select * from pos_record where trade_date=\'{}\''''.format(date))
