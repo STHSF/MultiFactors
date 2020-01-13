@@ -87,24 +87,28 @@ class SQLEngine(object):
         finally:
             self.session.close()
 
-    def write_data(self, table_name, df_data: pd.DataFrame):
+    def write_data(self, table_name, df_data: pd.DataFrame, if_exists='append'):
         """
         数据写入对应的表中
+        :param if_exists:
         :param table_name:
         :param df_data:
         :return:
         """
-        df_data.to_sql(table_name, self.engine, index=False, if_exists='append', chunksize=100)
+        if if_exists == 'replace':
+            df_data.to_sql(table_name, self.engine, index=False, if_exists='replace', chunksize=100)
+        else:
+            df_data.to_sql(table_name, self.engine, index=False, if_exists='append', chunksize=100)
 
 
 if __name__ == '__main__':
-    engine = SQLEngine('sqlite:////Users/li/PycharmProjects/MultiFactors/src/stacking/notebooks/cross_section/RealOperation/st/real_tune_record_without_alpha_1.db')
-    date = datetime.strptime('2020-01-09', '%Y-%m-%d').date()
+    engine = SQLEngine('sqlite:////Users/li/PycharmProjects/MultiFactors/src/stacking/notebooks/cross_section/RealOperation/s1/real_tune_record_without_alpha-Copy1.db')
+    date = datetime.strptime('2019-12-18', '%Y-%m-%d')
     data2 = engine.fetch_record_meta(Record2, trade_date=None)
     print(data2)
     # print(data2[data2['trade_date'] == date])
 
-    engine.del_historical_data(Record2, '2020-01-09')
+    engine.del_historical_data(Record2, date)
     # data = engine.fetch_record('pos_record')
     data2 = engine.fetch_record_meta(Record2, trade_date=None)
 
