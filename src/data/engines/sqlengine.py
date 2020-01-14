@@ -40,7 +40,7 @@ class SQLEngine(object):
         :return:
         """
         if type(trade_date) == str:
-            trade_date = datetime.strptime(trade_date, '%Y-%m-%d')
+            trade_date = datetime.strptime(trade_date, '%Y-%m-%d').date()
         else:
             trade_date = trade_date
 
