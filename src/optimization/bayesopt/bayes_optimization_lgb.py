@@ -14,7 +14,7 @@ sys.path.append('../../../')
 import pandas as pd
 import lightgbm as lgb
 from src.utils import log_util
-from src.optimization.bayes_optimization_base import BayesOptimizationBase
+from src.optimization.bayesopt.bayes_optimization_base import BayesOptimizationBase
 
 log = log_util.Logger('BayesOptimizationLightGBM', level='info')
 
