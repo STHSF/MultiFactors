@@ -25,9 +25,10 @@ class Record(Base):
     code = Column(String(20))
 
 
-class Record2(Base):
-    __tablename__ = 'pos_record2'
+class RecordBack(Base):
+    __tablename__ = 'pos_record_back'
     trade_date = Column(Date(), primary_key=True)
+    adjust_date = Column(Date())
     weight = Column(Float(20))
     industry = Column(String(20))
     er = Column(Float(20))
