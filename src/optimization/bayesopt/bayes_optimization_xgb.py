@@ -11,9 +11,10 @@ import sys
 sys.path.append('../')
 sys.path.append('../../')
 sys.path.append('../../../')
+sys.path.append('../../../../')
 import xgboost as xgb
-from utils import log_util
-from optimization.bayes_optimization_base import BayesOptimizationBase
+from src.utils import log_util
+from src.optimization.bayesopt.bayes_optimization_base import BayesOptimizationBase
 
 log = log_util.Logger('BayesOptimizationXGBoost', level='info')
 
