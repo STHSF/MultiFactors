@@ -11,11 +11,13 @@ import sys
 sys.path.append('../')
 sys.path.append('../../')
 sys.path.append('../../../')
+sys.path.append('../../../../')
+sys.path.append('../../../../../')
 
 import pandas as pd
 import sqlalchemy as sa
 import sqlalchemy.orm as orm
-from data.engines.model import Record2
+from src.data.engines.model import Record
 from datetime import datetime
 
 
@@ -104,13 +106,13 @@ class SQLEngine(object):
 if __name__ == '__main__':
     engine = SQLEngine('sqlite:////Users/li/PycharmProjects/MultiFactors/src/stacking/notebooks/cross_section/RealOperation/s1/real_tune_record_without_alpha-Copy1.db')
     date = datetime.strptime('2019-12-18', '%Y-%m-%d')
-    data2 = engine.fetch_record_meta(Record2, trade_date=None)
+    data2 = engine.fetch_record_meta(Record, trade_date=None)
     print(data2)
     # print(data2[data2['trade_date'] == date])
 
-    engine.del_historical_data(Record2, date)
+    engine.del_historical_data(Record, date)
     # data = engine.fetch_record('pos_record')
-    data2 = engine.fetch_record_meta(Record2, trade_date=None)
+    data2 = engine.fetch_record_meta(Record, trade_date=None)
 
     # print(data[data['trade_date'] == date])
     print(data2)
