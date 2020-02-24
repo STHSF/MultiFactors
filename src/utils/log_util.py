@@ -59,10 +59,12 @@ class Logger(object):
         :param msg: 输出的log文字
         :return:
         """
+        # self.logger.debug(Fore.WHITE + str(msg) + Style.RESET_ALL)
         self.logger.debug(Fore.WHITE + str(msg) + Style.RESET_ALL)
 
     def info(self, msg):
-        self.logger.info(Fore.GREEN + str(msg) + Style.RESET_ALL)
+        # self.logger.info(Fore.GREEN + str(msg) + Style.RESET_ALL)
+        self.logger.info(str(msg))
 
     def warning(self, msg):
         self.logger.warning(Fore.YELLOW + str(msg) + Style.RESET_ALL)
