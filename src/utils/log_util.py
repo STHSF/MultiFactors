@@ -11,7 +11,7 @@
 import logging
 from src.utils import file_util
 from logging import handlers
-from colorama import Fore, Style
+# from colorama import Fore, Style
 
 
 class Logger(object):
@@ -60,20 +60,23 @@ class Logger(object):
         :return:
         """
         # self.logger.debug(Fore.WHITE + str(msg) + Style.RESET_ALL)
-        self.logger.debug(Fore.WHITE + str(msg) + Style.RESET_ALL)
+        self.logger.debug(str(msg))
 
     def info(self, msg):
         # self.logger.info(Fore.GREEN + str(msg) + Style.RESET_ALL)
         self.logger.info(str(msg))
 
     def warning(self, msg):
-        self.logger.warning(Fore.YELLOW + str(msg) + Style.RESET_ALL)
+        # self.logger.warning(Fore.YELLOW + str(msg) + Style.RESET_ALL)
+        self.logger.warning(str(msg))
 
     def error(self, msg):
-        self.logger.error(Fore.RED + str(msg) + Style.RESET_ALL)
+        # self.logger.error(Fore.RED + str(msg) + Style.RESET_ALL)
+        self.logger.error(str(msg))
 
     def critical(self, msg):
-        self.logger.critical(Fore.RESET + str(msg) + Style.RESET_ALL)
+        # self.logger.critical(Fore.RESET + str(msg) + Style.RESET_ALL)
+        self.logger.critical(str(msg))
 
 
 if __name__ == '__main__':
