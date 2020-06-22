@@ -164,10 +164,11 @@ class XGBooster(object):
     def set_params(self, **params):
         self.xgb_params.update(params)
 
-    def save_model(self, best_model,model_path=None):
+    def save_model(self, best_model, model_path=None):
         # now = time.strftime('%Y-%m-%d %H:%M')
         model_name = 'xgboost_{}.bat'.format(now)
         if model_path:
+            # best_model.save_model(model_path + model_name)
             joblib.dump(best_model, model_path + model_name)
         else:
             joblib.dump(best_model, self.save_model_path + model_name)
@@ -177,6 +178,7 @@ class XGBooster(object):
             print('bst_model load error')
             exit()
         if model_path:
+            # bst_model = xgb.Booster(model_path)
             bst_model = joblib.load(model_path)
         else:
             bst_model = joblib.load(self.save_model_path)
